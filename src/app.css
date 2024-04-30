@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+/* Light theme colors */
+    --background-color: white;
+    --text-color: black;
+    --background-color-footer: #181818;
+    --text-color-footer: #B0B0B0;
+    --toggleButtonColor: #B0B0B0; 
+     --background-color-nav: #012853;
+    --text-color-nav: #686868;
+    --activeText-color-nav: #D0D0D0;
+    --insertButtonColor: #D0D0D0;
+    --insertButtonBackgroundColor: #012853;
+    --tableHeaderColor: #012853;
+    --tableHeaderBackgroundColor: #B0B0B0;   
+    --tableColor: #181818;
+    --tableBackgroundColor: #D0D0D0;   
+}
+
+[data-theme='dark'] {
+    /* Dark theme colors */
+    --background-color: #0c1a35;
+    --text-color: #D0D0D0;
+    --background-color-footer: #181818;
+    --text-color-footer: #B0B0B0;
+    --toggleButtonColor: #0c1a35;  
+    --background-color-nav: #D0D0D0;
+    --text-color-nav: #686868;
+    --activeText-color-nav: #012853;
+    --insertButtonColor: #012853;
+    --insertButtonBackgroundColor: #D0D0D0;
+     --tableHeaderColor: #012853;
+    --tableHeaderBackgroundColor: #B0B0B0;  
+    --tableColor: #181818;
+    --tableBackgroundColor: #D0D0D0;    
+    
+}

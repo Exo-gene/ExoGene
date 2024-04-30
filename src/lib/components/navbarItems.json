@@ -1,0 +1,33 @@
+[
+  
+  {
+    "label": "Home",
+    "url": "/dashboard/home"
+  },
+   {
+    "label": "Carousel",
+    "url": "/dashboard/carousel"
+  },
+  {
+    "label": "Advertisements",
+    "url": "/dashboard/advertisements"
+  },
+ 
+  {
+    "label": "Categories",
+    "url": "/dashboard/categories"
+  },
+  {
+    "label": "Subcategories",
+    "url": "/dashboard/subcategories"
+  },
+  {
+    "label": "Tags",
+    "url": "/dashboard/tags"
+  },
+  {
+    "label": "News",
+    "url": "/dashboard/news"
+  }
+]
+
