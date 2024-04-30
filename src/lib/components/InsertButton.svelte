@@ -6,7 +6,7 @@
   <button
     style="background-color: var(--insertButtonBackgroundColor); color:var(--insertButtonColor)"
     on:click={insertData}
-    class="flex gap-2 p-2 rounded-sm shadow-md border"
+    class="flex items-center gap-2 p-2 rounded-sm shadow-md border"
   >
     <svg
       width="20px"
@@ -28,6 +28,7 @@
         />
       </g>
     </svg>
+    Add
   </button>
 </div>
 

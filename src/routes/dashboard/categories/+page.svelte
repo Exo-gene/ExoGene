@@ -10,40 +10,48 @@
     TableHeadCell,
     Checkbox,
   } from "flowbite-svelte";
+  import { onMount } from "svelte";
+  import { supabase } from "$lib/supabaseClient";
+  import {
+    getCategoriesData,
+    categoriesStore,
+    deleteCategoryData,
+  } from "../../../stores/categoriesStore";
+  import { LanguageEnum } from "../../../models/languageEnum";
+  import { formatDateTime } from "$lib/utils/formatDateTime";
+  import EditButton from "$lib/components/EditButton.svelte";
+  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
+  import type { CategoryModel } from "../../../models/categoryModel";
+
+  let openModal = false;
+  let itemIdToDelete: number;
+  let categoriesData: CategoryModel[] = [];
+  onMount(() => {
+    getCategoriesData(supabase);
+  });
 
   function createCategory() {
     goto("/dashboard/categories/create");
   }
 
-  // Example data and headers
-  const tableHeaders = ["Product name", "Color", "Category", "Price", "ACTION"];
+  // Function to delete a category
+  function openDeleteModal(categoryId: number) {
+    itemIdToDelete = categoryId;
+    openModal = true;
+  }
 
-  const tableData = [
-    {
-      id: 1,
-      name: 'Apple MacBook Pro 17"',
-      color: "Silver",
-      category: "Laptop",
-      price: "$2999",
-      actions: "/tables",
-    },
-    {
-      id: 2,
-      name: "Microsoft Surface Pro",
-      color: "White",
-      category: "Laptop PC",
-      price: "1.0 lb.",
-      actions: "/tables",
-    },
-    {
-      id: 3,
-      name: "Magic Mouse 2",
-      color: "Black",
-      category: "Accessories",
-      price: "0.2 lb.",
-      actions: "/tables",
-    },
-  ];
+  async function deleteCategory() {
+    try {
+      await deleteCategoryData(itemIdToDelete, supabase);
+      console.log(`Category with ID ${itemIdToDelete} deleted successfully.`);
+      openModal = false;
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      openModal = false;
+    }
+  }
+
+  const tableHeaders = ["ID", "Created At", "Title", "Language", "Action"];
 </script>
 
 <div class="mx-2">
@@ -59,74 +67,34 @@
         {/each}
       </TableHead>
       <TableBody tableBodyClass="divide-y">
-        {#each tableData as row}
+        {#each $categoriesStore as category}
           <TableBodyRow
             style="background-color: var(--tableBackgroundColor); color:var(--tableColor)"
           >
             <TableBodyCell class="!p-4"></TableBodyCell>
-            <TableBodyCell>{row.name}</TableBodyCell>
-            <TableBodyCell>{row.color}</TableBodyCell>
-            <TableBodyCell>{row.category}</TableBodyCell>
-            <TableBodyCell>{row.price}</TableBodyCell>
+            <TableBodyCell>{category.id}</TableBodyCell>
+            <TableBodyCell class="font-semibold text-gray-700"
+              >{formatDateTime(category.created_at)}</TableBodyCell
+            >
+            {#each category.category_translations as translation}
+              {#if translation.language === LanguageEnum.EN}
+                <TableBodyCell>
+                  <span>{translation.title}</span>
+                </TableBodyCell>
+                <TableBodyCell>
+                  <span>{translation.language}</span>
+                </TableBodyCell>
+              {/if}
+            {/each}
+            <!-- action buttons  -->
             <TableBodyCell class="flex space-x-3">
-              <a
-                href={row.actions}
-                class="font-medium text-green-600 hover:underline dark:text-green-600"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="ionicon"
-                  viewBox="0 0 512 512"
-                  width="24"
-                  height="24"
-                >
-                  <path
-                    d="M384 224v184a40 40 0 01-40 40H104a40 40 0 01-40-40V168a40 40 0 0140-40h167.48"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="32"
-                  />
-                  <path
-                    d="M459.94 53.25a16.06 16.06 0 00-23.22-.56L424.35 65a8 8 0 000 11.31l11.34 11.32a8 8 0 0011.34 0l12.06-12c6.1-6.09 6.67-16.01.85-22.38zM399.34 90L218.82 270.2a9 9 0 00-2.31 3.93L208.16 299a3.91 3.91 0 004.86 4.86l24.85-8.35a9 9 0 003.93-2.31L422 112.66a9 9 0 000-12.66l-9.95-10a9 9 0 00-12.71 0z"
-                  />
-                </svg>
-              </a>
-
-              <a
-                href={row.actions}
+              <EditButton categoryId={category.id} pageLink="categories" />
+              <button
                 class="font-medium text-red-600 hover:underline dark:text-red-500"
+                on:click={() => openDeleteModal(category.id)}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="ionicon"
-                  viewBox="0 0 512 512"
-                  width="24"
-                  height="24"
-                  ><path
-                    d="M112 112l20 320c.95 18.49 14.4 32 32 32h184c17.67 0 30.87-13.51 32-32l20-320"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="32"
-                  /><path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-miterlimit="10"
-                    stroke-width="32"
-                    d="M80 112h352"
-                  /><path
-                    d="M192 112V72h0a23.93 23.93 0 0124-24h80a23.93 23.93 0 0124 24h0v40M256 176v224M184 176l8 224M328 176l-8 224"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="32"
-                  /></svg
-                >
-              </a>
+                <span>Delete</span>
+              </button>
             </TableBodyCell>
           </TableBodyRow>
         {/each}
@@ -134,3 +102,6 @@
     </Table>
   </div>
 </div>
+
+<!-- Parent Component -->
+<ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCategory} />
