@@ -63,6 +63,10 @@ const createCategoriesStore = () => {
       supabase: SupabaseClient
     ) => {
       try {
+
+        console.log("categoryObject", categoryObject);
+        console.log("categoryLanguageData", categoryLanguageData);
+        
         const { data, error } = await supabase.rpc(
           "insert_categories_and_category_translations",
           {

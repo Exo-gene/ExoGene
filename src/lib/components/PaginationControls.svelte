@@ -9,7 +9,7 @@
   <button
     on:click={previousPage}
     disabled={currentPage <= 1}
-    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded hover:bg-gray-100 disabled:opacity-50"
+    class="px-2 py-2 text-sm font-medium text-gray-700 bg-white rounded hover:bg-gray-100 disabled:opacity-50"
   >
     <!-- Icon for previous button -->
     <svg
@@ -33,7 +33,7 @@
   <button
     on:click={nextPage}
     disabled={currentPage >= totalPages}
-    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded hover:bg-gray-100 disabled:opacity-50"
+    class="px-2 py-2 text-sm font-medium text-gray-700 bg-white rounded hover:bg-gray-100 disabled:opacity-50"
   >
     <!-- Icon for next button -->
     <svg
