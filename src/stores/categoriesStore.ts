@@ -1,43 +1,92 @@
 import { writable } from "svelte/store";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { CategoryModel } from "../models/categoryModel";
+import type {
+  CategoryDataModel,
+  CategoryLanguageModel,
+  CategoryModel,
+} from "../models/categoryModel";
 
-export const categoriesStore = writable<CategoryModel[]>([]);
+const createCategoriesStore = () => {
+  const { subscribe, set, update } = writable<CategoryModel[]>([]);
 
-//Get all data
-export const getCategoriesData = async (supabase: SupabaseClient) => {
-  try {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*,category_translations(*)")
-      .order("created_at", { ascending: false });
-    return categoriesStore.set(data as CategoryModel[]);
-  } catch (error) {
-    throw error;
-  }
-};
+  return {
+    subscribe,
+    set: (categories: CategoryModel[]) => {
+      set(categories);
+    },
+    getCategoriesData: async (
+      supabase: SupabaseClient,
+      pageSize: number,
+      pageNum: number
+    ) => {
+      let query = await supabase.rpc("get_paged_categories", {
+        page_size: pageSize,
+        page_num: pageNum,
+      });
 
-//delete by id
-export const deleteCategoryData = async (
-  categoryId: number,
-  supabase: SupabaseClient
-) => {
-  try {
-    const { error } = await supabase.rpc(
-      "delete_categories_and_category_translations",
-      {
-        data: { id: categoryId },
+      if (query.error) {
+        console.error("Error fetching categories:", query.error);
+        set([]);
+      } else {
+        console.log("Categories fetched:", query.data);
+        set(query.data || []);
       }
-    );
+    },
+    deleteCategoryData: async (
+      categoryId: number,
+      supabase: SupabaseClient
+    ) => {
+      try {
+        const { error } = await supabase.rpc(
+          "delete_categories_and_category_translations",
+          {
+            data: { id: categoryId },
+          }
+        );
 
-    if (error) {
-      throw error;
-    }
+        if (error) {
+          console.error("Error deleting category:", error);
+          throw error;
+        }
 
-    categoriesStore.update((currentCategories) => {
-      return currentCategories.filter((category) => category.id !== categoryId);
-    });
-  } catch (error) {
-    throw error;
-  }
+        update((currentCategories) =>
+          currentCategories.filter((category) => category.id !== categoryId)
+        );
+      } catch (error) {
+        console.error("Failed to delete category:", error);
+        throw error;
+      }
+    },
+    insertCategoryData: async (
+      categoryObject: CategoryDataModel,
+      categoryLanguageData: CategoryLanguageModel[],
+      supabase: SupabaseClient
+    ) => {
+      try {
+        const { data, error } = await supabase.rpc(
+          "insert_categories_and_category_translations",
+          {
+            category_data: categoryObject,
+            category_lang_data: categoryLanguageData,
+          }
+        );
+
+        if (error) {
+          console.error("Error inserting category:", error);
+          throw error;
+        }
+
+        update((currentCategories) => {
+          return [...currentCategories, ...(data || [])];
+        });
+
+        return data;
+      } catch (error) {
+        console.error("Failed to insert category:", error);
+        throw error;
+      }
+    },
+  };
 };
+
+export const categoriesStore = createCategoriesStore();

@@ -3,6 +3,10 @@
   import "./styles.css";
   import "../app.css";
   import logo from "../lib/images/logo.png";
+
+  export async function navigateTo() {
+    return goto("/dashboard/home");
+  }
 </script>
 
 <div class="bg-gray-100 flex justify-center items-center h-screen">

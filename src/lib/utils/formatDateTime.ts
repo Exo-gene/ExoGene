@@ -1,6 +1,5 @@
 // Function to format date to display only date and time with AM/PM
-// This function formats a datetime string to display date and time with AM/PM
-export function formatDateTime(dateTimeString: string): string {
+export function formatDateTime(dateTimeString: Date): string {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "numeric",
