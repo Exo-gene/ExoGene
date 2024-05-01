@@ -63,10 +63,9 @@ const createCategoriesStore = () => {
       supabase: SupabaseClient
     ) => {
       try {
-
         console.log("categoryObject", categoryObject);
         console.log("categoryLanguageData", categoryLanguageData);
-        
+
         const { data, error } = await supabase.rpc(
           "insert_categories_and_category_translations",
           {
@@ -87,6 +86,40 @@ const createCategoriesStore = () => {
         return data;
       } catch (error) {
         console.error("Failed to insert category:", error);
+        throw error;
+      }
+    },
+    updateCategoryData: async (
+      categoryObject: CategoryDataModel,
+      categoryLanguageData: CategoryLanguageModel[],
+      supabase: SupabaseClient
+    ) => {
+      try {
+        const { data, error } = await supabase.rpc(
+          "update_categories_and_category_translations",
+          {
+            category_data: categoryObject,
+            category_lang_data: categoryLanguageData,
+          }
+        );
+
+        if (error) {
+          console.error("Error updating category:", error);
+          throw error;
+        }
+
+        update((currentCategories) => {
+          return currentCategories.map((category) => {
+            if (category.id === categoryObject.id) {
+              return data ? data[0] : category;
+            }
+            return category;
+          });
+        });
+
+        return data;
+      } catch (error) {
+        console.error("Failed to update category:", error);
         throw error;
       }
     },

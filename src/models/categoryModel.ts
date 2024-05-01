@@ -1,6 +1,7 @@
 import type { LanguageEnum } from "./languageEnum";
 
 export interface CategoryModel {
+  id: number;
   count: number;
   items: CategoryDataModel[];
   page: number;
