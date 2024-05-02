@@ -7,7 +7,7 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  import EditButton from "./EditButton.svelte";
+  // import EditButton from "./EditButton.svelte";
   import PaginationControls from "./PaginationControls.svelte";
 
   export let tableHeaders: string[] = [];
@@ -48,7 +48,7 @@
             {/each}
             <TableBodyCell class="flex space-x-3">
               <!-- action buttons -->
-              <EditButton categoryId={item.id} pageLink="categories" />
+              <!-- <EditButton categoryId={item.id} pageLink="categories" /> -->
               <button on:click={() => handleDelete(item.id)}>Delete</button>
             </TableBodyCell>
           </TableBodyRow>

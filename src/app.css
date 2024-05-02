@@ -2,7 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-
+@font-face {
+	font-family: 'EnglishFont';
+	src: url('./lib/fonts/bahij_janna_regular.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'EnglishFont';
+	src: url('./lib/fonts/PlusJakartaSans_Bold.woff2') format('woff2');
+	font-weight: bold;
+	font-style: normal;
+}
 :root {
 /* Light theme colors */
     --primary-background:#A5371B;
