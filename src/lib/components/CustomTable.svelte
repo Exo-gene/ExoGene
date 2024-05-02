@@ -7,27 +7,22 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  import { LanguageEnum } from "../../models/languageEnum";
   import EditButton from "./EditButton.svelte";
   import PaginationControls from "./PaginationControls.svelte";
-  import { createEventDispatcher } from "svelte";
 
-  export let tableHeaders: any = [];
-  export let categories: any = [];
-  export let currentPage = 1;
-  export let totalPages = 1;
+  export let tableHeaders: string[] = [];
+  export let items: any[] = [];
+  export let currentPage: number;
+  export let totalPages: number;
   export let previousPage: () => void;
   export let nextPage: () => void;
-  export let formatDateTime: (date: any) => string;
+  export let onDelete: (itemId: number) => void;
 
-  const dispatch = createEventDispatcher();
-  function handleDelete(categoryId: number) {
-    dispatch("delete", categoryId);
+  function handleDelete(itemId: number) {
+    onDelete(itemId);
   }
-
-  // Re-render the component when categories or currentPage changes
   $: {
-    console.log("Categories updated:", categories);
+    console.log(items);
   }
 </script>
 
@@ -42,29 +37,19 @@
           <TableHeadCell>{header}</TableHeadCell>
         {/each}
       </TableHead>
-      <TableBody tableBodyClass="divide-y">
-        {#each categories as category}
+      <TableBody>
+        {#each items as item}
           <TableBodyRow
             style="background-color: var(--tableBackgroundColor); color:var(--tableColor)"
           >
             <TableBodyCell class="!p-4"></TableBodyCell>
-            <TableBodyCell>{category.id}</TableBodyCell>
-            <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(category.created_at)}
-            </TableBodyCell>
-            {#each category.categorytranslation || [] as translation}
-              {#if translation.language === LanguageEnum.EN}
-                <TableBodyCell>
-                  <span>{translation.title}</span>
-                </TableBodyCell>
-                <TableBodyCell>
-                  <span>{translation.language}</span>
-                </TableBodyCell>
-              {/if}
+            {#each Object.values(item) as value}
+              <TableBodyCell>{value}</TableBodyCell>
             {/each}
             <TableBodyCell class="flex space-x-3">
-              <EditButton categoryId={category.id} pageLink="categories" />
-              <button on:click={() => handleDelete(category.id)}>Delete</button>
+              <!-- action buttons -->
+              <EditButton categoryId={item.id} pageLink="categories" />
+              <button on:click={() => handleDelete(item.id)}>Delete</button>
             </TableBodyCell>
           </TableBodyRow>
         {/each}

@@ -28,7 +28,6 @@ const createCategoriesStore = () => {
         console.error("Error fetching categories:", query.error);
         set([]);
       } else {
-        console.log("Categories fetched:", query.data);
         set(query.data || []);
       }
     },
@@ -63,9 +62,6 @@ const createCategoriesStore = () => {
       supabase: SupabaseClient
     ) => {
       try {
-        console.log("categoryObject", categoryObject);
-        console.log("categoryLanguageData", categoryLanguageData);
-
         const { data, error } = await supabase.rpc(
           "insert_categories_and_category_translations",
           {

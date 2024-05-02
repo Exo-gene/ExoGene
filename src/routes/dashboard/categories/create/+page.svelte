@@ -4,6 +4,7 @@
   import { categoriesStore } from "../../../../stores/categoriesStore";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
+  import Toast from "$lib/components/Toast.svelte";
 
   interface FormData {
     [key: string]: {
@@ -121,10 +122,7 @@
   </div>
 </div>
 
+ 
 {#if showToast}
-  <div
-    class="bg-green-500 text-white text-center py-2 fixed bottom-0 left-0 right-0"
-  >
-    New category has been inserted successfully
-  </div>
+  <Toast message="New category has been inserted successfully" type="success" />
 {/if}

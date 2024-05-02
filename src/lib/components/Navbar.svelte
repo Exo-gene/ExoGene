@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
-  import items from "./navbarItems.json";
+  import items from "../jsonFiles/navbarItems.json";
   import {
     Navbar,
     NavBrand,
