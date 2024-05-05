@@ -33,43 +33,43 @@ const createAdvertisementStore = () => {
       }
     },
     deleteAdvertisementData: async (
-      subcategoryId: number,
+      advertisementId: number,
       supabase: SupabaseClient
     ) => {
       try {
         const { error } = await supabase.rpc(
-          "delete_subcategories_and_subcategory_translations",
+          "delete_advertisement_and_advertisement_translations",
           {
-            data: { id: subcategoryId },
+            data: { id: advertisementId },
           }
         );
 
         if (error) {
-          console.error("Error deleting subcategory:", error);
+          console.error("Error deleting advertisement:", error);
           throw error;
         }
 
-        update((currentCategories) =>
-          currentCategories.filter(
-            (subcategory) => subcategory.id !== subcategoryId
+        update((currentAdvertisementId) =>
+          currentAdvertisementId.filter(
+            (advertisement) => advertisement.id !== advertisementId
           )
         );
       } catch (error) {
-        console.error("Failed to delete subcategory:", error);
+        console.error("Failed to delete advertisement:", error);
         throw error;
       }
     },
-    insertSubCategoryData: async (
-      subcategoryObject: AdvertisementDataModel,
-      subcategoryLanguageData: AdvertisementLanguageModel[],
+    insertAdvertisementData: async (
+      advertisementObject: any,
+      advertisementLanguageData: any[],
       supabase: SupabaseClient
     ) => {
       try {
         const { data, error } = await supabase.rpc(
-          "insert_subcategories_and_subcategory_translations",
+          "insert_advertisements_and_advertisement_translations",
           {
-            subcategory_data: subcategoryObject,
-            subcategory_lang_data: subcategoryLanguageData,
+            advertisement_data: advertisementObject,
+            advertisement_lang_data: advertisementLanguageData,
           }
         );
 
@@ -78,13 +78,13 @@ const createAdvertisementStore = () => {
           throw error;
         }
 
-        update((currentSubCategories) => {
-          return [...currentSubCategories, ...(data || [])];
+        update((currentAdvertisement) => {
+          return [...currentAdvertisement, ...(data || [])];
         });
 
         return data;
       } catch (error) {
-        console.error("Failed to insert subcategory:", error);
+        console.error("Failed to insert advertisement:", error);
         throw error;
       }
     },
