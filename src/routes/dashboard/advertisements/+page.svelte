@@ -52,7 +52,7 @@
   }
 
   function createAdvertisement() {
-    goto("/dashboard/advertisement/create");
+    goto("/dashboard/advertisements/create");
   }
 
   // Function to delete a category
@@ -84,7 +84,7 @@
     goto(`/dashboard/categories/${categoryId}`);
   }
 
-  const tableHeaders = ["ID", "Created At", "Title", "Language", "Action"];
+  const tableHeaders = ["ID", "Created At",  "Language", "Action"];
   $: totalPages = Math.ceil($advertisementStore[0]?.count / pageSize);
   let categories = $advertisementStore[0]?.items;
   $: categories = $advertisementStore[0]?.items || [];
