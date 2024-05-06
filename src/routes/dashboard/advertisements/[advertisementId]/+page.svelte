@@ -21,6 +21,7 @@
     id,
     start_date: new Date(),
     end_date: new Date(),
+    advertisement_translations: [],
   };
 
   let formData: { [key: string]: any } = {};

@@ -1,10 +1,35 @@
 <script lang="ts">
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
-  import { categoriesStore } from "../../../../stores/categoriesStore";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
+  import { onMount } from "svelte";
   import Toast from "$lib/components/Toast.svelte";
+  import type { TagLanguageModel } from "../../../../models/tagStore";
+  import { tagStore } from "../../../../stores/tagsStore";
+
+  const id = +$page.params.tagId;
+  let showToast = false;
+  const languages: LanguageEnum[] = Object.values(LanguageEnum);
+
+  // fetch data from db
+  onMount(async () => {
+    let query = await supabase.rpc("get_tag_by_id", {
+      input_tag_id: id,
+    });
+
+    if (query && query.data) {
+      languages.forEach((language) => {
+        const translation = query.data[0].tag_translations.find(
+          (t: TagLanguageModel) => t.language === language
+        );
+        if (translation) {
+          formData[language].title = translation.title;
+        }
+      });
+    }
+  });
 
   interface FormData {
     [key: string]: {
@@ -18,9 +43,6 @@
     language: LanguageEnum;
     created_at: Date;
   }
-
-  let showToast = false;
-  const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
   let formData: FormData = languages.reduce(
     (acc: FormData, language: LanguageEnum) => {
@@ -36,7 +58,7 @@
   // Prepare the data models based on formData for submission
   function prepareDataForSubmission() {
     const now = new Date();
-    const categoryTranslation: LanguageObject[] = languages.map(
+    const tagTranslation: LanguageObject[] = languages.map(
       (language: LanguageEnum) => ({
         title: formData[language].title,
         language,
@@ -45,10 +67,11 @@
     );
 
     return {
-      categoryObject: {
+      tagsObject: {
+        id: id,
         created_at: now,
       },
-      categoryLanguageData: categoryTranslation,
+      tagLanguageData: tagTranslation,
     };
   }
 
@@ -64,21 +87,17 @@
 
     if (!isValid) return;
 
-    const { categoryObject, categoryLanguageData } = prepareDataForSubmission();
+    const { tagsObject, tagLanguageData } = prepareDataForSubmission();
     try {
-      await categoriesStore.insertCategoryData(
-        categoryObject,
-        categoryLanguageData,
-        supabase
-      );
+      await tagStore.updateTagData(tagsObject, tagLanguageData, supabase);
 
       showToast = true;
       setTimeout(() => {
         showToast = false;
-        goto("/dashboard/categories");
+        goto("/dashboard/tags");
       }, 1000);
     } catch (error) {
-      console.error("Error during category insertion:", error);
+      console.error("Error during tag insertion:", error);
     }
   }
 </script>
@@ -116,7 +135,6 @@
   </div>
 </div>
 
- 
 {#if showToast}
-  <Toast message="New category has been inserted successfully" type="success" />
+  <Toast message="This tag has been Updated successfully" type="success" />
 {/if}

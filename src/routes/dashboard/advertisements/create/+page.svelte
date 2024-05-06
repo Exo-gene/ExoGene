@@ -35,6 +35,8 @@
 
   function handleFileChange(event: any, language: LanguageEnum) {
     const input = event.target;
+    console.log(input.files);
+
     if (input.files && input.files.length > 0) {
       formData[language].image = input.files[0];
       formData[language].imageName = input.files[0].name;
@@ -137,19 +139,31 @@
         <TabItem title={language} open={language === LanguageEnum.EN}>
           <div class="text-sm text-gray-500 dark:text-gray-400">
             <b>Enter data for {language}:</b>
-            <div class="mb-6">
-              <Label for={`image-${language}`}>Image</Label>
-              <Input
-                type="file"
-                id={`image-${language}`}
-                on:change={(event) => handleFileChange(event, language)}
-              />
-              {#if formData[language].imageName}
-                <span>Selected File: {formData[language].imageName}</span>
-              {/if}
-              {#if formData[language].imageError}
-                <p class="text-red-500">{formData[language].imageError}</p>
-              {/if}
+            <div class="mb-6 flex justify-between items-start">
+              <div class="mb-6">
+                <Label for={`image-${language}`}>Image</Label>
+                <Input
+                  type="file"
+                  id={`image-${language}`}
+                  on:change={(event) => handleFileChange(event, language)}
+                />
+                {#if formData[language].imageName}
+                  <span>Selected File: {formData[language].imageName}</span>
+                {/if}
+
+                {#if formData[language].imageError}
+                  <p class="text-red-500">{formData[language].imageError}</p>
+                {/if}
+              </div>
+              <div class="">
+                <!-- {#if formData[language]?.imageName}
+                  <img
+                    src={`${formData[language].image}`}
+                    alt={`Image for ${language}`}
+                    class="w-44 h-44 mt-2"
+                  />
+                {/if} -->
+              </div>
             </div>
           </div>
         </TabItem>

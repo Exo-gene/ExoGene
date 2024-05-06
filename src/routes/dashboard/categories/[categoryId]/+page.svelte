@@ -39,8 +39,6 @@
   }
 
   interface LanguageObject {
-    id: number;
-    category_id: number;
     title: string;
     language: LanguageEnum;
     created_at: Date;
@@ -62,8 +60,6 @@
     const now = new Date();
     const categoryTranslation: LanguageObject[] = languages.map(
       (language: LanguageEnum) => ({
-        id: 0,
-        category_id: 0,
         title: formData[language].title,
         language,
         created_at: now,
@@ -72,9 +68,8 @@
 
     return {
       categoryObject: {
-        id: 0,
+        id: id,
         created_at: now,
-        categorytranslation: categoryTranslation,
       },
       categoryLanguageData: categoryTranslation,
     };

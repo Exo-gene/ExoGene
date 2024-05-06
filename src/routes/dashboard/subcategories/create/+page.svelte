@@ -29,8 +29,6 @@
   }
 
   interface LanguageObject {
-    id: number;
-    subcategory_id: number;
     title: string;
     language: LanguageEnum;
     created_at: Date;
@@ -53,8 +51,6 @@
     const now = new Date();
     const subcategoryTranslation: LanguageObject[] = languages.map(
       (language: LanguageEnum) => ({
-        id: 0,
-        subcategory_id: 0,
         title: formData[language].title,
         language,
         created_at: now,
@@ -62,13 +58,11 @@
     );
 
     return {
-      categoryObject: {
-        id: 0,
+      subcategoryObject: {
         category_id: selectedCategoryId,
         created_at: now,
-        subcategorytranslation: subcategoryTranslation,
       },
-      categoryLanguageData: subcategoryTranslation,
+      subcategoryLanguageData: subcategoryTranslation,
     };
   }
 
@@ -88,11 +82,12 @@
 
     if (!isValid) return;
 
-    const { categoryObject, categoryLanguageData } = prepareDataForSubmission();
+    const { subcategoryObject, subcategoryLanguageData } =
+      prepareDataForSubmission();
     try {
       await subCategoriesStore.insertSubCategoryData(
-        categoryObject,
-        categoryLanguageData,
+        subcategoryObject,
+        subcategoryLanguageData,
         supabase
       );
 

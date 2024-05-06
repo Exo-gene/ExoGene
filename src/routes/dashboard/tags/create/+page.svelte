@@ -1,10 +1,10 @@
 <script lang="ts">
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
-  import { categoriesStore } from "../../../../stores/categoriesStore";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
+  import { tagStore } from "../../../../stores/tagsStore";
 
   interface FormData {
     [key: string]: {
@@ -36,7 +36,7 @@
   // Prepare the data models based on formData for submission
   function prepareDataForSubmission() {
     const now = new Date();
-    const categoryTranslation: LanguageObject[] = languages.map(
+    const tagTranslation: LanguageObject[] = languages.map(
       (language: LanguageEnum) => ({
         title: formData[language].title,
         language,
@@ -45,10 +45,10 @@
     );
 
     return {
-      categoryObject: {
+      tagObject: {
         created_at: now,
       },
-      categoryLanguageData: categoryTranslation,
+      tagLanguageData: tagTranslation,
     };
   }
 
@@ -64,21 +64,17 @@
 
     if (!isValid) return;
 
-    const { categoryObject, categoryLanguageData } = prepareDataForSubmission();
+    const { tagObject, tagLanguageData } = prepareDataForSubmission();
     try {
-      await categoriesStore.insertCategoryData(
-        categoryObject,
-        categoryLanguageData,
-        supabase
-      );
+      await tagStore.insertTagData(tagObject, tagLanguageData, supabase);
 
       showToast = true;
       setTimeout(() => {
         showToast = false;
-        goto("/dashboard/categories");
+        goto("/dashboard/tags");
       }, 1000);
     } catch (error) {
-      console.error("Error during category insertion:", error);
+      console.error("Error during tag insertion:", error);
     }
   }
 </script>
@@ -116,7 +112,6 @@
   </div>
 </div>
 
- 
 {#if showToast}
-  <Toast message="New category has been inserted successfully" type="success" />
+  <Toast message="New tag has been inserted successfully" type="success" />
 {/if}

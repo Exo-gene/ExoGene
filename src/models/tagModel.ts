@@ -1,28 +1,29 @@
 import type { LanguageEnum } from "./languageEnum";
 
-export interface CategoryModel {
+export interface TagModel {
   id: number;
   count: number;
-  items: CategoryDataModel[];
+  items: TagDataModel[];
   page: number;
   page_limit: number;
   remainingitems: number;
 }
-export interface CategoryDataModel {
+
+export interface TagDataModel {
   id: number;
   created_at: Date;
-  categorytranslation: CategoryLanguageModel[];
+  tagtranslation: TagLanguageModel[];
 }
 
-export interface CategoryLanguageModel {
+export interface TagLanguageModel {
   id: number;
-  category_id: number;
+  tag_id: number;
   title: string;
   language: LanguageEnum;
   created_at: Date;
 }
 
-export interface CategoryLanguageModelToUpdate {
+export interface TagLanguageModelToUpdate {
   title: string;
   language: LanguageEnum;
   created_at: Date;

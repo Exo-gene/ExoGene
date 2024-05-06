@@ -1,37 +1,37 @@
 import type { LanguageEnum } from "./languageEnum";
 
-export interface AdvertisementModel {
+export interface CarouselModel {
   id: number;
   count: number;
-  items: AdvertisementDataModel[];
+  items: CarouselDataModel[];
   page: number;
   page_limit: number;
   remainingitems: number;
 }
-export interface AdvertisementDataModel {
+export interface CarouselDataModel {
   id: number;
   created_at: Date;
   start_date: Date;
   end_date: Date;
-  advertisementtranslation: AdvertisementLanguageModel[];
+  carouseltranslation: CarouselLanguageModel[];
 }
 
-export interface AdvertisementLanguageModel {
+export interface CarouselLanguageModel {
   id: number;
-  advertisement_id: number;
+  carousel_id: number;
   image: string;
   language: LanguageEnum;
   created_at: Date;
 }
 
-export interface AdvertisementDataModelToUpdate {
+export interface CarouselDataModelToUpdate {
   id: number;
   start_date: Date;
   end_date: Date;
-  advertisement_translations: AdvertisementLanguageModel[];
+  carousel_translations: CarouselLanguageModel[];
 }
 
-export interface AdvertisementLanguageModelToUpdate {
+export interface CarouselLanguageModelToUpdate {
   image: string;
   language: LanguageEnum;
   created_at: Date;

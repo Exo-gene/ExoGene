@@ -29,25 +29,25 @@
 
   // Fetch initial data
   onMount(() => {
-    fetchCategories(currentPage);
+    fetchAdvertisement(currentPage);
     isLoading = false;
   });
 
-  // Function to fetch categories for a specific page
-  function fetchCategories(page: number) {
+  // Function to fetch advertisements for a specific page
+  function fetchAdvertisement(page: number) {
     currentPage = page;
     advertisementStore.getAdvertisementData(supabase, pageSize, currentPage);
   }
 
   function nextPage() {
     if (currentPage < totalPages) {
-      fetchCategories(currentPage + 1);
+      fetchAdvertisement(currentPage + 1);
     }
   }
 
   function previousPage() {
     if (currentPage > 1) {
-      fetchCategories(currentPage - 1);
+      fetchAdvertisement(currentPage - 1);
     }
   }
 
@@ -55,12 +55,12 @@
     goto("/dashboard/advertisements/create");
   }
 
-  // Function to delete a category
+  // Function to delete a advertisement
   function handleDelete(itemId: number) {
     itemIdToDelete = itemId;
     openModal = true;
   }
-  // Function to delete a category
+  // Function to delete a advertisement
   async function deleteAdvertisement() {
     if (itemIdToDelete === null) {
       console.error("No item ID specified for deletion");
@@ -72,22 +72,22 @@
         supabase
       );
       itemIdToDelete = null;
-      fetchCategories(currentPage);
+      fetchAdvertisement(currentPage);
     } catch (error) {
-      console.error("Error deleting category:", error);
+      console.error("Error deleting advertisement:", error);
     } finally {
       openModal = false;
     }
   }
 
-  function editCategory(advertisementId: number) {
+  function editAdvertisement(advertisementId: number) {
     goto(`/dashboard/advertisements/${advertisementId}`);
   }
 
   const tableHeaders = ["ID", "Created At", "Language", "Action"];
   $: totalPages = Math.ceil($advertisementStore[0]?.count / pageSize);
-  let categories = $advertisementStore[0]?.items;
-  $: categories = $advertisementStore[0]?.items || [];
+  let advertisements = $advertisementStore[0]?.items;
+  $: advertisements = $advertisementStore[0]?.items || [];
 </script>
 
 {#if isLoading}
@@ -105,16 +105,16 @@
         {/each}
       </TableHead>
       <TableBody tableBodyClass="divide-y">
-        {#each categories as category}
+        {#each advertisements as advertisementItem}
           <TableBodyRow
             style="background-color: var(--tableBackgroundColor); color:var(--tableColor)"
           >
             <TableBodyCell class="!p-4"></TableBodyCell>
-            <TableBodyCell>{category.id}</TableBodyCell>
+            <TableBodyCell>{advertisementItem.id}</TableBodyCell>
             <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(category.created_at)}
+              {formatDateTime(advertisementItem.created_at)}
             </TableBodyCell>
-            {#each category.advertisementtranslation as translation}
+            {#each advertisementItem.advertisementtranslation as translation}
               {#if translation.language === LanguageEnum.EN}
                 <TableBodyCell>
                   <span>{translation.language}</span>
@@ -124,11 +124,11 @@
             <TableBodyCell class="flex space-x-3">
               <button
                 class="font-medium text-green-600 hover:underline dark:text-green-600"
-                on:click={() => editCategory(category.id)}
+                on:click={() => editAdvertisement(advertisementItem.id)}
               >
                 <IconEdit stroke={2} class="text-green-700" />
               </button>
-              <button on:click={() => handleDelete(category.id)}
+              <button on:click={() => handleDelete(advertisementItem.id)}
                 ><IconTrash stroke={2} class="text-red-700" /></button
               >
             </TableBodyCell>

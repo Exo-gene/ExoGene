@@ -103,7 +103,8 @@
 
     return {
       subcategoryObject: {
-        subcategory_id: id,
+        id: id,
+        subcategory_id: selectedCategoryId,
         category_id: selectedCategoryId,
       },
       subcategoryLanguageData: subcategoryTranslation,

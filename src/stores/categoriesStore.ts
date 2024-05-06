@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   CategoryDataModel,
   CategoryLanguageModel,
+  CategoryLanguageModelToUpdate,
   CategoryModel,
 } from "../models/categoryModel";
 
@@ -87,7 +88,7 @@ const createCategoriesStore = () => {
     },
     updateCategoryData: async (
       categoryObject: CategoryDataModel,
-      categoryLanguageData: CategoryLanguageModel[],
+      categoryLanguageData: CategoryLanguageModelToUpdate[],
       supabase: SupabaseClient
     ) => {
       try {
