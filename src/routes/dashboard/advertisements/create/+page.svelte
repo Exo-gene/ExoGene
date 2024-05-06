@@ -1,12 +1,11 @@
-
 <script lang="ts">
-  import { advertisementStore } from '../../../../stores/advertisementStore';
+  import { advertisementStore } from "../../../../stores/advertisementStore";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
- import { v4 as uuidv4 } from 'uuid';
+  import { v4 as uuidv4 } from "uuid";
 
   let showToast = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
@@ -17,60 +16,59 @@
   interface FormData {
     [key: string]: {
       image: File | null;
-      imageName: string;  // Added to display the file name
+      imageName: string;
       imageError: string;
     };
   }
 
-  let formData: FormData = languages.reduce((acc: FormData, language: LanguageEnum) => {
-    acc[language] = {
-      image: null,
-      imageName: "",  // Initialize as empty
-      imageError: "",
-    };
-    return acc;
-  }, {});
+  let formData: FormData = languages.reduce(
+    (acc: FormData, language: LanguageEnum) => {
+      acc[language] = {
+        image: null,
+        imageName: "",
+        imageError: "",
+      };
+      return acc;
+    },
+    {}
+  );
 
- 
   function handleFileChange(event: any, language: LanguageEnum) {
     const input = event.target;
     if (input.files && input.files.length > 0) {
       formData[language].image = input.files[0];
-      formData[language].imageName = input.files[0].name;  // Store file name
+      formData[language].imageName = input.files[0].name;
       formData[language].imageError = "";
     } else {
       formData[language].image = null;
-      formData[language].imageName = "";  // Clear file name
+      formData[language].imageName = "";
     }
   }
- 
+
   function getRandomString() {
-    return uuidv4().split('-')[0];  
+    return uuidv4().split("-")[0];
   }
 
-async function uploadFile(file: File, language: LanguageEnum) {
-    const fileExtension = file.name.split('.').pop();
+  async function uploadFile(file: File, language: LanguageEnum) {
+    const fileExtension = file.name.split(".").pop();
     const randomPart = getRandomString();
     const fileName = `${language}_${randomPart}.${fileExtension}`;
-    
-    // const { data, error } = await supabase.storage
-    //     .from('advertisement-images')
-    //     .upload(fileName, file, {
-    //         cacheControl: '3600',
-    //         upsert: false
-    //     });
 
-    // if (error) {
-    //     console.error("Error uploading file:", error);
-    //     throw error;
-    // }
+    const { data, error } = await supabase.storage
+      .from("advertisement-images")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
 
     // Return the full path where the file was uploaded
     return `advertisement-images/${fileName}`;
-}
-
-
-
+  }
 
   async function formSubmit() {
     let isValid = true;
@@ -82,7 +80,7 @@ async function uploadFile(file: File, language: LanguageEnum) {
         isValid = false;
       } else {
         // Prepare the upload promise
-        const uploadPromise = uploadFile(formData[language].image, language);
+        const uploadPromise = uploadFile(formData[language].image!, language);
         uploads.push(uploadPromise);
       }
     }
@@ -120,17 +118,18 @@ async function uploadFile(file: File, language: LanguageEnum) {
       console.error("Error during advertisement insertion:", error);
     }
   }
- 
-
 </script>
 
- 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
-  <div class="w-44 mb-5">
-    <Label for="start-date">Start Date</Label>
-    <Input type="date" id="start-date" bind:value={start_date} />
-    <Label for="end-date">End Date</Label>
-    <Input type="date" id="end-date" bind:value={end_date} />
+  <div class="w-full mb-5 flex space-x-4">
+    <div>
+      <Label for="start-date">Start Date</Label>
+      <Input type="date" id="start-date" bind:value={start_date} />
+    </div>
+    <div>
+      <Label for="end-date">End Date</Label>
+      <Input type="date" id="end-date" bind:value={end_date} />
+    </div>
   </div>
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
@@ -163,5 +162,8 @@ async function uploadFile(file: File, language: LanguageEnum) {
 </div>
 
 {#if showToast}
-  <Toast message="New advertisement has been inserted successfully" type="success" />
+  <Toast
+    message="New advertisement has been inserted successfully"
+    type="success"
+  />
 {/if}

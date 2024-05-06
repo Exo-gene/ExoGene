@@ -2,7 +2,9 @@ import { writable } from "svelte/store";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   AdvertisementDataModel,
+  AdvertisementDataModelToUpdate,
   AdvertisementLanguageModel,
+  AdvertisementLanguageModelToUpdate,
   AdvertisementModel,
 } from "../models/advertisementModel";
 
@@ -74,7 +76,7 @@ const createAdvertisementStore = () => {
         );
 
         if (error) {
-          console.error("Error inserting subcategory:", error);
+          console.error("Error inserting advertisement:", error);
           throw error;
         }
 
@@ -88,37 +90,24 @@ const createAdvertisementStore = () => {
         throw error;
       }
     },
-    updateSubCategoryData: async (
-      subcategoryObject: AdvertisementDataModel,
-      subcategoryLanguageData: AdvertisementLanguageModel[],
+    updateAdvertisementData: async (
+      advertisementObject: AdvertisementDataModelToUpdate,
+      advertisementLanguageData: AdvertisementLanguageModelToUpdate[],
       supabase: SupabaseClient
     ) => {
       try {
-        const { data, error } = await supabase.rpc(
-          "update_subcategories_and_subcategory_translations",
-          {
-            subcategory_data: subcategoryObject,
-            subcategory_lang_data: subcategoryLanguageData,
-          }
-        );
-
-        if (error) {
-          console.error("Error updating subcategory:", error);
-          throw error;
-        }
-
-        update((currentSubCategories) => {
-          return currentSubCategories.map((subcategory) => {
-            if (subcategory.id === subcategoryObject.id) {
-              return data ? data[0] : subcategory;
-            }
-            return subcategory;
-          });
+        const { data, error } = await supabase.rpc("update_advertisement", {
+          advertisement_data: advertisementObject,
+          advertisement_lang_data: advertisementLanguageData,
         });
 
+        if (error) {
+          console.error("Error updating advertisement:", error);
+          throw error;
+        }
         return data;
       } catch (error) {
-        console.error("Failed to update subcategory:", error);
+        console.error("Failed to update advertisement:", error);
         throw error;
       }
     },

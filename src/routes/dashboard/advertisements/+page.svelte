@@ -80,11 +80,11 @@
     }
   }
 
-  function editCategory(categoryId: number) {
-    goto(`/dashboard/categories/${categoryId}`);
+  function editCategory(advertisementId: number) {
+    goto(`/dashboard/advertisements/${advertisementId}`);
   }
 
-  const tableHeaders = ["ID", "Created At",  "Language", "Action"];
+  const tableHeaders = ["ID", "Created At", "Language", "Action"];
   $: totalPages = Math.ceil($advertisementStore[0]?.count / pageSize);
   let categories = $advertisementStore[0]?.items;
   $: categories = $advertisementStore[0]?.items || [];

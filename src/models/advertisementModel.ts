@@ -23,3 +23,15 @@ export interface AdvertisementLanguageModel {
   language: LanguageEnum;
   created_at: Date;
 }
+
+export interface AdvertisementDataModelToUpdate {
+  id: number;
+  start_date: Date;
+  end_date: Date;
+}
+
+export interface AdvertisementLanguageModelToUpdate {
+  image: string;
+  language: LanguageEnum;
+  created_at: Date;
+}
