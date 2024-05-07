@@ -11,13 +11,14 @@
   import { Tabs, TabItem, Label, Input, Button, Select } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
+  import { newsStore } from "../../../../stores/newsStore";
 
   let showAlert = false;
   let alertMessage = "";
   let showToast = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
   let selectedNewsId: number = 0;
-  let news: NewsDataModel[] = [];
+  let newsItems: NewsDataModel[] = [];
 
   interface FormData {
     [key: string]: {
@@ -155,18 +156,12 @@
   }
 
   onMount(async () => {
-    const { data, error } = await supabase
-      .from("news")
-      .select("*,news_translations(*)")
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false });
-
-    news = data as NewsDataModel[];
-    if (error) {
-      console.error("Error fetching news:", error);
-    } else {
-      console.log("Fetched news data:", data);
-    }
+    let query = await supabase.rpc("get_paged_news_filter", {
+      page_size: 3,
+      page_num: 1,
+      filter_news_id: undefined,
+    });
+    newsItems = query.data.items;
   });
 
   function handleNewsChange(e: Event) {
@@ -185,12 +180,10 @@
   <div class="w-44 mb-5">
     <Label for="news-select">Select News</Label>
     <Select id="news-select" on:change={handleNewsChange}>
-      {#each news as item}
-        {#if item.news_translations.find((t) => t.language === "en")?.title}
-          <option value={item.id}>
-            {item.news_translations.find((t) => t.language === "en")?.title}
-          </option>
-        {/if}
+      {#each newsItems as item}
+        <option value={item.id}>
+          {item.title}
+        </option>
       {/each}
     </Select>
   </div>
