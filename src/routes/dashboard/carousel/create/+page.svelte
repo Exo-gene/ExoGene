@@ -11,15 +11,14 @@
   import { Tabs, TabItem, Label, Input, Button, Select } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
-  import { newsStore } from "../../../../stores/newsStore";
-
+  import NewsDropdown from "$lib/components/NewsDropdown.svelte";
+ 
+  let selectedNewsId: number = 0;
   let showAlert = false;
   let alertMessage = "";
   let showToast = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
-  let selectedNewsId: number = 0;
-  let newsItems: NewsDataModel[] = [];
-
+  
   interface FormData {
     [key: string]: {
       image: File | null;
@@ -155,21 +154,10 @@
     }
   }
 
-  onMount(async () => {
-    let query = await supabase.rpc("get_paged_news_filter", {
-      page_size: 3,
-      page_num: 1,
-      filter_news_id: undefined,
-    });
-    newsItems = query.data.items;
-  });
-
-  function handleNewsChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    selectedNewsId = parseInt(input.value);
-    if (selectedNewsId > 0) {
-      showAlert = false;
-    }
+ 
+  function onNewsSelected(newsId: number) {
+    selectedNewsId = newsId;
+    showAlert = false;
     Object.keys(formData).forEach((language) => {
       formData[language].news_id = selectedNewsId;
     });
@@ -177,16 +165,7 @@
 </script>
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
-  <div class="w-44 mb-5">
-    <Label for="news-select">Select News</Label>
-    <Select id="news-select" on:change={handleNewsChange}>
-      {#each newsItems as item}
-        <option value={item.id}>
-          {item.title}
-        </option>
-      {/each}
-    </Select>
-  </div>
+    <NewsDropdown bind:selectedNewsId={selectedNewsId} on:newsChange={onNewsSelected} />
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
       {#each languages as language}
