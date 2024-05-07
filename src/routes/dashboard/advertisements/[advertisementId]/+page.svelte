@@ -4,6 +4,7 @@
   import { page } from "$app/stores";
   import { supabase } from "$lib/supabaseClient";
   import Toast from "$lib/components/Toast.svelte";
+   // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import type {

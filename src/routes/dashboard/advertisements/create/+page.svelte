@@ -5,6 +5,7 @@
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
+   // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
 
   let showToast = false;

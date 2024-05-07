@@ -30,83 +30,80 @@ const createCarouselStore = () => {
         console.error("Error fetching Carousel:", query.error);
         set([]);
       } else {
-         set(query.data || []);
+        set(query.data || []);
       }
     },
     deleteCarouselData: async (
-      advertisementId: number,
+      carouselId: number,
       supabase: SupabaseClient
     ) => {
       try {
         const { error } = await supabase.rpc(
-          "delete_advertisement_and_advertisement_translations",
+          "delete_carousel_and_carousel_translations",
           {
-            data: { id: advertisementId },
+            data: { id: carouselId },
           }
         );
 
         if (error) {
-          console.error("Error deleting advertisement:", error);
+          console.error("Error deleting carousel:", error);
           throw error;
         }
 
-        update((currentAdvertisementId) =>
-          currentAdvertisementId.filter(
-            (advertisement) => advertisement.id !== advertisementId
-          )
+        update((currentCarouselId) =>
+          currentCarouselId.filter((carousel) => carousel.id !== carouselId)
         );
       } catch (error) {
-        console.error("Failed to delete advertisement:", error);
+        console.error("Failed to delete carousel:", error);
         throw error;
       }
     },
-    insertAdvertisementData: async (
-      advertisementObject: any,
-      advertisementLanguageData: any[],
+    insertCarouselData: async (
+      carouselObject: any,
+      carouselLanguageData: any[],
       supabase: SupabaseClient
     ) => {
       try {
         const { data, error } = await supabase.rpc(
-          "insert_advertisements_and_advertisement_translations",
+          "insert_carousel_and_carousel_translations",
           {
-            advertisement_data: advertisementObject,
-            advertisement_lang_data: advertisementLanguageData,
+            carousel_data: carouselObject,
+            carousel_lang_data: carouselLanguageData,
           }
         );
 
         if (error) {
-          console.error("Error inserting advertisement:", error);
+          console.error("Error inserting carousel :", error);
           throw error;
         }
 
-        update((currentAdvertisement) => {
-          return [...currentAdvertisement, ...(data || [])];
+        update((currentCarousel) => {
+          return [...currentCarousel, ...(data || [])];
         });
-
         return data;
       } catch (error) {
-        console.error("Failed to insert advertisement:", error);
+        console.error("Failed to insert carousel:", error);
         throw error;
       }
     },
-    updateAdvertisementData: async (
-      advertisementObject: CarouselLanguageModelToUpdate,
-      advertisementLanguageData: CarouselDataModelToUpdate[],
+    updateCarouselData: async (
+      carouselObject: CarouselLanguageModelToUpdate,
+      carouselLanguageData: CarouselDataModelToUpdate[],
       supabase: SupabaseClient
     ) => {
       try {
-        const { data, error } = await supabase.rpc("update_advertisement", {
-          advertisement_data: advertisementObject,
-          advertisement_lang_data: advertisementLanguageData,
+        const { data, error } = await supabase.rpc("update_carousel", {
+          carousel_data: carouselObject,
+          carousel_lang_data: carouselLanguageData,
         });
 
         if (error) {
-          console.error("Error updating advertisement:", error);
+          console.error("Error updating carousel:", error);
           throw error;
         }
         return data;
       } catch (error) {
-        console.error("Failed to update advertisement:", error);
+        console.error("Failed to update carousel:", error);
         throw error;
       }
     },
