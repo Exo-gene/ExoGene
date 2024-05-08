@@ -18,6 +18,7 @@ export interface CarouselDataModel {
 
 export interface CarouselLanguageModel {
   id: number;
+  title: string;
   carousel_id: number;
   image: string;
   language: LanguageEnum;

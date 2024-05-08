@@ -6,9 +6,7 @@
   import Toast from "$lib/components/Toast.svelte";
   // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
-  import type { NewsDataModel } from "../../../../models/newsModel";
-  import { onMount } from "svelte";
-  import { Tabs, TabItem, Label, Input, Button, Select } from "flowbite-svelte";
+  import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
@@ -73,7 +71,7 @@
     const fileName = `${language}_${randomPart}.${fileExtension}`;
 
     const { data, error } = await supabase.storage
-      .from("news-images")
+      .from("carousel-images")
       .upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
@@ -85,7 +83,7 @@
     }
 
     // Return the full path where the file was uploaded
-    return `news-images/${fileName}`;
+    return `carousel-images/${fileName}`;
   }
 
   async function formSubmit() {
@@ -155,6 +153,8 @@
   }
 
  
+  // Function to handle when the news ID changes
+
   function onNewsSelected(newsId: number) {
     selectedNewsId = newsId;
     showAlert = false;
@@ -165,7 +165,8 @@
 </script>
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
-    <NewsDropdown bind:selectedNewsId={selectedNewsId} on:newsChange={onNewsSelected} />
+   <NewsDropdown bind:selectedNewsId={selectedNewsId} on:newsChange={onNewsSelected} />
+
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
       {#each languages as language}

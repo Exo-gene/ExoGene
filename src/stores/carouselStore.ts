@@ -92,10 +92,13 @@ const createCarouselStore = () => {
       supabase: SupabaseClient
     ) => {
       try {
-        const { data, error } = await supabase.rpc("update_carousel", {
-          carousel_data: carouselObject,
-          carousel_lang_data: carouselLanguageData,
-        });
+        const { data, error } = await supabase.rpc(
+          "update_carousel_and_carousel_translations",
+          {
+            carousel_data: carouselObject,
+            carousel_lang_data: carouselLanguageData,
+          }
+        );
 
         if (error) {
           console.error("Error updating carousel:", error);

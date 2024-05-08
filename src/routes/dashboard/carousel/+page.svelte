@@ -81,7 +81,7 @@
     goto(`/dashboard/carousel/${carouselId}`);
   }
 
-  const tableHeaders = ["ID", "Created At", "Language", "Action"];
+  const tableHeaders = ["ID", "Created At", "Language", "Title", "Action"];
   $: totalPages = Math.ceil($carouselStore[0]?.count / pageSize);
   let carousel = $carouselStore[0]?.items;
   $: carousel = $carouselStore[0]?.items;
@@ -115,6 +115,13 @@
               {#each carouselItem.carouseltranslation as translation}
                 {#if translation.language === LanguageEnum.EN}
                   <span>{translation.language}</span>
+                {/if}
+              {/each}
+            </TableBodyCell>
+            <TableBodyCell class="font-semibold text-gray-700">
+              {#each carouselItem.carouseltranslation as translation}
+                {#if translation.language === LanguageEnum.EN}
+                  <span>{translation.title}</span>
                 {/if}
               {/each}
             </TableBodyCell>

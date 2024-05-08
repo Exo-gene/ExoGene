@@ -14,25 +14,7 @@ const createNewsStore = () => {
     set: (news: NewsModel[]) => {
       set(news);
     },
-    // fetchFilteredNewsPaginated: async (
-    //   supabase: SupabaseClient,
-    //   pageNum: number,
-    //   pageSize: number,
-    //   filter_news_id?: number
-    // ) => {
-    //   let query = await supabase.rpc("get_paged_news_filter", {
-    //     page_size: pageSize,
-    //     page_num: pageNum,
-    //     filter_news_id: filter_news_id,
-    //   });
 
-    //   if (query.error) {
-    //     console.error("Error fetching news:", query.error);
-    //     set([]);
-    //   } else {
-    //     set(query.data || []);
-    //   }
-    // },
     getSubCategoriesData: async (
       supabase: SupabaseClient,
       pageSize: number,
