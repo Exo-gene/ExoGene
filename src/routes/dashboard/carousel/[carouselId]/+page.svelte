@@ -18,11 +18,12 @@
   let showAlert = false;
   let alertMessage = "";
   let showToast = false;
+  let newsTitle = "";
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
   interface FormData {
     [key: string]: {
-      image: File | null;
+      image: File | null | String;
       imageName: string;
       imageError: string;
       titleError: string;
@@ -51,10 +52,42 @@
   );
 
   // Fetch data from db
+  async function fetchNewsById(newsId: number) {
+    let { data: newsData, error: newsError } = await supabase
+      .from("news")
+      .select("*, news_translations(*)")
+      .eq("id", newsId);
+
+    if (newsError) {
+      console.error("Error fetching news data:", newsError);
+      return;
+    }
+
+    if (!newsData || newsData.length === 0) {
+      console.log("No news data found for the provided ID.");
+      return;
+    }
+
+    const newsDetails = newsData[0];
+    const englishTranslation = newsDetails.news_translations.find(
+      (translation: any) => translation.language === "en"
+    );
+
+    if (englishTranslation) {
+      newsTitle = englishTranslation.title;
+      console.log("English News Title:", englishTranslation.title);
+    } else {
+      console.log("No English translation available.");
+    }
+  }
+
   onMount(async () => {
-    let { data, error } = await supabase.rpc("get_carousel_by_id", {
-      input_carousel_id: id,
-    });
+    let { data: carouselData, error } = await supabase.rpc(
+      "get_carousel_by_id",
+      {
+        input_carousel_id: id,
+      }
+    );
 
     if (error) {
       console.error("Error fetching data:", error);
@@ -62,27 +95,29 @@
       return;
     }
 
-    if (data && data.length > 0) {
-      const carouselData = data[0];
-      selectedNewsId = carouselData.news_id;
-
-      // Populate formData with fetched translations
-      carouselData.carousel_translations.forEach((translation) => {
-        if (formData[translation.language]) {
-          // Assuming `language` is a key in formData
-          formData[translation.language].title = translation.title;
-          formData[translation.language].description = translation.description;
-          formData[translation.language].imageName = translation.image;
-          formData[translation.language].news_id = carouselData.news_id;
-          // Assuming you are handling image paths correctly elsewhere:
-          formData[translation.language].image =
-            `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${translation.image}`;
-        }
-      });
+    if (!carouselData || carouselData.length === 0) {
+      console.log("No carousel data found.");
+      return;
     }
+
+    const firstCarouselData = carouselData[0];
+    selectedNewsId = firstCarouselData.news_id;
+
+    firstCarouselData.carousel_translations.forEach((translation: any) => {
+      if (formData[translation.language]) {
+        formData[translation.language].title = translation.title;
+        formData[translation.language].description = translation.description;
+        formData[translation.language].imageName = translation.image;
+        formData[translation.language].news_id = firstCarouselData.news_id;
+        formData[translation.language].image =
+          `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${translation.image}`;
+      }
+    });
   });
-  function getRandomString() {
-    return uuidv4().split("-")[0];
+
+  // Reactively fetch news details when selectedNewsId changes
+  $: if (selectedNewsId) {
+    fetchNewsById(selectedNewsId);
   }
 
   function handleFileChange(event: any, language: LanguageEnum) {
@@ -215,7 +250,8 @@
     }
   }
 
-  function onNewsSelected(newsId: number) {
+  function onNewsSelected(event: any) {
+    let newsId = event.detail;
     selectedNewsId = newsId;
     showAlert = false;
     Object.keys(formData).forEach((language) => {
@@ -226,6 +262,10 @@
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   <NewsDropdown bind:selectedNewsId on:newsChange={onNewsSelected} />
+  <div class="my-2">
+    <p class="text-gray-400">This carousel is linked to this news</p>
+    <a href={`/dashboard/news/${id}`} class="underline">{newsTitle}</a>
+  </div>
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
       {#each languages as language}

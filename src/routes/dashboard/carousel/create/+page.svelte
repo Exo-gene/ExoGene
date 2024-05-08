@@ -10,13 +10,13 @@
   import { Alert } from "flowbite-svelte";
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
- 
+
   let selectedNewsId: number = 0;
   let showAlert = false;
   let alertMessage = "";
   let showToast = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
-  
+
   interface FormData {
     [key: string]: {
       image: File | null;
@@ -152,10 +152,10 @@
     }
   }
 
- 
   // Function to handle when the news ID changes
 
-  function onNewsSelected(newsId: number) {
+  function onNewsSelected(event: any) {
+    let newsId = event.detail;
     selectedNewsId = newsId;
     showAlert = false;
     Object.keys(formData).forEach((language) => {
@@ -165,7 +165,7 @@
 </script>
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
-   <NewsDropdown bind:selectedNewsId={selectedNewsId} on:newsChange={onNewsSelected} />
+  <NewsDropdown bind:selectedNewsId on:newsChange={onNewsSelected} />
 
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">

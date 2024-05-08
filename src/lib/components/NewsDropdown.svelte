@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, createEventDispatcher } from "svelte";
   import { Button, Dropdown, DropdownItem, Search } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import type { NewsDataModel } from "../../models/newsModel";
 
   export let selectedNewsId: number;
-  export let onNewsChange: (newsId: number) => void;
+
+  const dispatch = createEventDispatcher();
 
   let searchTerm = "";
   let newsItems: NewsDataModel[] = [];
   let lastFilter: string | undefined = "";
 
   async function fetchNews(titleFilter?: string) {
-    // Only fetch if the filter has actually changed to avoid duplicate requests
     if (titleFilter === lastFilter) return;
     lastFilter = titleFilter;
 
@@ -43,8 +43,10 @@
   function handleSelection(item: NewsDataModel, event: MouseEvent) {
     event.stopPropagation();
     selectedNewsId = item.id;
-    searchTerm = item.title; // Display the selected item's title in the search input
-    onNewsChange(item.id);
+    searchTerm = item.title;
+
+    // Using event dispatcher instead of direct call
+    dispatch('newsChange', item.id);
   }
 
   function isSelected(id: number): boolean {
