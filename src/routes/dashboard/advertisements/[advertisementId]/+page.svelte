@@ -20,7 +20,7 @@
   let isLoading = false;
   let showToast = false;
   let categories: any = [];
-  let selectedCategoryId: number = null;
+  let selectedCategoryId: number | null = null;
   let start_date = "";
   let end_date = "";
   let positions = Object.values(PositionEnum);
@@ -208,8 +208,7 @@
         created_at: new Date().toISOString(),
       };
 
-      console.log("advertisementObject to be sent:", advertisementObject);
-
+   
       await advertisementStore.updateAdvertisementData(
         advertisementObject,
         advertisementLanguageData,

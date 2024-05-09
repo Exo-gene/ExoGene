@@ -118,8 +118,7 @@
         created_at: new Date().toISOString(),
       };
 
-      console.log("advertisementObject to be sent:", advertisementObject);
-
+   
       await advertisementStore.insertAdvertisementData(
         advertisementObject,
         advertisementLanguageData,

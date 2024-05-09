@@ -119,13 +119,12 @@
   function handleCategoryChange(e: Event) {
     const input = e.target as HTMLInputElement;
     selectedCategoryId = parseInt(input.value);
-    console.log("Selected Category ID:", selectedCategoryId); // Log the selected ID
-
+    
     Object.keys(formData).forEach((language) => {
       formData[language].category_id = selectedCategoryId;
     });
 
-    console.log("Updated Form Data:", formData); // Log the updated form data
+ 
   }
 </script>
 

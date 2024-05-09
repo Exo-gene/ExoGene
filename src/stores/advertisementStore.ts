@@ -30,8 +30,7 @@ const createAdvertisementStore = () => {
         console.error("Error fetching Advertisement:", query.error);
         set([]);
       } else {
-        console.log("Advertisement data:", query.data);
-        set(query.data || []);
+       set(query.data || []);
       }
     },
     deleteAdvertisementData: async (

@@ -21,9 +21,7 @@
   function handleDelete(itemId: number) {
     onDelete(itemId);
   }
-  $: {
-    console.log(items);
-  }
+ 
 </script>
 
 <div class="mx-2">

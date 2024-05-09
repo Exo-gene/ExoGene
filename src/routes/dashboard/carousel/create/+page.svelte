@@ -49,7 +49,7 @@
 
   function handleFileChange(event: any, language: LanguageEnum) {
     const input = event.target;
-    console.log(input.files);
+ 
 
     if (input.files && input.files.length > 0) {
       formData[language].image = input.files[0];

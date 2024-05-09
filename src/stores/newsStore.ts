@@ -32,10 +32,7 @@ const createNewsStore = () => {
         set(query.data || []);
       }
     },
-    deleteNewsData: async (
-      subcategoryId: number,
-      supabase: SupabaseClient
-    ) => {
+    deleteNewsData: async (subcategoryId: number, supabase: SupabaseClient) => {
       try {
         const { error } = await supabase.rpc(
           "delete_subcategories_and_subcategory_translations",
@@ -60,31 +57,35 @@ const createNewsStore = () => {
       }
     },
     insertNewsData: async (
-      subcategoryObject: NewsDataModel,
-      subcategoryLanguageData: NewsLanguageModel[],
+      newsObject: any,
+      newsLanguageData: any[],
+      category_ids_data: any[],
+      subcategory_ids_data: any[],
       supabase: SupabaseClient
     ) => {
       try {
         const { data, error } = await supabase.rpc(
-          "insert_subcategories_and_subcategory_translations",
+          "insert_news_and_news_translations",
           {
-            subcategory_data: subcategoryObject,
-            subcategory_lang_data: subcategoryLanguageData,
+            subcategory_data: newsObject,
+            news_lang_data: newsLanguageData,
+            category_ids_data,
+            subcategory_ids_data,
           }
         );
 
         if (error) {
-          console.error("Error inserting subcategory:", error);
+          console.error("Error inserting news:", error);
           throw error;
         }
 
-        update((currentSubCategories) => {
-          return [...currentSubCategories, ...(data || [])];
+        update((currentNews) => {
+          return [...currentNews, ...(data || [])];
         });
 
         return data;
       } catch (error) {
-        console.error("Failed to insert subcategory:", error);
+        console.error("Failed to insert news:", error);
         throw error;
       }
     },
