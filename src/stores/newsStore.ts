@@ -15,24 +15,24 @@ const createNewsStore = () => {
       set(news);
     },
 
-    getSubCategoriesData: async (
+    getNewsData: async (
       supabase: SupabaseClient,
       pageSize: number,
       pageNum: number
     ) => {
-      let query = await supabase.rpc("get_paged_subcategories", {
+      let query = await supabase.rpc("get_paged_news", {
         page_size: pageSize,
         page_num: pageNum,
       });
 
       if (query.error) {
-        console.error("Error fetching subcategories:", query.error);
+        console.error("Error fetching news:", query.error);
         set([]);
       } else {
         set(query.data || []);
       }
     },
-    deleteSubCategoryData: async (
+    deleteNewsData: async (
       subcategoryId: number,
       supabase: SupabaseClient
     ) => {
@@ -59,7 +59,7 @@ const createNewsStore = () => {
         throw error;
       }
     },
-    insertSubCategoryData: async (
+    insertNewsData: async (
       subcategoryObject: NewsDataModel,
       subcategoryLanguageData: NewsLanguageModel[],
       supabase: SupabaseClient
@@ -88,7 +88,7 @@ const createNewsStore = () => {
         throw error;
       }
     },
-    updateSubCategoryData: async (
+    updateNewsData: async (
       subcategoryObject: NewsDataModel,
       subcategoryLanguageData: NewsLanguageModel[],
       supabase: SupabaseClient

@@ -1,35 +1,32 @@
- <script lang="ts">
-	import { advertisementStore } from './../../../../stores/advertisementStore.ts';
-	import LanguageTabs from './../../../../lib/components/LanguageTabs.svelte';
-	import PositionSelect from './../../../../lib/components/PositionSelect.svelte';
-	import CategorySelect from './../../../../lib/components/CategorySelect.svelte';
-	import DateInput from './../../../../lib/components/DateInput.svelte';
-	import { LanguageEnum } from './../../../../models/languageEnum.ts';
-	import { PositionEnum } from './../../../../models/positionEnum.ts';
-  import { Button } from "flowbite-svelte";
+<script lang="ts">
+  import LanguageTabs from "./../../../../lib/components/LanguageTabs.svelte";
+  import PositionSelect from "./../../../../lib/components/PositionSelect.svelte";
+  import CategorySelect from "./../../../../lib/components/CategorySelect.svelte";
+  import { Button, Label } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-   import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
-     // @ts-ignore
+  // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
-  import LoadingIndicator from '$lib/components/LoadingIndicator.svelte';
-  import FullPageLoadingIndicator from '$lib/components/FullPageLoadingIndicator.svelte';
-  import { toUtc } from '$lib/components/dateTimeFormat.js';
+  import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
+  import { toUtc } from "$lib/utils/dateTimeFormat.js";
+  import { PositionEnum } from "../../../../models/positionEnum.js";
+  import { LanguageEnum } from "../../../../models/languageEnum";
+  import { advertisementStore } from "../../../../stores/advertisementStore";
 
-
- let isLoading = false;
-  let categories:any = [];
+  let isLoading = false;
+  let categories: any = [];
   let positions = Object.values(PositionEnum);
   let languages = Object.values(LanguageEnum);
-  let selectedCategoryId :number|null = null;
-  let start_date = new Date();
-  let end_date = new Date();
+  let selectedCategoryId: number | null = null;
+  let start_date = "";
+  let end_date = "";
+
   let selectedPosition = PositionEnum.LEFT;
   let showToast = false;
 
-
-  let formData:any = languages.reduce((acc, language) => {
+  let formData: any = languages.reduce((acc, language) => {
     acc[language] = {
       image: null,
       video: null,
@@ -41,7 +38,7 @@
     return acc;
   }, {});
 
-    function handleFileChange(
+  function handleFileChange(
     event: any,
     language: LanguageEnum,
     type: "image" | "video"
@@ -72,7 +69,7 @@
     }
   }
 
-  function handleCategoryChange(event:any) {
+  function handleCategoryChange(event: any) {
     const value = parseInt(event.target.value);
     selectedCategoryId = value;
     Object.keys(formData).forEach((language) => {
@@ -80,14 +77,14 @@
     });
   }
 
-  function selectPosition(event:any) {
+  function selectPosition(event: any) {
     selectedPosition = event.target.value;
   }
 
   async function formSubmit() {
     let isValid = true;
     const uploads = [];
-   isLoading = true;
+    isLoading = true;
 
     for (const language of languages) {
       if (!formData[language].image && !formData[language].video) {
@@ -95,14 +92,15 @@
         isValid = false;
       } else {
         const file = formData[language].image || formData[language].video;
-        const uploadPromise = uploadFile(file!, language);
+        const uploadPromise = uploadFile(file, language);
         uploads.push(uploadPromise);
       }
     }
 
-    if (!isValid){
-        isLoading = false;
-        return};
+    if (!isValid) {
+      isLoading = false;
+      return;
+    }
 
     try {
       const filePaths = await Promise.all(uploads);
@@ -113,14 +111,15 @@
       }));
 
       const advertisementObject = {
-       start_date:toUtc(start_date) ,
+        start_date: toUtc(start_date),
         end_date: toUtc(end_date),
         position: selectedPosition,
         category_id: selectedCategoryId,
         created_at: new Date().toISOString(),
       };
 
-      // Passing the structured data to the store
+      console.log("advertisementObject to be sent:", advertisementObject);
+
       await advertisementStore.insertAdvertisementData(
         advertisementObject,
         advertisementLanguageData,
@@ -132,17 +131,17 @@
         showToast = false;
         goto("/dashboard/advertisements");
       }, 3000);
-        isLoading = false;
     } catch (error) {
       console.error("Error during advertisement insertion:", error);
-        isLoading = false;
+    } finally {
+      isLoading = false;
     }
   }
 
-   function getRandomString() {
+  function getRandomString() {
     return uuidv4().split("-")[0];
   }
-   async function uploadFile(file: File, language: LanguageEnum) {
+  async function uploadFile(file: File, language: LanguageEnum) {
     const fileExtension = file.name.split(".").pop();
     const randomPart = getRandomString();
     const fileName = `${language}_${randomPart}.${fileExtension}`;
@@ -175,13 +174,31 @@
       categories = data;
     }
   });
-  
 </script>
- 
-<div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
+
+<div
+  class="pt-5 lg:pt-10 flex flex-col justify-center items-center max-w-screen-lg mx-auto"
+>
   <div class="w-full mb-5 flex space-x-4">
-    <DateInput id="start-date" label="Start Date" bind_value={start_date} />
-    <DateInput id="end-date" label="End Date" bind_value={end_date} />
+    <div class="mb-4">
+      <Label for="start-date">Start Date</Label>
+      <input
+        class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+        type="date"
+        id="start-date"
+        bind:value={start_date}
+      />
+    </div>
+
+    <div class="mb-4">
+      <Label for="end-date">End Date</Label>
+      <input
+        class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+        type="date"
+        id="end-date"
+        bind:value={end_date}
+      />
+    </div>
     <CategorySelect {categories} {handleCategoryChange} {selectedCategoryId} />
     <PositionSelect {positions} {selectPosition} {selectedPosition} />
   </div>
@@ -202,5 +219,3 @@
     type="success"
   />
 {/if}
-
- 

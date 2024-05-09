@@ -1,22 +1,29 @@
 <script lang="ts">
   import { Label, Select } from "flowbite-svelte";
 
-  export let categories :any= [];
-  export let handleCategoryChange;
+  export let categories: any = [];
+  export let handleCategoryChange: (event: any) => void;
+  export let selectedCategoryId: number | null;
 
-  // You might want to pass the selected category ID as a prop if needed
-  export let selectedCategoryId;
+  const findEnglishTitle = (category: any) => {
+    return (
+      category.category_translations.find((t) => t.language === "en")?.title ||
+      "No Title"
+    );
+  };
 </script>
 
 <div>
   <Label for="category-select">Select Category</Label>
-  <Select id="category-select" on:change={handleCategoryChange}>
+  <Select
+    id="category-select"
+    bind:value={selectedCategoryId}
+    on:change={handleCategoryChange}
+  >
     {#each categories as category}
-      {#if category.category_translations.find((t) => t.language === "en")?.title}
-        <option value={category.id} selected={category.id === selectedCategoryId}>
-          {category.category_translations.find((t) => t.language === "en")?.title}
-        </option>
-      {/if}
+      <option value={category.id} selected={category.id === selectedCategoryId}>
+        {findEnglishTitle(category)}
+      </option>
     {/each}
   </Select>
 </div>

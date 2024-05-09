@@ -1,7 +1,7 @@
 import type { LanguageEnum } from "./languageEnum";
 
 export interface NewsModel {
-  total_count: number;
+  count: number;
   items: NewsDataModel[];
   page: number;
   page_limit: number;
@@ -9,8 +9,9 @@ export interface NewsModel {
 }
 export interface NewsDataModel {
   id: number;
-  created_at: Date; 
+  created_at: Date;
   title: string;
+  newstranslation: NewsLanguageModel[];
 }
 
 export interface NewsLanguageModel {

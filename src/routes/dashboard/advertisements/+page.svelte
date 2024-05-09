@@ -19,6 +19,7 @@
   import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
   import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
+  import { toLocaleDate } from "$lib/utils/dateTimeFormat.js";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -112,7 +113,7 @@
             <TableBodyCell class="!p-4"></TableBodyCell>
             <TableBodyCell>{advertisementItem.id}</TableBodyCell>
             <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(advertisementItem.created_at)}
+              {formatDateTime(advertisementItem.created_at.toString())}
             </TableBodyCell>
             {#each advertisementItem.advertisementtranslation as translation}
               {#if translation.language === LanguageEnum.EN}

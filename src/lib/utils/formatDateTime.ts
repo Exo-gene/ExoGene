@@ -1,5 +1,8 @@
-// Function to format date to display only date and time with AM/PM
-export function formatDateTime(dateTimeString: Date): string {
+import moment from "moment";
+
+// Function to convert UTC date to local date and format it
+export function formatDateTime(dateTimeString: string): string {
+  const localDate = moment.utc(dateTimeString).local();
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "numeric",
@@ -9,5 +12,6 @@ export function formatDateTime(dateTimeString: Date): string {
     second: "numeric",
     hour12: true,
   };
-  return new Date(dateTimeString).toLocaleString(undefined, options);
+  return localDate.toDate().toLocaleString(undefined, options);
 }
+ 

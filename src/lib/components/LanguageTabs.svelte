@@ -22,10 +22,16 @@
                 type="file"
                 accept="image/*"
                 id={`image-${language}`}
-                on:change={(event) => handleFileChange(event, language, "image")}
+                on:change={(event) =>
+                  handleFileChange(event, language, "image")}
               />
-              {#if formData[language].imageName}
+              {#if formData[language].image}
                 <span>Selected File: {formData[language].imageName}</span>
+                <img
+                  src={`${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${formData[language].image}`}
+                  alt={`Image for ${language}`}
+                  class="w-44 h-44 mt-2"
+                />
               {/if}
             </div>
             <div class="border border-gray-500 my-3"></div>
@@ -35,10 +41,20 @@
                 type="file"
                 accept="video/*"
                 id={`video-${language}`}
-                on:change={(event) => handleFileChange(event, language, "video")}
+                on:change={(event) =>
+                  handleFileChange(event, language, "video")}
               />
-              {#if formData[language].videoName}
-                <span>Selected File: {formData[language].videoName}</span>
+              {#if formData[language].video}
+                <video
+                  src={`${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${formData[language].vedio}`}
+                  alt={`Video for ${language}`}
+                  class="w-44 h-44 mt-2"
+                  controls
+                >
+                  Your browser does not support the video tag.
+                </video>
+              {:else}
+                <p>No media available for {language} language</p>
               {/if}
             </div>
             {#if formData[language].fileError}
@@ -51,6 +67,3 @@
     </TabItem>
   {/each}
 </Tabs>
-
-
-
