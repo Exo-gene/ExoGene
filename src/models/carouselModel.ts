@@ -35,5 +35,4 @@ export interface CarouselDataModelToUpdate {
 export interface CarouselLanguageModelToUpdate {
   image: string;
   language: LanguageEnum;
-  created_at: Date;
 }
