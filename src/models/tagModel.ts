@@ -10,9 +10,7 @@ export interface TagModel {
 }
 
 export interface TagDataModel {
-  id: number;
-  created_at: Date;
-  tagtranslation: TagLanguageModel[];
+  id: number; 
 }
 
 export interface TagLanguageModel {
