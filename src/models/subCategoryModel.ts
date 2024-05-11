@@ -11,11 +11,9 @@ export interface SubCategoryModel {
 export interface SubCategoryDataModel {
   id: number;
   category_id: number;
-  created_at: Date;
 }
 
 export interface SubCategoryLanguageModel {
   title: string;
   language: LanguageEnum;
-  created_at: Date;
 }
