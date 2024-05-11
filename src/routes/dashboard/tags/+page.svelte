@@ -108,9 +108,8 @@
             <TableBodyCell class="!p-4"></TableBodyCell>
             <TableBodyCell>{tagItem.id}</TableBodyCell>
             <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(tagItem.created_at)}
+            {formatDateTime(tagItem.created_at.toString())}
             </TableBodyCell>
-       
             {#each tagItem.tagtranslation as translation}
               {#if translation.language === LanguageEnum.EN}
                 <TableBodyCell>
@@ -128,7 +127,6 @@
               >
                 <IconEdit stroke={2} class="text-green-700" />
               </button>
-
               <button on:click={() => handleDelete(tagItem.id)}
                 ><IconTrash stroke={2} class="text-red-700" /></button
               >
