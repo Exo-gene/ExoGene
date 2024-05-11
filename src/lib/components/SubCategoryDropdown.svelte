@@ -21,7 +21,7 @@
 
     const params = {
       page_num: 1,
-      page_size: 10,
+      page_size: 3,
       filter_title: titleFilter || undefined,
     };
 
@@ -54,7 +54,7 @@
     } else {
       selectedSubCategoryIds = [...selectedSubCategoryIds, item.id];
     }
-    dispatch("categoryChange", selectedSubCategoryIds);
+    dispatch("subcategoryChange", selectedSubCategoryIds);
   }
 
   function isSelected(id: number): boolean {
@@ -63,7 +63,7 @@
 </script>
 
 <div class="my-2">
-  <Button>Select SubCategory</Button>
+  <Button>Select SubCategories</Button>
   <Dropdown class="w-full">
     <div slot="header" class="p-3">
       <Search
