@@ -29,3 +29,27 @@ export interface NewsLanguageModelToUpdate {
   language: LanguageEnum;
   created_at: Date;
 }
+
+enum LanguageEnum {
+  EN = "en",
+  AR = "ar",
+  CKB = "ckb",
+}
+
+export interface FormData {
+  title: string | null;
+  subtitle: string | null;
+  description: string | null;
+  image: File | null;
+  video: File | null;
+  imageName: string;
+  videoName: string;
+  fileError: string;
+  titleError: string;
+  subtitleError: string;
+  descriptionError: string;
+}
+
+export interface FormDataSet {
+  [key: string]: FormData;
+}
