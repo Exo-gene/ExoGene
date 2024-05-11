@@ -109,7 +109,7 @@
             <TableBodyCell class="!p-4"></TableBodyCell>
             <TableBodyCell>{carouselItem.id}</TableBodyCell>
             <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(carouselItem.created_at)}
+              {formatDateTime(carouselItem.created_at.toString())}
             </TableBodyCell>
             <TableBodyCell>
               {#each carouselItem.carouseltranslation as translation}
