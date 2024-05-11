@@ -59,8 +59,7 @@
   }
 
   interface CategoryDataModel {
-    id: number;
-    deleted_at: Date;
+    id: number; 
     category_translations: CategoryLanguageModel[];
   }
 
@@ -74,8 +73,7 @@
 
   interface LanguageObject {
     title: string;
-    language: LanguageEnum;
-    created_at: Date;
+    language: LanguageEnum; 
   }
 
   let formData: FormData = languages.reduce(
@@ -91,13 +89,11 @@
   );
 
   // Prepare the data models based on formData for submission
-  function prepareDataForSubmission() {
-    const now = new Date();
+  function prepareDataForSubmission() { 
     const subcategoryTranslation: LanguageObject[] = languages.map(
       (language: LanguageEnum) => ({
         title: formData[language].title,
-        language,
-        created_at: now,
+        language, 
       })
     );
 
