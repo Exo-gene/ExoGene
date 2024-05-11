@@ -113,7 +113,7 @@
             <TableBodyCell class="!p-4"></TableBodyCell>
             <TableBodyCell>{advertisementItem.id}</TableBodyCell>
             <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(advertisementItem.created_at.toString())}
+            {formatDateTime(advertisementItem.created_at.toString())}
             </TableBodyCell>
             {#each advertisementItem.advertisementtranslation as translation}
               {#if translation.language === LanguageEnum.EN}
