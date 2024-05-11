@@ -114,7 +114,7 @@
             {#each newsItem.newstranslation as translation}
               {#if translation.language === LanguageEnum.EN}
                 <TableBodyCell>
-                  <span>{translation.title}</span>
+                 <span>{translation.title.slice(0, 40)}{translation.title.length > 40 ? '...' : ''}</span>
                 </TableBodyCell>
                 <TableBodyCell>
                   <span>{translation.language}</span>
