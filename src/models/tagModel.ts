@@ -23,6 +23,5 @@ export interface TagLanguageModel {
 
 export interface TagLanguageModelToUpdate {
   title: string;
-  language: LanguageEnum;
-  created_at: Date;
+  language: LanguageEnum; 
 }
