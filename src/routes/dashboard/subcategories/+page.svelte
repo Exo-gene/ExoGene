@@ -108,7 +108,7 @@
             <TableBodyCell class="!p-4"></TableBodyCell>
             <TableBodyCell>{subcategory.id}</TableBodyCell>
             <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(subcategory.created_at)}
+              {formatDateTime(subcategory.created_at.toString())}
             </TableBodyCell>
             {#each subcategory.subcategorytranslation as translation}
               {#if translation.language === LanguageEnum.EN}
