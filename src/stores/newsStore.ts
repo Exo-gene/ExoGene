@@ -61,16 +61,18 @@ const createNewsStore = () => {
       newsLanguageData: any[],
       category_ids_data: any[],
       subcategory_ids_data: any[],
+      tag_ids_data :any[],
       supabase: SupabaseClient
     ) => {
       try {
         const { data, error } = await supabase.rpc(
-          "insert_news_and_news_translations",
+          "insert_news_and_related_data",
           {
-            subcategory_data: newsObject,
+            news_data: newsObject,
             news_lang_data: newsLanguageData,
             category_ids_data,
             subcategory_ids_data,
+            tag_ids_data,
           }
         );
 
