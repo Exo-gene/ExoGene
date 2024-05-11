@@ -128,13 +128,11 @@
         title: formData[language].title,
         description: formData[language].description,
         language,
-        created_at: new Date(),
-      }));
+        }));
 
       const carouselObject = {
         news_id: selectedNewsId,
-        created_at: new Date(),
-      };
+       };
 
       await carouselStore.insertCarouselData(
         carouselObject,
