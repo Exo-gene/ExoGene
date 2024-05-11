@@ -15,8 +15,7 @@
 
   interface LanguageObject {
     title: string;
-    language: LanguageEnum;
-    created_at: Date;
+    language: LanguageEnum; 
   }
 
   let showToast = false;
@@ -35,19 +34,15 @@
 
   // Prepare the data models based on formData for submission
   function prepareDataForSubmission() {
-    const now = new Date();
     const tagTranslation: LanguageObject[] = languages.map(
       (language: LanguageEnum) => ({
         title: formData[language].title,
         language,
-        created_at: now,
-      })
+       })
     );
 
     return {
-      tagObject: {
-        created_at: now,
-      },
+      tagObject: {},
       tagLanguageData: tagTranslation,
     };
   }
