@@ -149,11 +149,10 @@
       throw error;
     }
 
-    const createdAt = new Date();
+   
     return {
       path: `carousel-images/${fileName}`,
-      createdAt: createdAt,
-    };
+     };
   }
 
   async function formSubmit() {
@@ -201,8 +200,7 @@
             Promise.resolve({
               language,
               image: formData[language].imageName,
-              created_at: new Date(),
-              title: formData[language].title,
+               title: formData[language].title,
               description: formData[language].description,
             })
           );
@@ -220,8 +218,7 @@
       const carouselLanguageData = await Promise.all(uploads);
       const carouselObject = {
         id: id,
-        news_id: selectedNewsId,
-        created_at: new Date(),
+        news_id: selectedNewsId, 
       };
 
       // Filter out any null responses from failed uploads
