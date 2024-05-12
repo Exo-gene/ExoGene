@@ -99,7 +99,7 @@ const createNewsStore = () => {
     ) => {
       try {
         const { data, error } = await supabase.rpc(
-          "update_news_and_news_translations",
+          "update_news_and_related_data",
           {
             news_data: newsObject,
             news_lang_data: newsLanguageData,
