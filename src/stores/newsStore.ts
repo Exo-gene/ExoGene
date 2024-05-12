@@ -90,22 +90,23 @@ const createNewsStore = () => {
       }
     },
     updateNewsData: async (
+      existingNewsId: number,
       newsObject: any,
       newsLanguageData: any[],
-      category_ids_data: any[],
-      subcategory_ids_data: any[],
-      tag_ids_data: any[],
+      categoryData: any[],
+      subcategoryData: any[],
+      tagData: any[],
       supabase: SupabaseClient
     ) => {
       try {
         const { data, error } = await supabase.rpc(
           "update_news_and_related_data",
           {
-            news_data: newsObject,
+            category_ids_data: categoryData,
+            existing_news_id: existingNewsId,
             news_lang_data: newsLanguageData,
-            category_ids_data,
-            subcategory_ids_data,
-            tag_ids_data,
+            subcategory_ids_data: subcategoryData,
+            tag_ids_data: tagData,
           }
         );
 
