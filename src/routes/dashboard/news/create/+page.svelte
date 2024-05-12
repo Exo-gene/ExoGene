@@ -2,8 +2,7 @@
   import type { FormDataSet } from "./../../../../models/newsModel.ts";
   import TagDropdown from "./../../../../lib/components/TagDropdown.svelte";
   import LanguageNewsTabs from "./../../../../lib/components/languageNewsTabs.svelte";
-  import CategoryDropdown from "$lib/components/CategoryDropdown.svelte";
-  import SubCategoryDropdown from "$lib/components/SubCategoryDropdown.svelte";
+  import CategoryDropdown from "$lib/components/CategoryDropdown.svelte"; 
   import { Button } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
@@ -129,12 +128,12 @@
       }
     }
 
-    // if (!selectedCategoryIds.length) {
-    //   alertMessage =
-    //     "At least one category is required. Please select a category before submitting.";
-    //   showAlert = true;
-    //   isValid = false;
-    // }
+    if (!selectedCategoryIds.length) {
+      alertMessage =
+        "At least one category is required. Please select a category before submitting.";
+      showAlert = true;
+      isValid = false;
+    }
 
     if (!isValid) {
       isLoading = false;
