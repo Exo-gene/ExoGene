@@ -46,7 +46,7 @@
               />
               {#if formData[language].video}
                 <video
-                  src={`${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${formData[language].vedio}`}
+                  src={`${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${formData[language].video}`}
                   alt={`Video for ${language}`}
                   class="w-44 h-44 mt-2"
                   controls
@@ -68,10 +68,8 @@
   {/each}
 </Tabs>
 
-
 <style>
   .tabs-background {
     background-color: var(--background-color);
   }
 </style>
- 

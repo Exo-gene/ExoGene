@@ -6,8 +6,9 @@
   import { page } from "$app/stores";
   import { onMount } from "svelte";
   import Toast from "$lib/components/Toast.svelte";
-  import type { TagLanguageModel } from "../../../../models/tagStore";
+
   import { tagStore } from "../../../../stores/tagsStore";
+  import type { TagLanguageModel } from "../../../../models/tagModel";
 
   const id = +$page.params.tagId;
   let showToast = false;
@@ -40,7 +41,7 @@
 
   interface LanguageObject {
     title: string;
-    language: LanguageEnum; 
+    language: LanguageEnum;
   }
 
   let formData: FormData = languages.reduce(
@@ -55,17 +56,17 @@
   );
 
   // Prepare the data models based on formData for submission
-  function prepareDataForSubmission() { 
+  function prepareDataForSubmission() {
     const tagTranslation: LanguageObject[] = languages.map(
       (language: LanguageEnum) => ({
         title: formData[language].title,
-        language, 
+        language,
       })
     );
 
     return {
       tagsObject: {
-        id: id, 
+        id: id,
       },
       tagLanguageData: tagTranslation,
     };

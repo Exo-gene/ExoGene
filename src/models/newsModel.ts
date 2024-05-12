@@ -1,6 +1,7 @@
 import type { LanguageEnum } from "./languageEnum";
 
 export interface NewsModel {
+  id: number;
   count: number;
   items: NewsDataModel[];
   page: number;
@@ -30,18 +31,12 @@ export interface NewsLanguageModelToUpdate {
   created_at: Date;
 }
 
-enum LanguageEnum {
-  EN = "en",
-  AR = "ar",
-  CKB = "ckb",
-}
-
 export interface FormData {
   title: string | null;
   subtitle: string | null;
   description: string | null;
-  image: File | null;
-  video: File | null;
+  image: File | string | null;
+  video: File | string | null;
   imageName: string;
   videoName: string;
   fileError: string;

@@ -32,27 +32,25 @@ const createNewsStore = () => {
         set(query.data || []);
       }
     },
-    deleteNewsData: async (subcategoryId: number, supabase: SupabaseClient) => {
+    deleteNewsData: async (newsId: number, supabase: SupabaseClient) => {
       try {
         const { error } = await supabase.rpc(
-          "delete_subcategories_and_subcategory_translations",
+          "delete_news_and_news_translations",
           {
-            data: { id: subcategoryId },
+            data: { id: newsId },
           }
         );
 
         if (error) {
-          console.error("Error deleting subcategory:", error);
+          console.error("Error deleting news:", error);
           throw error;
         }
 
-        update((currentCategories) =>
-          currentCategories.filter(
-            (subcategory) => subcategory.id !== subcategoryId
-          )
+        update((currentNews) =>
+          currentNews.filter((news) => news.id !== newsId)
         );
       } catch (error) {
-        console.error("Failed to delete subcategory:", error);
+        console.error("Failed to delete news:", error);
         throw error;
       }
     },
@@ -61,7 +59,7 @@ const createNewsStore = () => {
       newsLanguageData: any[],
       category_ids_data: any[],
       subcategory_ids_data: any[],
-      tag_ids_data :any[],
+      tag_ids_data: any[],
       supabase: SupabaseClient
     ) => {
       try {
@@ -92,36 +90,42 @@ const createNewsStore = () => {
       }
     },
     updateNewsData: async (
-      subcategoryObject: NewsDataModel,
-      subcategoryLanguageData: NewsLanguageModel[],
+      newsObject: any,
+      newsLanguageData: any[],
+      category_ids_data: any[],
+      subcategory_ids_data: any[],
+      tag_ids_data: any[],
       supabase: SupabaseClient
     ) => {
       try {
         const { data, error } = await supabase.rpc(
-          "update_subcategories_and_subcategory_translations",
+          "update_news_and_news_translations",
           {
-            subcategory_data: subcategoryObject,
-            subcategory_lang_data: subcategoryLanguageData,
+            news_data: newsObject,
+            news_lang_data: newsLanguageData,
+            category_ids_data,
+            subcategory_ids_data,
+            tag_ids_data,
           }
         );
 
         if (error) {
-          console.error("Error updating subcategory:", error);
+          console.error("Error updating news:", error);
           throw error;
         }
 
-        update((currentSubCategories) => {
-          return currentSubCategories.map((subcategory) => {
-            if (subcategory.id === subcategoryObject.id) {
-              return data ? data[0] : subcategory;
+        update((currentNews) => {
+          return currentNews.map((news) => {
+            if (news.id === newsObject.id) {
+              return data ? data[0] : news;
             }
-            return subcategory;
+            return news;
           });
         });
 
         return data;
       } catch (error) {
-        console.error("Failed to update subcategory:", error);
+        console.error("Failed to update news:", error);
         throw error;
       }
     },

@@ -1,60 +1,69 @@
 <script lang="ts">
-  import { Tabs, TabItem, Input, Label, Textarea } from 'flowbite-svelte';
-  import { LanguageEnum } from '../../models/languageEnum';
-  import type { FormDataSet } from '../../models/newsModel';
-  import { onDestroy } from 'svelte';
+  import { Tabs, TabItem, Input, Label, Textarea } from "flowbite-svelte";
+  import { LanguageEnum } from "../../models/languageEnum";
+  import type { FormDataSet } from "../../models/newsModel";
+  import { onDestroy, onMount } from "svelte";
 
   export let languages: LanguageEnum[];
   export let formData: FormDataSet;
-  export let handleFileChange: (event: Event, language: string, type: 'image' | 'video') => void;
+  export let handleFileChange: (
+    event: Event,
+    language: string,
+    type: "image" | "video"
+  ) => void;
 
   // Function to remove the selected image
-function removeImage(language: string): void {
+  function removeImage(language: string): void {
     formData[language].image = null;
-    formData[language].imageName = '';
+    formData[language].imageName = "";
     formData = { ...formData };
-      const inputField = document.getElementById(`image-${language}`);
-    if (inputField) {
-        inputField.value = '';
-    }
-}
+  }
 
-function removeVideo(language: string): void {
+  // Function to remove the selected video
+  function removeVideo(language: string): void {
     formData[language].video = null;
-    formData[language].videoName = '';
-    // Update formData to trigger reactivity
+    formData[language].videoName = "";
     formData = { ...formData };
-    // Reset the input field
-    const inputField = document.getElementById(`video-${language}`);
-    if (inputField) {
-        inputField.value = '';
-    }
-}
+  }
 
-
-  
-  const getObjectUrl = (file: File | null): string => {
-    if (file) {
+  // Helper function to get the object URL for File objects or return the path for strings
+  const getObjectUrl = (file: File | string | null): string => {
+    if (file instanceof File) {
       return URL.createObjectURL(file);
+    } else if (typeof file === "string") {
+      // Directly use the full URL if it's a string
+      return `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${file}`;
     }
-    return '';
+    return "";
   };
 
+  // Cleanup object URLs to avoid memory leaks
   onDestroy(() => {
-    languages.forEach(language => {
-      if (formData[language].image) {
+    languages.forEach((language) => {
+      if (formData[language].image instanceof File) {
         URL.revokeObjectURL(getObjectUrl(formData[language].image));
       }
-      if (formData[language].video) {
+      if (formData[language].video instanceof File) {
         URL.revokeObjectURL(getObjectUrl(formData[language].video));
       }
     });
   });
+
+  // Force update on mount to ensure all data shows correctly
+  onMount(() => {
+    // Ensure formData is reactive when component mounts
+    formData = { ...formData };
+  });
+
+  // Reactive block to ensure updates reflect in the UI
+  $: {
+    // Trigger reactivity by updating formData
+    formData = { ...formData };
+  }
 </script>
 
-
 <Tabs tabStyle="underline" contentClass="tabs-background">
-  {#each languages as language}
+  {#each languages as language (language)}
     <TabItem title={language} open={language === LanguageEnum.EN}>
       <div class="text-sm text-gray-500 dark:text-gray-400 p-2">
         <div>
@@ -114,6 +123,7 @@ function removeVideo(language: string): void {
                 on:change={(event) => handleFileChange(event, language, "image")}
               />
               {#if formData[language].image}
+                <!-- Display image based on whether it's a File object or a string path -->
                 <div class="relative mt-2 border">
                   <img
                     src={getObjectUrl(formData[language].image)}
@@ -131,7 +141,7 @@ function removeVideo(language: string): void {
                 <p>No image selected for {language}</p>
               {/if}
             </div>
-            <div class="border border-gray-500 my-3"></div>
+            <div class="border border-gray-500 my-3 rounded"></div>
             <div>
               <b>Enter video file for {language}:</b>
               <Input
@@ -141,6 +151,7 @@ function removeVideo(language: string): void {
                 on:change={(event) => handleFileChange(event, language, "video")}
               />
               {#if formData[language].video}
+                <!-- Display video based on whether it's a File object or a string path -->
                 <div class="relative mt-2 border rounded">
                   <video
                     src={getObjectUrl(formData[language].video)}
@@ -170,7 +181,6 @@ function removeVideo(language: string): void {
     </TabItem>
   {/each}
 </Tabs>
-
 
 <style>
   .tabs-background {
