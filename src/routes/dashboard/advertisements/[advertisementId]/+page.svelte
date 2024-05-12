@@ -7,7 +7,7 @@
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
-  // @ts-ignore
+ignore  // @ts-
   import { v4 as uuidv4 } from "uuid";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
   import { toLocaleDate, toUtc } from "$lib/utils/dateTimeFormat.js";

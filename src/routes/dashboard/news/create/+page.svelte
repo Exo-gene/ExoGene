@@ -102,8 +102,6 @@
   }
 
   async function formSubmit() {
-    console.log("???/");
-
     let isValid = true;
     const uploads: Promise<string>[] = [];
     isLoading = true;
@@ -162,13 +160,6 @@
         subcategory_id: id,
       }));
       const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
-      console.log(
-        newsObject,
-        newsLanguageData,
-        categoryData,
-        subcategoryData,
-        tagData
-      );
 
       await newsStore.insertNewsData(
         newsObject,
@@ -192,7 +183,6 @@
   }
 
   function handleCategoryChange(event: any) {
-   
     selectedCategoryIds = event.detail.categoryIds;
     selectedSubCategoryIds = event.detail.subcategoryIds;
     console.log("Selected Category IDs:", selectedCategoryIds);

@@ -8,6 +8,7 @@
     Checkbox,
   } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
+  // @ts-ignore
   import { debounce } from "lodash-es";
 
   const dispatch = createEventDispatcher();
@@ -22,7 +23,6 @@
   async function fetchCategory(titleFilter?: string) {
     isLoading = true;
     errorMessage = "";
-
     const params = {
       page_num: 1,
       page_size: 3,
@@ -34,11 +34,10 @@
         "get_paged_category_filter_depend_subcategory",
         params
       );
-
       if (error) throw new Error("Failed to fetch categories.");
       categoryItems = data.items || [];
     } catch (error) {
-      errorMessage = error.message;
+      // errorMessage = error;
     } finally {
       isLoading = false;
     }
@@ -63,7 +62,9 @@
       selectedCategoryIds.delete(categoryId);
       categoryItems
         .find((c) => c.category_id === categoryId)
-        ?.subcategories.forEach((sub) => selectedSubCategoryIds.delete(sub.id));
+        ?.subcategories.forEach((sub) => {
+          selectedSubCategoryIds.delete(sub.id);
+        });
     }
     dispatchSelections();
   }
@@ -78,6 +79,15 @@
       selectedCategoryIds.add(categoryId); // Ensure the parent category is selected
     } else {
       selectedSubCategoryIds.delete(subcategoryId);
+      // Optionally check if all subcategories are deselected and also deselect the parent category
+      const allDeselected = categoryItems
+        .find((c: any) => c.category_id === categoryId)
+        ?.subcategories.every(
+          (sub: any) => !selectedSubCategoryIds.has(sub.id)
+        );
+      if (allDeselected) {
+        selectedCategoryIds.delete(categoryId);
+      }
     }
     dispatchSelections();
   }
@@ -89,7 +99,7 @@
     });
   }
 
-  function isChecked(set, id) {
+  function isChecked(set: any, id: number) {
     return set.has(id);
   }
 </script>
