@@ -1,12 +1,10 @@
 <script lang="ts">
   import type {
-    FormDataSet,
-    NewsLanguageModel,
+    FormDataSet, 
   } from "./../../../../models/newsModel.ts";
   import TagDropdown from "./../../../../lib/components/TagDropdown.svelte";
   import LanguageNewsTabs from "./../../../../lib/components/languageNewsTabs.svelte";
-  import CategoryDropdown from "$lib/components/CategoryDropdown.svelte";
-  import SubCategoryDropdown from "$lib/components/SubCategoryDropdown.svelte";
+  import CategoryDropdown from "$lib/components/CategoryDropdown.svelte"; 
   import { Button } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
@@ -18,15 +16,17 @@
   import { newsStore } from "../../../../stores/newsStore";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
+ 
 
   let isLoading = false;
   let languages = Object.values(LanguageEnum);
   let selectedCategoryIds: number[] = [];
+  let selectedSubCategoryIds: number[] = [];
   let selectedTagIds: number[] = [];
   let showToast = false;
   let alertMessage = "";
   let showAlert = false;
-  const id = +$page.params.newsId;
+  const id = +$page.params.newsId;  // Ensure you define $page or use an alternative approach
 
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
@@ -48,7 +48,6 @@
     {}
   );
 
-  // Fetch data from the database and populate the form
   onMount(async () => {
     try {
       isLoading = true;
@@ -66,7 +65,6 @@
       if (data && typeof data === "object") {
         const news = data;
 
-        // Populate translations into formData
         news.translations.forEach((translation: any) => {
           const languageData = formData[translation.language];
           if (languageData) {
@@ -88,11 +86,9 @@
           }
         });
 
-        selectedCategoryIds = news.categories.map((c: any) => c.category_id); // Populate category IDs
-        selectedTagIds = news.tags.map((t: any) => t.tag_id); // Populate tag IDs
-        selectedSubCategoryIds = news.subcategories.map(
-          (sc: any) => sc.subcategory_id
-        ); // Populate subcategory IDs
+        selectedCategoryIds = news.categories.map(c => c.category_id).filter(Boolean);
+        selectedSubCategoryIds = news.subcategories.map(sc => sc.subcategory_id).filter(Boolean);
+        selectedTagIds = news.tags.map((t: any) => t.tag_id);
       }
     } catch (err) {
       console.error("Error in onMount:", err);
@@ -122,7 +118,6 @@
 
       newData.fileError = "";
 
-      // Ensuring reactivity by updating formData with the new language-specific data
       formData = { ...formData, [language]: newData };
     }
   }
@@ -132,6 +127,11 @@
   }
 
   async function uploadFile(file: File, language: LanguageEnum) {
+    if (!file || !file.name) {
+      console.error("No file provided for upload");
+      throw new Error("No file provided for upload");
+    }
+
     const fileExtension = file.name.split(".").pop();
     const randomPart = getRandomString();
     const fileName = `${language}_${randomPart}.${fileExtension}`;
@@ -150,35 +150,46 @@
 
   async function formSubmit() {
     let isValid = true;
-    const uploads: Promise<string>[] = [];
+    const uploads: Promise<string | null>[] = [];
     isLoading = true;
 
     for (const language of languages) {
-      if (!formData[language].title?.trim()) {
-        formData[language].titleError = "Title is required";
+      const langData = formData[language];
+      if (!langData.title?.trim()) {
+        langData.titleError = "Title is required";
         isValid = false;
       }
-      if (!formData[language].subtitle?.trim()) {
-        formData[language].subtitleError = "Subtitle is required";
+      if (!langData.subtitle?.trim()) {
+        langData.subtitleError = "Subtitle is required";
         isValid = false;
       }
-      if (!formData[language].description?.trim()) {
-        formData[language].descriptionError = "Description is required";
+      if (!langData.description?.trim()) {
+        langData.descriptionError = "Description is required";
         isValid = false;
       }
-      if (!formData[language].image && !formData[language].video) {
-        formData[language].fileError = "Either image or video is required";
-        isValid = false;
+
+      if (!langData.image && !langData.video) {
+        if (!langData.imageName && !langData.videoName) {
+          langData.fileError = "Either image or video is required";
+          isValid = false;
+        }
       } else {
-        const file = formData[language].image || formData[language].video;
-        const uploadPromise = uploadFile(file as File, language);
-        uploads.push(uploadPromise);
+        const file = langData.image || langData.video;
+        if (file instanceof File) {
+          const uploadPromise = uploadFile(file, language).then(path => path, error => {
+            console.error("Upload failed for", language, ":", error);
+            return null; // Return null if upload fails
+          });
+          uploads.push(uploadPromise);
+        } else {
+          // Keep existing file path if no new file was selected
+          uploads.push(Promise.resolve(langData.image || langData.video));
+        }
       }
     }
 
     if (!selectedCategoryIds.length) {
-      alertMessage =
-        "At least one category is required. Please select a category before submitting.";
+      alertMessage = "At least one category is required. Please select a category before submitting.";
       showAlert = true;
       isValid = false;
     }
@@ -191,7 +202,7 @@
     try {
       const filePaths = await Promise.all(uploads);
       const newsLanguageData = languages.map((language, index) => ({
-        file: filePaths[index],
+        file: filePaths[index] || formData[language].image || formData[language].video, // Use the uploaded path or the existing path
         title: formData[language].title as string,
         subtitle: formData[language].subtitle as string,
         description: formData[language].description as string,
@@ -200,15 +211,12 @@
 
       const newsObject = {};
 
-      const categoryData = selectedCategoryIds.map((id) => ({
-        category_id: id,
-      }));
-      const subcategoryData = selectedSubCategoryIds.map((id) => ({
-        subcategory_id: id,
-      }));
-      const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
+      const categoryData = selectedCategoryIds.map(id => ({ category_id: id }));
+      const subcategoryData = selectedSubCategoryIds.map(id => ({ subcategory_id: id }));
+      const tagData = selectedTagIds.map(id => ({ tag_id: id }));
 
       await newsStore.updateNewsData(
+         id,
         newsObject,
         newsLanguageData,
         categoryData,
@@ -229,21 +237,18 @@
     }
   }
 
-  function handleCategoryChange(event: { detail: number[] }): void {
-    selectedCategoryIds = event.detail;
-  }
-
-  function handleSubCategoryChange(event: { detail: number[] }): void {
-    selectedSubCategoryIds = event.detail;
+  function handleCategoryChange(event: any) {
+    selectedCategoryIds = event.detail.categoryIds;
+    selectedSubCategoryIds = event.detail.subcategoryIds;
+    console.log("Selected Category IDs:", selectedCategoryIds);
+    console.log("Selected Subcategory IDs:", selectedSubCategoryIds);
   }
 
   function handleTagChange(event: { detail: number[] }): void {
     selectedTagIds = event.detail;
   }
-  onMount(() => {
-    console.log(formData);
-  });
 </script>
+
 
 <div
   class="pt-5 lg:pt-10 flex flex-col justify-center items-center max-w-screen-lg mx-auto"
@@ -252,14 +257,7 @@
     <FullPageLoadingIndicator />
   {:else}
     <div class="w-full mb-5 flex space-x-4">
-      <CategoryDropdown
-        {selectedCategoryIds}
-        on:categoryChange={handleCategoryChange}
-      />
-      <!-- <SubCategoryDropdown
-        {selectedSubCategoryIds}
-        on:subcategoryChange={handleSubCategoryChange}
-      /> -->
+    <CategoryDropdown {selectedCategoryIds} {selectedSubCategoryIds} on:categoryChange={handleCategoryChange} />
       <TagDropdown {selectedTagIds} on:tagChange={handleTagChange} />
     </div>
     <div class="border rounded w-full">
@@ -272,5 +270,5 @@
 </div>
 
 {#if showToast}
-  <Toast message="New news has been inserted successfully" type="success" />
+  <Toast message="New news has been updated successfully" type="success" />
 {/if}
