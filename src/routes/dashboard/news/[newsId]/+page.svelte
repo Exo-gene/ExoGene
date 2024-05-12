@@ -22,7 +22,6 @@
   let isLoading = false;
   let languages = Object.values(LanguageEnum);
   let selectedCategoryIds: number[] = [];
-  let selectedSubCategoryIds: number[] = [];
   let selectedTagIds: number[] = [];
   let showToast = false;
   let alertMessage = "";
@@ -257,10 +256,10 @@
         {selectedCategoryIds}
         on:categoryChange={handleCategoryChange}
       />
-      <SubCategoryDropdown
+      <!-- <SubCategoryDropdown
         {selectedSubCategoryIds}
         on:subcategoryChange={handleSubCategoryChange}
-      />
+      /> -->
       <TagDropdown {selectedTagIds} on:tagChange={handleTagChange} />
     </div>
     <div class="border rounded w-full">

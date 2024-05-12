@@ -23,7 +23,6 @@
   let alertMessage = "";
   let showAlert = false;
 
- 
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
@@ -75,7 +74,6 @@
     }
   }
 
-
   function getRandomString(): string {
     return uuidv4().split("-")[0];
   }
@@ -104,6 +102,8 @@
   }
 
   async function formSubmit() {
+    console.log("???/");
+
     let isValid = true;
     const uploads: Promise<string>[] = [];
     isLoading = true;
@@ -131,12 +131,12 @@
       }
     }
 
-    if (!selectedCategoryIds.length) {
-      alertMessage =
-        "At least one category is required. Please select a category before submitting.";
-      showAlert = true;
-      isValid = false;
-    }
+    // if (!selectedCategoryIds.length) {
+    //   alertMessage =
+    //     "At least one category is required. Please select a category before submitting.";
+    //   showAlert = true;
+    //   isValid = false;
+    // }
 
     if (!isValid) {
       isLoading = false;
@@ -162,6 +162,13 @@
         subcategory_id: id,
       }));
       const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
+      console.log(
+        newsObject,
+        newsLanguageData,
+        categoryData,
+        subcategoryData,
+        tagData
+      );
 
       await newsStore.insertNewsData(
         newsObject,
@@ -184,12 +191,12 @@
     }
   }
 
-  function handleCategoryChange(event: { detail: number[] }): void {
-    selectedCategoryIds = event.detail;
-  }
-
-  function handleSubCategoryChange(event: { detail: number[] }): void {
-    selectedSubCategoryIds = event.detail;
+  function handleCategoryChange(event: any) {
+   
+    selectedCategoryIds = event.detail.categoryIds;
+    selectedSubCategoryIds = event.detail.subcategoryIds;
+    console.log("Selected Category IDs:", selectedCategoryIds);
+    console.log("Selected Subcategory IDs:", selectedSubCategoryIds);
   }
 
   function handleTagChange(event: { detail: number[] }): void {
@@ -202,7 +209,6 @@
 >
   <div class="w-full mb-5 flex space-x-4">
     <CategoryDropdown on:categoryChange={handleCategoryChange} />
-    <SubCategoryDropdown on:subcategoryChange={handleSubCategoryChange} />
     <TagDropdown on:tagChange={handleTagChange} />
   </div>
   <div class="border rounded w-full">

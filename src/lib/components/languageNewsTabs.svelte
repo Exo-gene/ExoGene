@@ -26,7 +26,7 @@
     formData = { ...formData };
   }
 
-  // Helper function to get the object URL for File objects or return the path for strings
+  //   function to get the object URL for File objects or return the path for strings
   const getObjectUrl = (file: File | string | null): string => {
     if (file instanceof File) {
       return URL.createObjectURL(file);
@@ -49,15 +49,11 @@
     });
   });
 
-  // Force update on mount to ensure all data shows correctly
   onMount(() => {
-    // Ensure formData is reactive when component mounts
     formData = { ...formData };
   });
 
-  // Reactive block to ensure updates reflect in the UI
   $: {
-    // Trigger reactivity by updating formData
     formData = { ...formData };
   }
 </script>
@@ -74,7 +70,9 @@
                 id={`title-${language}`}
                 bind:value={formData[language].title}
                 placeholder="Enter title"
-                on:input={() => { formData[language].titleError = ""; }}
+                on:input={() => {
+                  formData[language].titleError = "";
+                }}
               />
               {#if formData[language].titleError}
                 <p class="text-red-500">{formData[language].titleError}</p>
@@ -88,7 +86,9 @@
                 id={`subtitle-${language}`}
                 bind:value={formData[language].subtitle}
                 placeholder="Enter subtitle"
-                on:input={() => { formData[language].subtitleError = ""; }}
+                on:input={() => {
+                  formData[language].subtitleError = "";
+                }}
               />
               {#if formData[language].subtitleError}
                 <p class="text-red-500">{formData[language].subtitleError}</p>
@@ -102,17 +102,22 @@
                 id={`description-${language}`}
                 bind:value={formData[language].description}
                 placeholder="Enter description"
-                on:input={() => { formData[language].descriptionError = ""; }}
+                on:input={() => {
+                  formData[language].descriptionError = "";
+                }}
               />
               {#if formData[language].descriptionError}
-                <p class="text-red-500">{formData[language].descriptionError}</p>
+                <p class="text-red-500">
+                  {formData[language].descriptionError}
+                </p>
               {/if}
             </div>
           </div>
           <div class="border border-gray-500 my-3 rounded"></div>
           <div class="mx-4">
             <p class="text-red-600 mb-2">
-              Note: Only one file (image or video) can be entered for each language.
+              Note: Only one file (image or video) can be entered for each
+              language.
             </p>
             <div>
               <b>Enter image file for {language}:</b>
@@ -120,7 +125,8 @@
                 type="file"
                 accept="image/*"
                 id={`image-${language}`}
-                on:change={(event) => handleFileChange(event, language, "image")}
+                on:change={(event) =>
+                  handleFileChange(event, language, "image")}
               />
               {#if formData[language].image}
                 <!-- Display image based on whether it's a File object or a string path -->
@@ -148,7 +154,8 @@
                 type="file"
                 accept="video/*"
                 id={`video-${language}`}
-                on:change={(event) => handleFileChange(event, language, "video")}
+                on:change={(event) =>
+                  handleFileChange(event, language, "video")}
               />
               {#if formData[language].video}
                 <!-- Display video based on whether it's a File object or a string path -->
@@ -187,4 +194,3 @@
     background-color: var(--background-color);
   }
 </style>
- 
