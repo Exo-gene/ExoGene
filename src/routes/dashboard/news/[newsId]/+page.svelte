@@ -26,7 +26,7 @@
   let showToast = false;
   let alertMessage = "";
   let showAlert = false;
-  const id = +$page.params.newsId;  // Ensure you define $page or use an alternative approach
+  const id = +$page.params.newsId;   
 
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
@@ -48,60 +48,59 @@
     {}
   );
 
-  onMount(async () => {
-    try {
-      isLoading = true;
-      let { data, error } = await supabase.rpc("get_news_by_id", {
-        news_id: id,
+onMount(async () => {
+  try {
+    isLoading = true;
+    const { data, error } = await supabase.rpc("get_news_by_id", { news_id: id });
+
+    if (error) {
+      console.error("Error fetching newsData:", error);
+      alertMessage = "Failed to load news data";
+      showAlert = true;
+      return;
+    }
+
+    if (data && Array.isArray(data.translations)) {
+      data.translations.forEach((translation: { language: LanguageEnum; title: string; subtitle: string; description: string; file: string }) => {
+        const languageData = formData[translation.language];
+        if (languageData) {
+          languageData.title = translation.title;
+          languageData.subtitle = translation.subtitle;
+          languageData.description = translation.description;
+
+          const fileParts = translation.file.split("/");
+          const fileName = fileParts[fileParts.length - 1];
+          const fileExtension = fileName.split(".").pop()?.toLowerCase();
+
+          if (["jpg", "png", "jpeg"].includes(fileExtension!)) {
+            languageData.image = translation.file;
+            languageData.imageName = fileName;
+          } else if (["mp4", "avi"].includes(fileExtension!)) {
+            languageData.video = translation.file;
+            languageData.videoName = fileName;
+          }
+        }
       });
 
-      if (error) {
-        console.error("Error fetching newsData:", error);
-        alertMessage = "Failed to load news data";
-        showAlert = true;
-        return;
-      }
-
-      if (data && typeof data === "object") {
-        const news = data;
-
-        news.translations.forEach((translation: any) => {
-          const languageData = formData[translation.language];
-          if (languageData) {
-            languageData.title = translation.title;
-            languageData.subtitle = translation.subtitle;
-            languageData.description = translation.description;
-
-            const fileParts = translation.file.split("/");
-            const fileName = fileParts[fileParts.length - 1];
-            const fileExtension = fileName.split(".").pop().toLowerCase();
-
-            if (["jpg", "png", "jpeg"].includes(fileExtension)) {
-              languageData.image = translation.file;
-              languageData.imageName = fileName;
-            } else if (["mp4", "avi"].includes(fileExtension)) {
-              languageData.video = translation.file;
-              languageData.videoName = fileName;
-            }
-          }
-        });
-
-        selectedCategoryIds = news.categories.map(c => c.category_id).filter(Boolean);
-        selectedSubCategoryIds = news.subcategories.map(sc => sc.subcategory_id).filter(Boolean);
-        selectedTagIds = news.tags.map((t: any) => t.tag_id);
-      }
-    } catch (err) {
-      console.error("Error in onMount:", err);
-      alertMessage = "An unexpected error occurred";
-      showAlert = true;
-    } finally {
-      isLoading = false;
+      // Use optional chaining and fallback to empty array
+      selectedCategoryIds = data.categories?.map((c: any) => c.category_id).filter(Boolean) || [];
+      selectedSubCategoryIds = data.subcategories?.map((sc: any) => sc.subcategory_id).filter(Boolean) || [];
+      selectedTagIds = data.tags?.map((t: any) => t.tag_id) || [];
     }
-  });
+  } catch (err) {
+    console.error("Error in onMount:", err);
+    alertMessage = "An unexpected error occurred";
+    showAlert = true;
+  } finally {
+    isLoading = false;
+  }
+});
 
-  function handleFileChange(event: any, language: any, type: any) {
-    const file = event.target.files[0];
-    if (file) {
+
+  function handleFileChange(event: Event, language: LanguageEnum, type: "image" | "video"): void {
+    const input = event.target as HTMLInputElement;
+    if (input && input.files && input.files[0]) {
+      const file = input.files[0];
       const newData = { ...formData[language] };
 
       if (type === "image") {
@@ -117,10 +116,10 @@
       }
 
       newData.fileError = "";
-
       formData = { ...formData, [language]: newData };
     }
   }
+
 
   function getRandomString(): string {
     return uuidv4().split("-")[0];
@@ -148,100 +147,102 @@
     return `news-files/${fileName}`;
   }
 
-  async function formSubmit() {
-    let isValid = true;
-    const uploads: Promise<string | null>[] = [];
-    isLoading = true;
+ async function formSubmit(): Promise<void> {
+  let isValid = true;
+  const uploads: Promise<string | null>[] = [];
+  isLoading = true;
 
-    for (const language of languages) {
-      const langData = formData[language];
-      if (!langData.title?.trim()) {
-        langData.titleError = "Title is required";
-        isValid = false;
-      }
-      if (!langData.subtitle?.trim()) {
-        langData.subtitleError = "Subtitle is required";
-        isValid = false;
-      }
-      if (!langData.description?.trim()) {
-        langData.descriptionError = "Description is required";
-        isValid = false;
-      }
-
-      if (!langData.image && !langData.video) {
-        if (!langData.imageName && !langData.videoName) {
-          langData.fileError = "Either image or video is required";
-          isValid = false;
-        }
-      } else {
-        const file = langData.image || langData.video;
-        if (file instanceof File) {
-          const uploadPromise = uploadFile(file, language).then(path => path, error => {
-            console.error("Upload failed for", language, ":", error);
-            return null; // Return null if upload fails
-          });
-          uploads.push(uploadPromise);
-        } else {
-          // Keep existing file path if no new file was selected
-          uploads.push(Promise.resolve(langData.image || langData.video));
-        }
-      }
+  for (const language of languages) {
+    const langData = formData[language];
+    if (!langData.title?.trim()) {
+      langData.titleError = "Title is required";
+      isValid = false;
     }
-
-    if (!selectedCategoryIds.length) {
-      alertMessage = "At least one category is required. Please select a category before submitting.";
-      showAlert = true;
+    if (!langData.subtitle?.trim()) {
+      langData.subtitleError = "Subtitle is required";
+      isValid = false;
+    }
+    if (!langData.description?.trim()) {
+      langData.descriptionError = "Description is required";
       isValid = false;
     }
 
-    if (!isValid) {
-      isLoading = false;
-      return;
-    }
-
-    try {
-      const filePaths = await Promise.all(uploads);
-      const newsLanguageData = languages.map((language, index) => ({
-        file: filePaths[index] || formData[language].image || formData[language].video, // Use the uploaded path or the existing path
-        title: formData[language].title as string,
-        subtitle: formData[language].subtitle as string,
-        description: formData[language].description as string,
-        language,
-      }));
-
-      const newsObject = {};
-
-      const categoryData = selectedCategoryIds.map(id => ({ category_id: id }));
-      const subcategoryData = selectedSubCategoryIds.map(id => ({ subcategory_id: id }));
-      const tagData = selectedTagIds.map(id => ({ tag_id: id }));
-
-      await newsStore.updateNewsData(
-         id,
-        newsObject,
-        newsLanguageData,
-        categoryData,
-        subcategoryData,
-        tagData,
-        supabase
-      );
-
-      showToast = true;
-      setTimeout(() => {
-        showToast = false;
-        goto("/dashboard/news");
-      }, 3000);
-    } catch (error) {
-      console.error("Error during news insertion:", error);
-    } finally {
-      isLoading = false;
+    // Check if image or video fields are empty and if their names are also empty
+    if (!langData.image && !langData.video && !langData.imageName && !langData.videoName) {
+      langData.fileError = "Either image or video is required";
+      isValid = false;
+    } else {
+      // Determine what to push to uploads based on the type of image or video
+      const file = langData.image || langData.video;
+      if (file instanceof File) {
+        // File needs to be uploaded
+        const uploadPromise = uploadFile(file, language).catch(error => {
+          console.error("Upload failed for", language, ":", error);
+          return null;
+        });
+        uploads.push(uploadPromise);
+      } else if (typeof file === 'string') {
+        // File is already a string (likely a path), push it wrapped in a Promise
+        uploads.push(Promise.resolve(file));
+      } else {
+        // No file is selected, and no path is provided
+        uploads.push(Promise.resolve(null));
+      }
     }
   }
 
-  function handleCategoryChange(event: any) {
+  if (!selectedCategoryIds.length) {
+    alertMessage = "At least one category is required. Please select a category before submitting.";
+    showAlert = true;
+    isValid = false;
+  }
+
+  if (!isValid) {
+    isLoading = false;
+    return;
+  }
+
+  try {
+    const filePaths = await Promise.all(uploads);
+    const newsLanguageData = languages.map((language, index) => ({
+      file: filePaths[index] || formData[language].image || formData[language].video,
+      title: formData[language].title!,
+      subtitle: formData[language].subtitle!,
+      description: formData[language].description!,
+      language,
+    }));
+
+    const newsObject = {};
+
+    const categoryData = selectedCategoryIds.map(id => ({ category_id: id }));
+    const subcategoryData = selectedSubCategoryIds.map(id => ({ subcategory_id: id }));
+    const tagData = selectedTagIds.map(id => ({ tag_id: id }));
+
+    await newsStore.updateNewsData(
+      id,
+      newsObject,
+      newsLanguageData,
+      categoryData,
+      subcategoryData,
+      tagData,
+      supabase
+    );
+
+    showToast = true;
+    setTimeout(() => {
+      showToast = false;
+      goto("/dashboard/news");
+    }, 3000);
+  } catch (error) {
+    console.error("Error during news insertion:", error);
+  } finally {
+    isLoading = false;
+  }
+}
+
+ function handleCategoryChange(event: CustomEvent<{ categoryIds: number[]; subcategoryIds: number[] }>): void {
     selectedCategoryIds = event.detail.categoryIds;
     selectedSubCategoryIds = event.detail.subcategoryIds;
-    console.log("Selected Category IDs:", selectedCategoryIds);
-    console.log("Selected Subcategory IDs:", selectedSubCategoryIds);
   }
 
   function handleTagChange(event: { detail: number[] }): void {
