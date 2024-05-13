@@ -41,8 +41,8 @@
     },
     {}
   );
-
-  function handleFileChange(
+  
+function handleFileChange(
     event: Event,
     language: string,
     type: "image" | "video"
@@ -71,13 +71,12 @@
         formData[language].videoName = "";
       }
     }
-  }
+}
 
-  function getRandomString(): string {
+function getRandomString(): string {
     return uuidv4().split("-")[0];
-  }
-
-  async function uploadFile(
+}
+async function uploadFile(
     file: File,
     language: LanguageEnum
   ): Promise<string> {
@@ -98,9 +97,8 @@
     }
 
     return `news-files/${fileName}`;
-  }
-
-  async function formSubmit() {
+}
+async function formSubmit() {
     let isValid = true;
     const uploads: Promise<string>[] = [];
     isLoading = true;
@@ -179,18 +177,14 @@
     } finally {
       isLoading = false;
     }
-  }
-
-  function handleCategoryChange(event: any) {
-    selectedCategoryIds = event.detail.categoryIds;
-    selectedSubCategoryIds = event.detail.subcategoryIds;
-    console.log("Selected Category IDs:", selectedCategoryIds);
-    console.log("Selected Subcategory IDs:", selectedSubCategoryIds);
-  }
-
-  function handleTagChange(event: { detail: number[] }): void {
+}
+function handleCategoryChange(event: CustomEvent<{ categoryIds: number[]; subcategoryIds: number[]; }>): void {
+  selectedCategoryIds = event.detail.categoryIds;
+  selectedSubCategoryIds = event.detail.subcategoryIds;
+}
+function handleTagChange(event: { detail: number[] }): void {
     selectedTagIds = event.detail;
-  }
+}
 </script>
 
 <div
