@@ -22,6 +22,7 @@
   let alertMessage = "";
   let showAlert = false;
 
+  
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
