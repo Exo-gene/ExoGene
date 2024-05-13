@@ -9,20 +9,15 @@ export interface NewsModel {
   remainingItems: number;
 }
 export interface NewsDataModel {
-  id: number;
-  created_at: Date;
-  title: string;
-  translation: NewsLanguageModel[];
+  id: number; 
 }
 
 export interface NewsLanguageModel {
-  id: number;
-  news_id: number;
+  file: string;
   title: string;
-  description: string;
   subtitle: string;
+  description: string;
   language: LanguageEnum;
-  created_at: Date;
 }
 
 export interface NewsLanguageModelToUpdate {
