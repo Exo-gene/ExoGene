@@ -41,7 +41,7 @@ export interface FormData {
   imageError: string;
   titleError: string;
   descriptionError: string;
-  news_id: number;
+  news_id: number |null;
   title: string;
   description: string;
 }
