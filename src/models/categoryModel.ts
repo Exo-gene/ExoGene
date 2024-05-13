@@ -9,21 +9,37 @@ export interface CategoryModel {
   remainingitems: number;
 }
 export interface CategoryDataModel {
-  id: number;
-  created_at: Date;
-  categorytranslation: CategoryLanguageModel[];
+  id: number; 
 }
 
 export interface CategoryLanguageModel {
-  id: number;
-  category_id: number;
   title: string;
-  language: LanguageEnum;
-  created_at: Date;
+  language: LanguageEnum; 
 }
 
 export interface CategoryLanguageModelToUpdate {
   title: string;
   language: LanguageEnum;
-  created_at: Date;
 }
+
+export interface categoryId {
+  category_id: number;
+}
+
+
+
+export interface FormData {
+  title: string | null;
+  titleError: string;
+}
+
+export interface FormDataSet {
+  [key: string]: FormData;
+}
+
+export interface LanguageObject {
+  title: string;
+  language: LanguageEnum;
+}
+
+ 
