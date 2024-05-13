@@ -18,8 +18,6 @@
 
 
   
-
-
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
@@ -55,8 +53,6 @@
     }
  
     try {
-
-      
        const subcategoryLanguageData = languages.map((language, index) => ({
         title: formData[language].title as string, 
         language,
