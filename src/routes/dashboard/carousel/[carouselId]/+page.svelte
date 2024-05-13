@@ -12,6 +12,7 @@
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
   import { page } from "$app/stores";
+  import type { FormDataSet } from "../../../../models/carouselModel";
 
   const id = +$page.params.carouselId;
   let selectedNewsId: number = 0;
@@ -19,25 +20,15 @@
   let alertMessage = "";
   let showToast = false;
   let newsTitle = "";
+    let isLoading = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
-  interface FormData {
-    [key: string]: {
-      image: File | null | String;
-      imageName: string;
-      imageError: string;
-      titleError: string;
-      descriptionError: string;
-      news_id: number;
-      title: string;
-      description: string;
-    };
-  }
+  
 
-  let formData: FormData = languages.reduce(
-    (acc: FormData, language: LanguageEnum) => {
-      acc[language] = {
-        image: null,
+ 
+  let formData: FormDataSet = languages.reduce(
+    (acc: FormDataSet, language: LanguageEnum) => {
+      acc[language] = {   image: null,
         imageName: "",
         imageError: "",
         titleError: "",
@@ -109,8 +100,7 @@
         formData[translation.language].description = translation.description;
         formData[translation.language].imageName = translation.image;
         formData[translation.language].news_id = firstCarouselData.news_id;
-        formData[translation.language].image =
-          `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${translation.image}`;
+        formData[translation.language].image =translation.image;
       }
     });
   });
@@ -155,97 +145,95 @@
      };
   }
 
-  async function formSubmit() {
-    let isValid = true;
-    const uploads: any = [];
-    const errors = [];
+async function formSubmit() {
+  let isValid = true;
+  const uploads: Promise<any>[] = [];
+  const errors: string[] = [];
+  isLoading = true;
 
-    // Validate required fields before attempting to upload
-    languages.forEach((language) => {
-      if (!formData[language].title.trim()) {
-        formData[language].titleError = "Title is required";
-        isValid = false;
-      }
-      if (!formData[language].description.trim()) {
-        formData[language].descriptionError = "Description is required";
-        isValid = false;
-      }
-      if (!formData[language].image && !formData[language].imageName) {
-        formData[language].imageError = "Image is required";
-        isValid = false;
-      }
+  languages.forEach((language) => {
+    if (!formData[language].title.trim()) {
+      formData[language].titleError = "Title is required";
+      isValid = false;
+    }
+    if (!formData[language].description.trim()) {
+      formData[language].descriptionError = "Description is required";
+      isValid = false;
+    }
+    if (!formData[language].image && !formData[language].imageName) {
+      formData[language].imageError = "Image is required";
+      isValid = false;
+    }
 
-      if (isValid) {
-        if (formData[language].image instanceof File) {
-          const uploadPromise = uploadFile(formData[language].image!, language)
-            .then(({ path, createdAt }) => {
-              formData[language].image = path;
-              return {
-                language,
-                image: path,
-                created_at: createdAt,
-                title: formData[language].title,
-                description: formData[language].description,
-              };
-            })
-            .catch((error) => {
-              errors.push(
-                `Failed to upload image for ${language}: ${error.message}`
-              );
-              return null; // Ensure failure does not stop the overall processing
-            });
-          uploads.push(uploadPromise);
-        } else if (formData[language].imageName) {
-          uploads.push(
-            Promise.resolve({
+    if (isValid) {
+      if (formData[language].image instanceof File) {
+        const imageFile = formData[language].image as File;  
+        const uploadPromise = uploadFile(imageFile, language)
+          .then(({ path }) => {  
+            formData[language].image = path;
+            return {
               language,
-              image: formData[language].imageName,
-               title: formData[language].title,
+              image: path,
+              title: formData[language].title,
               description: formData[language].description,
-            })
-          );
-        }
+            };
+          })
+          .catch((error) => {
+            errors.push(`Failed to upload image for ${language}: ${error.message}`);
+            return null;
+          });
+        uploads.push(uploadPromise);
+      } else if (formData[language].imageName) {
+        uploads.push(Promise.resolve({
+          language,
+          image: formData[language].imageName,
+          title: formData[language].title,
+          description: formData[language].description,
+        }));
       }
-    });
-
-    if (!isValid || errors.length > 0) {
-      alertMessage = "Please correct the errors before submitting.";
-      showAlert = true;
-      return;
     }
+  });
 
-    try {
-      const carouselLanguageData = await Promise.all(uploads);
-      const carouselObject = {
-        id: id,
-        news_id: selectedNewsId, 
-      };
-
-      // Filter out any null responses from failed uploads
-      const validData = carouselLanguageData.filter((data) => data !== null);
-      if (validData.length === 0) {
-        throw new Error(
-          "No valid data to update. Check file uploads and data entries."
-        );
-      }
-
-      await carouselStore.updateCarouselData(
-        carouselObject,
-        validData,
-        supabase
-      );
-
-      showToast = true;
-      setTimeout(() => {
-        showToast = false;
-        goto("/dashboard/carousel");
-      }, 3000);
-    } catch (error) {
-      console.error("Error during advertisement update:", error);
-      alertMessage = "Update failed: " + error;
-      showAlert = true;
-    }
+  if (!isValid || errors.length > 0) {
+    alertMessage = "Please correct the errors before submitting.";
+    showAlert = true;
+    isLoading = false;
+    return;
   }
+
+  try {
+    const carouselLanguageData = await Promise.all(uploads);
+    const carouselObject = {
+      id: id, 
+      news_id: selectedNewsId,
+    };
+
+    const validData = carouselLanguageData.filter((data) => data !== null);
+    if (validData.length === 0) {
+      throw new Error("No valid data to update. Check file uploads and data entries.");
+    }
+
+    await carouselStore.updateCarouselData(
+      carouselObject,
+      validData,
+      supabase
+    );
+
+    showToast = true;
+    setTimeout(() => {
+      showToast = false;
+      goto("/dashboard/carousel");
+    }, 3000);
+  } catch (error) {
+    console.error("Error during advertisement update:", error);
+    alertMessage = "Update failed: " + error;
+    showAlert = true;
+  } finally {
+    isLoading = false;
+  }
+}
+
+
 
   function onNewsSelected(event: any) {
     let newsId = event.detail;
@@ -255,6 +243,16 @@
       formData[language].news_id = selectedNewsId;
     });
   }
+
+
+   const getObjectUrl = (file: File | string | null): string => {
+    if (file instanceof File) {
+      return URL.createObjectURL(file);
+    } else if (typeof file === "string") { 
+      return `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${file}`;
+    }
+    return "";
+  };
 </script>
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
@@ -310,6 +308,7 @@
                     <Label for={`image-${language}`}>Image</Label>
                     <Input
                       type="file"
+                      accept="image/*"
                       id={`image-${language}`}
                       on:change={(event) => handleFileChange(event, language)}
                     />
@@ -326,7 +325,7 @@
                 <div class="">
                   {#if formData[language]?.imageName}
                     <img
-                      src={`${formData[language].image}`}
+                       src={getObjectUrl(formData[language].image)}
                       alt={`Image for ${language}`}
                       class="w-44 h-44 mt-2"
                     />
