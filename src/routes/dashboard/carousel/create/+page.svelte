@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FullPageLoadingIndicator from './../../../../lib/components/FullPageLoadingIndicator.svelte';
   import { carouselStore } from "../../../../stores/carouselStore";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { supabase } from "$lib/supabaseClient";
@@ -10,28 +11,18 @@
   import { Alert } from "flowbite-svelte";
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
+  import type { FormDataSet } from "../../../../models/carouselModel";
 
   let selectedNewsId: number = 0;
   let showAlert = false;
   let alertMessage = "";
   let showToast = false;
+  let isLoading = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
-  interface FormData {
-    [key: string]: {
-      image: File | null;
-      imageName: string;
-      imageError: string;
-      titleError: string;
-      descriptionError: string;
-      news_id: number;
-      title: string;
-      description: string;
-    };
-  }
-
-  let formData: FormData = languages.reduce(
-    (acc: FormData, language: LanguageEnum) => {
+ 
+ let formData: FormDataSet = languages.reduce(
+    (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
         image: null,
         imageName: "",
@@ -89,6 +80,7 @@
   async function formSubmit() {
     let isValid = true;
     const uploads = [];
+    isLoading = true;
 
     // Check if a news item is selected
     if (!selectedNewsId) {
@@ -98,26 +90,41 @@
       isValid = false;
     }
 
-    for (const language of languages) {
-      if (!formData[language].image) {
-        formData[language].imageError = "Image is required";
-        isValid = false;
-      }
-      if (!formData[language].title.trim()) {
-        formData[language].titleError = "Title is required";
-        isValid = false;
-      }
-      if (!formData[language].description.trim()) {
-        formData[language].descriptionError = "Description is required";
-        isValid = false;
-      }
-      if (isValid && formData[language].image) {
-        const uploadPromise = uploadFile(formData[language].image!, language);
-        uploads.push(uploadPromise);
-      }
+  for (const language of languages) {
+  if (!formData[language].image) {
+    formData[language].imageError = "Image is required";
+    isValid = false;
+  }
+  if (!formData[language].title.trim()) {
+    formData[language].titleError = "Title is required";
+    isValid = false;
+  }
+  if (!formData[language].description.trim()) {
+    formData[language].descriptionError = "Description is required";
+    isValid = false;
+  }
+  if (isValid && formData[language].image) {
+    // Ensure the image is not null and is a File before calling uploadFile
+    const file = formData[language].image;
+    if (file instanceof File) {
+      const uploadPromise = uploadFile(file, language);
+      uploads.push(uploadPromise);
+    } else {
+       console.error(`Expected a File, but received ${typeof file}`);
+      isValid = false;
     }
+  }
+}
 
-    if (!isValid) return;
+if (!isValid) {
+  isLoading = false;
+  return;
+}
+
+     if (!isValid) {
+      isLoading = false;
+      return;
+    }
 
     try {
       // Wait for all file uploads to finish
@@ -147,24 +154,22 @@
       }, 3000);
     } catch (error) {
       console.error("Error during carousel insertion:", error);
+     } finally {
+      isLoading = false;
     }
   }
 
-  // Function to handle when the news ID changes
-
   function onNewsSelected(event: any) {
-    let newsId = event.detail;
-    selectedNewsId = newsId;
+    selectedNewsId =event.detail  ;
     showAlert = false;
-    Object.keys(formData).forEach((language) => {
-      formData[language].news_id = selectedNewsId;
-    });
   }
 </script>
 
+ {#if isLoading}
+    <FullPageLoadingIndicator />
+  {:else}
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
-  <NewsDropdown bind:selectedNewsId on:newsChange={onNewsSelected} />
-
+  <NewsDropdown {selectedNewsId} on:newsChange={onNewsSelected} />
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
       {#each languages as language}
@@ -210,7 +215,8 @@
                 <div>
                   <Label for={`image-${language}`}>Image</Label>
                   <Input
-                    type="file"
+                   type="file"
+                   accept="image/*"
                     id={`image-${language}`}
                     on:change={(event) => handleFileChange(event, language)}
                   />
@@ -242,10 +248,15 @@
     </div>
   </div>
 </div>
+{/if}
+
 
 {#if showToast}
   <Toast message="New news has been inserted successfully" type="success" />
 {/if}
+
+
+
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   {#if showAlert}
     <Alert class="mb-4 flex items-center">
