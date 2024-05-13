@@ -1,7 +1,7 @@
 <script lang="ts">
+ import CategoryDropdown from "$lib/components/CategoryDropdown.svelte";
   import LanguageTabs from "./../../../../lib/components/LanguageTabs.svelte";
-  import PositionSelect from "./../../../../lib/components/PositionSelect.svelte";
-  import CategorySelect from "./../../../../lib/components/CategorySelect.svelte";
+  import PositionSelect from "./../../../../lib/components/PositionSelect.svelte"; 
   import { Button, Label } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
@@ -15,84 +15,81 @@
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { advertisementStore } from "../../../../stores/advertisementStore";
   import { page } from "$app/stores";
+  import type { AdvertisementLanguageModelToUpdate, FormDataSet } from "../../../../models/advertisementModel";
 
   const id = +$page.params.advertisementId;
   let isLoading = false;
-  let showToast = false;
-  let categories: any = [];
-  let selectedCategoryId: number | null = null;
+  let showToast = false; 
+  let selectedCategoryId: number;
   let start_date = "";
   let end_date = "";
   let positions = Object.values(PositionEnum);
   let languages = Object.values(LanguageEnum);
   let selectedPosition = PositionEnum.LEFT;
 
-  let formData: any = languages.reduce((acc, language) => {
-    acc[language] = {
+ 
+ let formData: FormDataSet = languages.reduce(
+    (acc: FormDataSet, language: LanguageEnum) => {
+      acc[language] = {
       image: null,
       video: null,
       imageName: "",
       videoName: "",
       fileError: "",
       category_id: null,
-    };
-    return acc;
-  }, {});
+      };
+      return acc;
+    },
+    {}
+  );
 
-  onMount(async () => {
-    isLoading = true;
-    const [
-      { data: categoryData, error: categoryError },
-      { data: advertisementData, error: advertisementError },
-    ] = await Promise.all([
-      supabase
-        .from("categories")
-        .select("*, category_translations(*)")
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false }),
-      supabase.rpc("get_advertisement_by_id", { input_advertisement_id: id }),
-    ]);
+ onMount(async () => {
+  isLoading = true;
 
-    if (categoryError) {
-      console.error("Error fetching categories:", categoryError);
-      showToast = true;
-    } else {
-      categories = categoryData;
-    }
+  const { data: advertisementData, error: advertisementError } = await supabase
+    .rpc("get_advertisement_by_id", { input_advertisement_id: id });
 
-    if (advertisementError) {
-      console.error("Error fetching advertisement data:", advertisementError);
-      showToast = true;
-    } else if (advertisementData && advertisementData.length > 0) {
-      const advertisement = advertisementData[0];
+  if (advertisementError) {
+    console.error("Error fetching advertisement data:", advertisementError);
+    showToast = true;
+  } else if (advertisementData && advertisementData.length > 0) {
+    const advertisement = advertisementData[0];
 
-      // Convert UTC dates to local dates
-      start_date = toLocaleDate(advertisement.start_date);
-      end_date = toLocaleDate(advertisement.end_date);
+    // Convert UTC dates to local dates
+    start_date = toLocaleDate(advertisement.start_date);
+    end_date = toLocaleDate(advertisement.end_date);
 
-      selectedPosition = advertisement.position;
-      selectedCategoryId = advertisement.category_id;
+    selectedPosition = advertisement.position;
+    selectedCategoryId = advertisement.category_id;
 
-      for (const translation of advertisement.advertisement_translations) {
-        const fileParts = translation.file.split("/");
-        const fileName = fileParts[fileParts.length - 1];
-        const fileExtension = fileName.split(".").pop();
+    for (const translation of advertisement.advertisement_translations) {
+      const fileParts = translation.file.split("/");
+      const fileName = fileParts[fileParts.length - 1];
+      const fileExtension = fileName.split(".").pop();
 
-        if (["jpg", "png", "jpeg"].includes(fileExtension)) {
-          formData[translation.language].image =
-            `advertisement-files/${fileName}`;
-          formData[translation.language].imageName = fileName;
-        } else if (["mp4", "avi"].includes(fileExtension)) {
-          formData[translation.language].video =
-            `advertisement-files/${fileName}`;
-          formData[translation.language].videoName = fileName;
-        }
+      if (["jpg", "png", "jpeg"].includes(fileExtension)) {
+        formData[translation.language] = {
+          ...formData[translation.language],
+          image: `advertisement-files/${fileName}`,
+          imageName: fileName
+        };
+      } else if (["mp4", "avi"].includes(fileExtension)) {
+        formData[translation.language] = {
+          ...formData[translation.language],
+          video: `advertisement-files/${fileName}`,
+          videoName: fileName
+        };
       }
     }
-    isLoading = false;
-  });
+  }
 
-  function handleFileChange(event: any, language: any, type: any) {
+  isLoading = false;
+});
+
+  function handleFileChange(
+  event: any,
+   language: LanguageEnum,
+   type: "image" | "video") {
     const file = event.target.files[0];
     if (file) {
       const newData = { ...formData[language] };
@@ -117,10 +114,7 @@
   }
 
   function handleCategoryChange(event: any) {
-    selectedCategoryId = parseInt(event.target.value);
-    Object.keys(formData).forEach(
-      (language) => (formData[language].category_id = selectedCategoryId)
-    );
+    selectedCategoryId = event.detail;
   }
 
   function selectPosition(event: any) {
@@ -165,7 +159,7 @@
         if (languageData.image instanceof File) {
           uploadPromises.push(
             uploadFile(languageData.image, language).then((filePath) => {
-              languageData.image = filePath; // Updating with the new file path
+              languageData.image = filePath;  
               return filePath;
             })
           );
@@ -175,7 +169,7 @@
         if (languageData.video instanceof File) {
           uploadPromises.push(
             uploadFile(languageData.video, language).then((filePath) => {
-              languageData.video = filePath; // Updating with the new file path
+              languageData.video = filePath; 
               return filePath;
             })
           );
@@ -191,21 +185,20 @@
     try {
       // Wait for all uploads to complete
       await Promise.all(uploadPromises);
-
-      // Construct the payload with the updated formData
-      const advertisementLanguageData = languages.map((language) => ({
-        file: formData[language].image || formData[language].video,
-        language,
-        created_at: new Date().toISOString(),
-      }));
+     const advertisementLanguageData: AdvertisementLanguageModelToUpdate[] = languages.map(language => {
+      const file = formData[language].image || formData[language].video;
+      if (typeof file !== 'string') {
+        throw new Error("File is not uploaded properly: " + language);
+      }
+      return { file, language };
+    });
 
       const advertisementObject = {
         id,
         start_date: toUtc(start_date),
         end_date: toUtc(end_date),
         position: selectedPosition,
-        category_id: selectedCategoryId,
-        created_at: new Date().toISOString(),
+        category_id: selectedCategoryId, 
       };
 
    
@@ -228,6 +221,10 @@
   }
 </script>
 
+
+ {#if isLoading}
+    <FullPageLoadingIndicator />
+{:else}
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   <div class="w-full mb-5 flex space-x-4">
     <div class="mb-4">
@@ -248,12 +245,10 @@
         bind:value={end_date}
       />
     </div>
-    <CategorySelect
-      {categories}
-      bind:selectedCategoryId
-      {handleCategoryChange}
-    />
     <PositionSelect {positions} bind:selectedPosition {selectPosition} />
+  <div class="mt-3">
+  <CategoryDropdown  {selectedCategoryId} on:categoryChange={handleCategoryChange} />
+  </div>
   </div>
   <div class="border rounded w-full">
     <LanguageTabs {languages} {formData} {handleFileChange} />
@@ -265,6 +260,7 @@
     <FullPageLoadingIndicator />
   {/if}
 </div>
+{/if}
 
 {#if showToast}
   <Toast
