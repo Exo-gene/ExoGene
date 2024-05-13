@@ -41,16 +41,20 @@
         <TableBodyCell class="font-semibold text-gray-700">
           {formatDateTime(item.created_at.toString())}
         </TableBodyCell>
-        {#each item.translation as translation}
-          {#if translation.language === LanguageEnum.EN}
-            <TableBodyCell>
-              <span>{translation.title.slice(0, 40)}{translation.title.length > 40 ? '...' : ''}</span>
-            </TableBodyCell>
-            <TableBodyCell>
-              <span>{translation.language}</span>
-            </TableBodyCell>
-          {/if}
-        {/each}
+       {#each item.translation as translation}
+  {#if translation.language === LanguageEnum.EN}
+    
+      {#if 'title' in translation}
+      <TableBodyCell>
+        <span>{translation.title.slice(0, 40)}{translation.title.length > 40 ? '...' : ''}</span>
+      </TableBodyCell>
+      {/if}
+    <TableBodyCell>
+      <span>{translation.language}</span>
+    </TableBodyCell>
+  {/if}
+{/each}
+
         <TableBodyCell class="flex space-x-3">
           <button
             class="font-medium text-green-600 hover:underline dark:text-green-600"
