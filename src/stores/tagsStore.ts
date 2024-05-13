@@ -55,7 +55,7 @@ const createTagsStore = () => {
       }
     },
     insertTagData: async (
-      tagsObject: TagDataModel,
+      tagsObject: any,
       tagLanguageData: TagLanguageModel[],
       supabase: SupabaseClient
     ) => {
