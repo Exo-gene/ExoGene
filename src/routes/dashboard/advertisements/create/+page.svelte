@@ -1,9 +1,7 @@
 <script lang="ts">
   import LanguageTabs from "./../../../../lib/components/LanguageTabs.svelte";
   import PositionSelect from "./../../../../lib/components/PositionSelect.svelte";
-  import CategorySelect from "./../../../../lib/components/CategorySelect.svelte";
   import { Button, Label } from "flowbite-svelte";
-  import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
@@ -14,37 +12,42 @@
   import { PositionEnum } from "../../../../models/positionEnum.js";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { advertisementStore } from "../../../../stores/advertisementStore";
+  import type { FormDataSet } from "../../../../models/advertisementModel";
+  import CategoryDropdown from "$lib/components/CategoryDropdown.svelte";
 
-  let isLoading = false;
-  let categories: any = [];
+  let isLoading = false; 
   let positions = Object.values(PositionEnum);
   let languages = Object.values(LanguageEnum);
-  let selectedCategoryId: number | null = null;
+  let selectedCategoryId: number;
   let start_date = "";
   let end_date = "";
 
   let selectedPosition = PositionEnum.LEFT;
   let showToast = false;
 
-  let formData: any = languages.reduce((acc, language) => {
-    acc[language] = {
+
+ let formData: FormDataSet = languages.reduce(
+    (acc: FormDataSet, language: LanguageEnum) => {
+      acc[language] = {
       image: null,
       video: null,
       imageName: "",
       videoName: "",
       fileError: "",
       category_id: null,
-    };
-    return acc;
-  }, {});
+      };
+      return acc;
+    },
+    {}
+  );
+
 
   function handleFileChange(
-    event: any,
+    event: Event,
     language: LanguageEnum,
     type: "image" | "video"
   ) {
-    const input = event.target;
-
+     const input = event.target as HTMLInputElement;  
     if (input.files && input.files.length > 0) {
       if (type === "image") {
         formData[language].image = input.files[0];
@@ -70,11 +73,7 @@
   }
 
   function handleCategoryChange(event: any) {
-    const value = parseInt(event.target.value);
-    selectedCategoryId = value;
-    Object.keys(formData).forEach((language) => {
-      formData[language].category_id = value;
-    });
+    selectedCategoryId = event.detail;
   }
 
   function selectPosition(event: any) {
@@ -106,16 +105,14 @@
       const filePaths = await Promise.all(uploads);
       const advertisementLanguageData = languages.map((language, index) => ({
         file: filePaths[index],
-        language,
-        created_at: new Date().toISOString(),
+        language, 
       }));
 
       const advertisementObject = {
         start_date: toUtc(start_date),
         end_date: toUtc(end_date),
         position: selectedPosition,
-        category_id: selectedCategoryId,
-        created_at: new Date().toISOString(),
+        category_id: selectedCategoryId, 
       };
 
    
@@ -160,21 +157,11 @@
     return `advertisement-files/${fileName}`;
   }
 
-  onMount(async () => {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*,category_translations(*)")
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching categories:", error);
-    } else {
-      categories = data;
-    }
-  });
 </script>
 
+ {#if isLoading}
+    <FullPageLoadingIndicator />
+  {:else}
 <div
   class="pt-5 lg:pt-10 flex flex-col justify-center items-center max-w-screen-lg mx-auto"
 >
@@ -198,8 +185,10 @@
         bind:value={end_date}
       />
     </div>
-    <CategorySelect {categories} {handleCategoryChange} {selectedCategoryId} />
     <PositionSelect {positions} {selectPosition} {selectedPosition} />
+  <div class="mt-3">
+    <CategoryDropdown  {selectedCategoryId} on:categoryChange={handleCategoryChange} />
+  </div>
   </div>
   <div class="border rounded w-full">
     <LanguageTabs {languages} {formData} {handleFileChange} />
@@ -211,7 +200,7 @@
     <FullPageLoadingIndicator />
   {/if}
 </div>
-
+{/if}
 {#if showToast}
   <Toast
     message="New advertisement has been inserted successfully"
