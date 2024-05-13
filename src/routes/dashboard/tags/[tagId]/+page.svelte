@@ -8,9 +8,11 @@
   import Toast from "$lib/components/Toast.svelte";
   import { tagStore } from "../../../../stores/tagsStore";
   import type { FormDataSet, TagLanguageModel } from "../../../../models/tagModel";
+  import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
 
   const id = +$page.params.tagId;
   let showToast = false;
+  let isLoading = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
   // fetch data from db
@@ -45,6 +47,8 @@
  
   async function formSubmit() {
     let isValid = true;
+     isLoading = true;
+
     // Perform validation for each language
     languages.forEach((language) => {
       if (!formData[language].title) {
@@ -53,9 +57,12 @@
       }
     });
 
-    if (!isValid) return;
-
     
+    if (!isValid) {
+      isLoading = false;
+      return;
+    }
+
     try {
        const tagLanguageData = languages.map((language, index) => ({
         title: formData[language].title as string, 
@@ -72,10 +79,15 @@
       }, 1000);
     } catch (error) {
       console.error("Error during tag insertion:", error);
+    } finally {
+      isLoading = false;
     }
   }
 </script>
 
+ {#if isLoading}
+    <FullPageLoadingIndicator />
+  {:else}
 <div class="pt-5 lg:pt-10 flex justify-center w-full">
   <div class="max-w-screen-md w-full border rounded">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
@@ -108,6 +120,7 @@
     </div>
   </div>
 </div>
+{/if}
 
 {#if showToast}
   <Toast message="This tag has been Updated successfully" type="success" />
