@@ -58,7 +58,7 @@ const createCategoriesStore = () => {
       }
     },
     insertCategoryData: async (
-      categoryObject: CategoryDataModel,
+      categoryObject: any,
       categoryLanguageData: CategoryLanguageModel[],
       supabase: SupabaseClient
     ) => {
