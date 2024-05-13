@@ -27,12 +27,25 @@ export interface CarouselLanguageModel {
 
 export interface CarouselDataModelToUpdate {
   id: number;
-  start_date: Date;
-  end_date: Date;
-  carousel_translations: CarouselLanguageModel[];
+  news_id: number;
 }
 
 export interface CarouselLanguageModelToUpdate {
   image: string;
   language: LanguageEnum;
+}
+
+export interface FormData {
+  image: File | string | null;
+  imageName: string;
+  imageError: string;
+  titleError: string;
+  descriptionError: string;
+  news_id: number;
+  title: string;
+  description: string;
+}
+
+export interface FormDataSet {
+  [key: string]: FormData;
 }
