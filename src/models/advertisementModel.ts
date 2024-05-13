@@ -1,4 +1,5 @@
 import type { LanguageEnum } from "./languageEnum";
+import type { PositionEnum } from "./positionEnum";
 
 export interface AdvertisementModel {
   id: number;
@@ -26,13 +27,26 @@ export interface AdvertisementLanguageModel {
 
 export interface AdvertisementDataModelToUpdate {
   id: number;
-  start_date: Date;
-  end_date: Date;
-  advertisement_translations: AdvertisementLanguageModel[];
+  start_date: string;
+  end_date: string;
+  position: PositionEnum;
+  category_id: number;
 }
 
 export interface AdvertisementLanguageModelToUpdate {
-  image: string;
-  language: LanguageEnum;
-  created_at: Date;
+  file: string;
+  language: LanguageEnum; 
+}
+
+export interface FormData {
+  image: File | string | null;
+  video: File | string | null;
+  imageName: string;
+  videoName: string;
+  fileError: string;
+  category_id: number | null;
+}
+
+export interface FormDataSet {
+  [key: string]: FormData;
 }
