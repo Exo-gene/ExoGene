@@ -1,24 +1,12 @@
 <script lang="ts">
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
-  import {
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import { LanguageEnum } from "../../../models/languageEnum";
-  import { formatDateTime } from "$lib/utils/formatDateTime";
-  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
-  import PaginationControls from "$lib/components/PaginationControls.svelte";
-  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
-  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
+  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte"; 
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import { carouselStore } from "../../../stores/carouselStore";
+  import CustomTable from "$lib/components/CustomTable.svelte";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -87,60 +75,13 @@
   $: carousel = $carouselStore[0]?.items;
 </script>
 
+ 
 {#if isLoading}
   <LoadingIndicator />
-{:else if $carouselStore[0]?.items.length > 0}
+{:else}
   <div class="mx-2">
-    <InsertButton insertData={createCarousel} />
-    <Table>
-      <TableHead
-        style="background-color: var(--tableHeaderBackgroundColor); color:var(--tableHeaderColor)"
-      >
-        <TableHeadCell class="!p-4"></TableHeadCell>
-        {#each tableHeaders as header}
-          <TableHeadCell>{header}</TableHeadCell>
-        {/each}
-      </TableHead>
-      <TableBody tableBodyClass="divide-y">
-        {#each carousel as carouselItem}
-          <TableBodyRow
-            style="background-color: var(--tableBackgroundColor); color:var(--tableColor)"
-          >
-            <TableBodyCell class="!p-4"></TableBodyCell>
-            <TableBodyCell>{carouselItem.id}</TableBodyCell>
-            <TableBodyCell class="font-semibold text-gray-700">
-              {formatDateTime(carouselItem.created_at.toString())}
-            </TableBodyCell>
-            <TableBodyCell>
-              {#each carouselItem.carouseltranslation as translation}
-                {#if translation.language === LanguageEnum.EN}
-                  <span>{translation.language}</span>
-                {/if}
-              {/each}
-            </TableBodyCell>
-            <TableBodyCell class="font-semibold text-gray-700">
-              {#each carouselItem.carouseltranslation as translation}
-                {#if translation.language === LanguageEnum.EN}
-                  <span>{translation.title}</span>
-                {/if}
-              {/each}
-            </TableBodyCell>
-            <TableBodyCell class="flex space-x-3">
-              <button
-                class="font-medium text-green-600 hover:underline dark:text-green-600"
-                on:click={() => editCarousel(carouselItem.id)}
-              >
-                <IconEdit stroke={2} class="text-green-700" />
-              </button>
-              <button on:click={() => handleDelete(carouselItem.id)}
-                ><IconTrash stroke={2} class="text-red-700" /></button
-              >
-            </TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-    <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
-    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCarousel} />
+   <InsertButton insertData={createCarousel} />
+   <CustomTable items={carousel} editData={editCarousel} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
+   <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCarousel} />
   </div>
 {/if}
