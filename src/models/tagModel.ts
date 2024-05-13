@@ -14,14 +14,32 @@ export interface TagDataModel {
 }
 
 export interface TagLanguageModel {
-  id: number;
-  tag_id: number;
   title: string;
   language: LanguageEnum;
-  created_at: Date;
 }
 
 export interface TagLanguageModelToUpdate {
   title: string;
   language: LanguageEnum; 
+}
+
+export interface FormData {
+  title: string | null;
+  titleError: string;
+}
+
+export interface FormDataSet {
+  [key: string]: FormData;
+}
+
+ 
+  export interface LanguageObject {
+    title: string;
+    language: LanguageEnum;
+  }
+
+
+
+export interface TagId {
+  tag_id: number;
 }
