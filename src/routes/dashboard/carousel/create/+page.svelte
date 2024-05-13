@@ -21,6 +21,7 @@
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
  
+
  let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
@@ -31,17 +32,15 @@
         title: "",
         description: "",
         descriptionError: "",
-        news_id: 0,
+        news_id:null,
       };
       return acc;
     },
     {}
   );
 
-  function handleFileChange(event: any, language: LanguageEnum) {
-    const input = event.target;
- 
-
+  function handleFileChange(event: Event, language: LanguageEnum) {
+     const input = event.target as HTMLInputElement;  
     if (input.files && input.files.length > 0) {
       formData[language].image = input.files[0];
       formData[language].imageName = input.files[0].name;
