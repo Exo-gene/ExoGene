@@ -77,15 +77,10 @@
  
 {#if isLoading}
   <LoadingIndicator />
-{:else if tags.length > 0}
+{:else}
   <div class="mx-2">
    <InsertButton insertData={createTag} />
    <CustomTable items={tags} editData={editTag} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteTag} />
-  </div>
-{:else}
-  <div class="text-center py-10">
-    <p>No news to display</p>
-    <InsertButton insertData={createTag} />
   </div>
 {/if}
