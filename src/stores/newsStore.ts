@@ -5,6 +5,9 @@ import type {
   NewsLanguageModel,
   NewsModel,
 } from "../models/newsModel";
+import type { TagId } from "../models/tagModel";
+import type { categoryId } from "../models/categoryModel";
+import type { SubcategoryId } from "../models/subCategoryModel";
 
 const createNewsStore = () => {
   const { subscribe, set, update } = writable<NewsModel[]>([]);
@@ -54,12 +57,13 @@ const createNewsStore = () => {
         throw error;
       }
     },
+    
     insertNewsData: async (
       newsObject: any,
-      newsLanguageData: any[],
-      category_ids_data: any[],
-      subcategory_ids_data: any[],
-      tag_ids_data: any[],
+      newsLanguageData: NewsLanguageModel[],
+      category_ids_data: categoryId[],
+      subcategory_ids_data: SubcategoryId[],
+      tag_ids_data: TagId[],
       supabase: SupabaseClient
     ) => {
       try {
@@ -91,7 +95,6 @@ const createNewsStore = () => {
     },
     updateNewsData: async (
       existingNewsId: number,
-      newsObject: any,
       newsLanguageData: any[],
       categoryData: any[],
       subcategoryData: any[],
@@ -117,7 +120,7 @@ const createNewsStore = () => {
 
         update((currentNews) => {
           return currentNews.map((news) => {
-            if (news.id === newsObject.id) {
+            if (news.id === existingNewsId) {
               return data ? data[0] : news;
             }
             return news;
