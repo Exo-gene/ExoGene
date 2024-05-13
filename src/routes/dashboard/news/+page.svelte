@@ -79,15 +79,10 @@
 
 {#if isLoading}
   <LoadingIndicator />
-{:else if news.length > 0}
-  <div class="mx-2">
+{:else}
+   <div class="mx-2">
    <InsertButton insertData={createNews} />
    <CustomTable items={news} editData={editNews} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteNews} />
-  </div>
-{:else}
-  <div class="text-center py-10">
-    <p>No news to display</p>
-    <InsertButton insertData={createNews} />
   </div>
 {/if}
