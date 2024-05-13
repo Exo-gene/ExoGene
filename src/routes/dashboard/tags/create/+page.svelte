@@ -5,24 +5,17 @@
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
   import { tagStore } from "../../../../stores/tagsStore";
+  import type { FormDataSet } from "../../../../models/tagModel";
 
-  interface FormData {
-    [key: string]: {
-      title: string;
-      titleError: string;
-    };
-  }
-
-  interface LanguageObject {
-    title: string;
-    language: LanguageEnum; 
-  }
+  
 
   let showToast = false;
+  let isLoading = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
-  let formData: FormData = languages.reduce(
-    (acc: FormData, language: LanguageEnum) => {
+
+  let formData: FormDataSet = languages.reduce(
+    (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
         title: "",
         titleError: "",
@@ -32,23 +25,11 @@
     {}
   );
 
-  // Prepare the data models based on formData for submission
-  function prepareDataForSubmission() {
-    const tagTranslation: LanguageObject[] = languages.map(
-      (language: LanguageEnum) => ({
-        title: formData[language].title,
-        language,
-       })
-    );
-
-    return {
-      tagObject: {},
-      tagLanguageData: tagTranslation,
-    };
-  }
-
+ 
   async function formSubmit() {
     let isValid = true;
+     isLoading = true;
+
     // Perform validation for each language
     languages.forEach((language) => {
       if (!formData[language].title) {
@@ -59,8 +40,14 @@
 
     if (!isValid) return;
 
-    const { tagObject, tagLanguageData } = prepareDataForSubmission();
     try {
+
+       const tagLanguageData = languages.map((language, index) => ({
+        title: formData[language].title as string, 
+        language,
+      }));
+       const tagObject = {};
+
       await tagStore.insertTagData(tagObject, tagLanguageData, supabase);
 
       showToast = true;
