@@ -1,4 +1,5 @@
 <script lang="ts">  
+	import FullPageLoadingIndicator from './../../../../lib/components/FullPageLoadingIndicator.svelte';
 	import  type{CategoryDataModel}  from './../../../../models/categoryModel.ts';
 	import  CategoryDropdown  from '$lib/components/CategoryDropdown.svelte';
   import { LanguageEnum } from "../../../../models/languageEnum";
@@ -97,6 +98,9 @@
 }
 </script>
 
+ {#if isLoading}
+    <FullPageLoadingIndicator />
+  {:else}
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   <div class="w-44 mb-5">
   <CategoryDropdown  {selectedCategoryId} on:categoryChange={handleCategoryChange} />
@@ -132,6 +136,8 @@
     </div>
   </div>
 </div>
+{/if}
+
 
 {#if showToast}
   <Toast
