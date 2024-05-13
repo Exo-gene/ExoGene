@@ -87,7 +87,7 @@ const createCarouselStore = () => {
       }
     },
     updateCarouselData: async (
-      carouselObject: CarouselLanguageModelToUpdate,
+      carouselObject: CarouselDataModelToUpdate,
       carouselLanguageData: CarouselDataModelToUpdate[],
       supabase: SupabaseClient
     ) => {
