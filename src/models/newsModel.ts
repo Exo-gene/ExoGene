@@ -12,7 +12,7 @@ export interface NewsDataModel {
   id: number;
   created_at: Date;
   title: string;
-  newstranslation: NewsLanguageModel[];
+  translation: NewsLanguageModel[];
 }
 
 export interface NewsLanguageModel {
