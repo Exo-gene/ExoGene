@@ -1,4 +1,5 @@
 <script lang="ts">
+	import  CategoryDropdown  from '$lib/components/CategoryDropdown.svelte';
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { subCategoriesStore } from "../../../../stores/subcategoriesStore";
   import { supabase } from "$lib/supabaseClient";
@@ -6,14 +7,17 @@
   import { page } from "$app/stores";
   import { onMount } from "svelte";
   import Toast from "$lib/components/Toast.svelte";
-  import type { SubCategoryLanguageModel } from "../../../../models/subCategoryModel";
+  import type { FormDataSet, SubCategoryLanguageModel } from "../../../../models/subCategoryModel";
   import { Tabs, TabItem, Label, Input, Button, Select } from "flowbite-svelte";
+  import type { CategoryDataModel } from "../../../../models/categoryModel";
 
   let categories: CategoryDataModel[] = [];
   const id = +$page.params.subCategoryId;
   let showToast = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
   let selectedCategoryId: number = 0;
+  let isLoading = false;
+
 
   // fetch data from db
   onMount(async () => {
@@ -52,32 +56,9 @@
     selectedCategoryId = subcategoryResult.data[0].category_id;
   });
 
-  interface CategoryLanguageModel {
-    id: number;
-    language: LanguageEnum;
-    title: string;
-  }
 
-  interface CategoryDataModel {
-    id: number; 
-    category_translations: CategoryLanguageModel[];
-  }
-
-  interface FormData {
-    [key: string]: {
-      title: string;
-      category_id: number;
-      titleError: string;
-    };
-  }
-
-  interface LanguageObject {
-    title: string;
-    language: LanguageEnum; 
-  }
-
-  let formData: FormData = languages.reduce(
-    (acc: FormData, language: LanguageEnum) => {
+  let formData: FormDataSet = languages.reduce(
+    (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
         title: "",
         category_id: 0,
@@ -88,27 +69,11 @@
     {}
   );
 
-  // Prepare the data models based on formData for submission
-  function prepareDataForSubmission() { 
-    const subcategoryTranslation: LanguageObject[] = languages.map(
-      (language: LanguageEnum) => ({
-        title: formData[language].title,
-        language, 
-      })
-    );
-
-    return {
-      subcategoryObject: {
-        id: id,
-        subcategory_id: selectedCategoryId,
-        category_id: selectedCategoryId,
-      },
-      subcategoryLanguageData: subcategoryTranslation,
-    };
-  }
 
   async function formSubmit() {
     let isValid = true;
+       isLoading = true;
+
     // Perform validation for each language
     languages.forEach((language) => {
       if (!formData[language].title) {
@@ -117,11 +82,21 @@
       }
     });
 
-    if (!isValid) return;
+    if (!isValid) {
+      isLoading = false;
+      return;
+    }
 
-    const { subcategoryObject, subcategoryLanguageData } =
-      prepareDataForSubmission();
+
     try {
+
+
+        const subcategoryLanguageData = languages.map((language, index) => ({
+        title: formData[language].title as string, 
+        language,
+      }));
+       const subcategoryObject = {id,category_id:selectedCategoryId};
+ 
       await subCategoriesStore.updateSubCategoryData(
         subcategoryObject,
         subcategoryLanguageData,
@@ -138,37 +113,16 @@
     }
   }
 
-  function handleCategoryChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    selectedCategoryId = parseInt(input.value);
-    languages.forEach((language) => {
-      formData[language].category_id = selectedCategoryId;
-    });
-  }
-
-  function isSelected(categoryId: number) {
-    return categoryId === selectedCategoryId;
-  }
+ function handleCategoryChange(event: { detail: number }): void {
+ selectedCategoryId = event.detail;
+}
+ 
 </script>
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   <div class="w-44 mb-5">
-    <Label for="category-select">Select Category</Label>
-    <Select id="category-select" on:change={handleCategoryChange}>
-      {#each categories as category}
-        {#if category.category_translations.find((t) => t.language === "en")}
-          <option value={category.id} selected={isSelected(category.id)}>
-            {category.category_translations.find((t) => t.language === "en")
-              ?.title}
-          </option>
-        {:else}
-          <option disabled>No English translation available</option>
-        {/if}
-      {/each}
-      {#if categories.length === 0}
-        <option disabled>No categories available</option>
-      {/if}
-    </Select>
+    <CategoryDropdown  {selectedCategoryId} on:categoryChange={handleCategoryChange} />
+
   </div>
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
