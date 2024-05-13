@@ -212,15 +212,13 @@ onMount(async () => {
       language,
     }));
 
-    const newsObject = {};
 
     const categoryData = selectedCategoryIds.map(id => ({ category_id: id }));
     const subcategoryData = selectedSubCategoryIds.map(id => ({ subcategory_id: id }));
     const tagData = selectedTagIds.map(id => ({ tag_id: id }));
 
     await newsStore.updateNewsData(
-      id,
-      newsObject,
+      id, 
       newsLanguageData,
       categoryData,
       subcategoryData,
