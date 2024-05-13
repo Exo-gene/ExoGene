@@ -10,6 +10,7 @@
   import type { FormDataSet, SubCategoryLanguageModel } from "../../../../models/subCategoryModel";
   import { Tabs, TabItem, Label, Input, Button, Select } from "flowbite-svelte";
   import type { CategoryDataModel } from "../../../../models/categoryModel";
+  import FullPageLoadingIndicator from '$lib/components/FullPageLoadingIndicator.svelte';
 
   let categories: CategoryDataModel[] = [];
   const id = +$page.params.subCategoryId;
@@ -87,10 +88,7 @@
       return;
     }
 
-
     try {
-
-
         const subcategoryLanguageData = languages.map((language, index) => ({
         title: formData[language].title as string, 
         language,
@@ -110,6 +108,8 @@
       }, 1000);
     } catch (error) {
       console.error("Error during category insertion:", error);
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -119,10 +119,12 @@
  
 </script>
 
+ {#if isLoading}
+  <FullPageLoadingIndicator />
+  {:else}
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   <div class="w-44 mb-5">
     <CategoryDropdown  {selectedCategoryId} on:categoryChange={handleCategoryChange} />
-
   </div>
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
@@ -155,6 +157,7 @@
     </div>
   </div>
 </div>
+{/if}
 
 {#if showToast}
   <Toast
