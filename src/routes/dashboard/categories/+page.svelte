@@ -19,6 +19,7 @@
   import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
   import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
+  import CustomTable from "$lib/components/CustomTable.svelte";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -88,55 +89,10 @@
 
 {#if isLoading}
   <LoadingIndicator />
-{:else if $categoriesStore[0]?.items.length > 0}
+{:else}
   <div class="mx-2">
-    <InsertButton insertData={createCategory} />
-    <Table>
-      <TableHead
-        style="background-color: var(--tableHeaderBackgroundColor); color:var(--tableHeaderColor)"
-      >
-        <TableHeadCell class="!p-4"></TableHeadCell>
-        {#each tableHeaders as header}
-          <TableHeadCell>{header}</TableHeadCell>
-        {/each}
-      </TableHead>
-      <TableBody tableBodyClass="divide-y">
-        {#each categories as category}
-          <TableBodyRow
-            style="background-color: var(--tableBackgroundColor); color:var(--tableColor)"
-          >
-            <TableBodyCell class="!p-4"></TableBodyCell>
-            <TableBodyCell>{category.id}</TableBodyCell>
-            <TableBodyCell class="font-semibold text-gray-700">
-             {formatDateTime(category.created_at.toString())}
-            </TableBodyCell>
-            {#each category.categorytranslation as translation}
-              {#if translation.language === LanguageEnum.EN}
-                <TableBodyCell>
-                  <span>{translation.title}</span>
-                </TableBodyCell>
-                <TableBodyCell>
-                  <span>{translation.language}</span>
-                </TableBodyCell>
-              {/if}
-            {/each}
-            <TableBodyCell class="flex space-x-3">
-              <button
-                class="font-medium text-green-600 hover:underline dark:text-green-600"
-                on:click={() => editCategory(category.id)}
-              >
-                <IconEdit stroke={2} class="text-green-700" />
-              </button>
-
-              <button on:click={() => handleDelete(category.id)}
-                ><IconTrash stroke={2} class="text-red-700" /></button
-              >
-            </TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-    <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
-    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCategory} />
+   <InsertButton insertData={createCategory} />
+   <CustomTable items={categories} editData={editCategory} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
+   <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCategory} />
   </div>
 {/if}
