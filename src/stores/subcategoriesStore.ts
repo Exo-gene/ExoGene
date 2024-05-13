@@ -59,7 +59,7 @@ const createSubCategoriesStore = () => {
       }
     },
     insertSubCategoryData: async (
-      subcategoryObject: SubCategoryDataModel,
+      subcategoryObject: any,
       subcategoryLanguageData: SubCategoryLanguageModel[],
       supabase: SupabaseClient
     ) => {
