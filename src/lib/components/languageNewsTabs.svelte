@@ -8,7 +8,7 @@
   export let formData: FormDataSet;
   export let handleFileChange: (
     event: Event,
-    language: string,
+    language: LanguageEnum,
     type: "image" | "video"
   ) => void;
 
