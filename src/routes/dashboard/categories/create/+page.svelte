@@ -5,24 +5,16 @@
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
+  import type { FormDataSet } from "../../../../models/categoryModel";
+  import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
 
-  interface FormData {
-    [key: string]: {
-      title: string;
-      titleError: string;
-    };
-  }
-
-  interface LanguageObject {
-    title: string;
-    language: LanguageEnum;
-  }
-
+  
+   let isLoading = false;
   let showToast = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
-  let formData: FormData = languages.reduce(
-    (acc: FormData, language: LanguageEnum) => {
+ let formData: FormDataSet = languages.reduce(
+    (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
         title: "",
         titleError: "",
@@ -32,25 +24,12 @@
     {}
   );
 
-  // Prepare the data models based on formData for submission
-  function prepareDataForSubmission() {
-     const categoryTranslation: LanguageObject[] = languages.map(
-      (language: LanguageEnum) => ({
-        title: formData[language].title,
-        language,
-        
-      })
-    );
-
-    return {
-      categoryObject: {
-      },
-      categoryLanguageData: categoryTranslation,
-    };
-  }
+ 
 
   async function formSubmit() {
     let isValid = true;
+     isLoading = true;
+
     // Perform validation for each language
     languages.forEach((language) => {
       if (!formData[language].title) {
@@ -59,10 +38,19 @@
       }
     });
 
-    if (!isValid) return;
-
-    const { categoryObject, categoryLanguageData } = prepareDataForSubmission();
+    
+    if (!isValid) {
+      isLoading = false;
+      return;
+    }
+   
     try {
+         const categoryLanguageData = languages.map((language, index) => ({
+        title: formData[language].title as string, 
+        language,
+      }));
+       const categoryObject = {};
+
       await categoriesStore.insertCategoryData(
         categoryObject,
         categoryLanguageData,
@@ -76,10 +64,15 @@
       }, 1000);
     } catch (error) {
       console.error("Error during category insertion:", error);
+   } finally {
+      isLoading = false;
     }
   }
 </script>
 
+ {#if isLoading}
+    <FullPageLoadingIndicator />
+  {:else}
 <div class="pt-5 lg:pt-10 flex justify-center w-full">
   <div class="max-w-screen-md w-full border rounded">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
@@ -112,7 +105,7 @@
     </div>
   </div>
 </div>
-
+{/if}
  
 {#if showToast}
   <Toast message="New category has been inserted successfully" type="success" />
