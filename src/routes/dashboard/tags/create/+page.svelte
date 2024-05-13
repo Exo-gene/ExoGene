@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FullPageLoadingIndicator from './../../../../lib/components/FullPageLoadingIndicator.svelte';
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
@@ -38,8 +39,12 @@
       }
     });
 
-    if (!isValid) return;
-
+   
+    if (!isValid) {
+      isLoading = false;
+      return;
+    }
+    
     try {
 
        const tagLanguageData = languages.map((language, index) => ({
@@ -57,10 +62,15 @@
       }, 1000);
     } catch (error) {
       console.error("Error during tag insertion:", error);
+    }  finally {
+      isLoading = false;
     }
   }
 </script>
 
+ {#if isLoading}
+    <FullPageLoadingIndicator />
+  {:else}
 <div class="pt-5 lg:pt-10 flex justify-center w-full">
   <div class="max-w-screen-md w-full border rounded">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
@@ -93,6 +103,7 @@
     </div>
   </div>
 </div>
+{/if}
 
 {#if showToast}
   <Toast message="New tag has been inserted successfully" type="success" />
