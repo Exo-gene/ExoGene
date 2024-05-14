@@ -20,15 +20,13 @@
   let alertMessage = "";
   let showToast = false;
   let newsTitle = "";
-    let isLoading = false;
+  let isLoading = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
-  
-
- 
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
-      acc[language] = {   image: null,
+      acc[language] = {
+        image: null,
         imageName: "",
         imageError: "",
         titleError: "",
@@ -100,7 +98,7 @@
         formData[translation.language].description = translation.description;
         formData[translation.language].imageName = translation.image;
         formData[translation.language].news_id = firstCarouselData.news_id;
-        formData[translation.language].image =translation.image;
+        formData[translation.language].image = translation.image;
       }
     });
   });
@@ -139,101 +137,104 @@
       throw error;
     }
 
-   
     return {
       path: `carousel-images/${fileName}`,
-     };
+    };
   }
 
-async function formSubmit() {
-  let isValid = true;
-  const uploads: Promise<any>[] = [];
-  const errors: string[] = [];
-  isLoading = true;
+  async function formSubmit() {
+    let isValid = true;
+    const uploads: Promise<any>[] = [];
+    const errors: string[] = [];
+    isLoading = true;
 
-  languages.forEach((language) => {
-    if (!formData[language].title.trim()) {
-      formData[language].titleError = "Title is required";
-      isValid = false;
-    }
-    if (!formData[language].description.trim()) {
-      formData[language].descriptionError = "Description is required";
-      isValid = false;
-    }
-    if (!formData[language].image && !formData[language].imageName) {
-      formData[language].imageError = "Image is required";
-      isValid = false;
-    }
+    languages.forEach((language) => {
+      if (!formData[language].title.trim()) {
+        formData[language].titleError = "Title is required";
+        isValid = false;
+      }
+      if (!formData[language].description.trim()) {
+        formData[language].descriptionError = "Description is required";
+        isValid = false;
+      }
+      if (!formData[language].image && !formData[language].imageName) {
+        formData[language].imageError = "Image is required";
+        isValid = false;
+      }
 
-    if (isValid) {
-      if (formData[language].image instanceof File) {
-        const imageFile = formData[language].image as File;  
-        const uploadPromise = uploadFile(imageFile, language)
-          .then(({ path }) => {  
-            formData[language].image = path;
-            return {
+      if (isValid) {
+        if (formData[language].image instanceof File) {
+          const imageFile = formData[language].image as File;
+          const uploadPromise = uploadFile(imageFile, language)
+            .then(({ path }) => {
+              formData[language].image = path;
+              return {
+                language,
+                image: path,
+                title: formData[language].title,
+                description: formData[language].description,
+              };
+            })
+            .catch((error) => {
+              errors.push(
+                `Failed to upload image for ${language}: ${error.message}`
+              );
+              return null;
+            });
+          uploads.push(uploadPromise);
+        } else if (formData[language].imageName) {
+          uploads.push(
+            Promise.resolve({
               language,
-              image: path,
+              image: formData[language].imageName,
               title: formData[language].title,
               description: formData[language].description,
-            };
-          })
-          .catch((error) => {
-            errors.push(`Failed to upload image for ${language}: ${error.message}`);
-            return null;
-          });
-        uploads.push(uploadPromise);
-      } else if (formData[language].imageName) {
-        uploads.push(Promise.resolve({
-          language,
-          image: formData[language].imageName,
-          title: formData[language].title,
-          description: formData[language].description,
-        }));
+            })
+          );
+        }
       }
-    }
-  });
+    });
 
-  if (!isValid || errors.length > 0) {
-    alertMessage = "Please correct the errors before submitting.";
-    showAlert = true;
-    isLoading = false;
-    return;
-  }
-
-  try {
-    const carouselLanguageData = await Promise.all(uploads);
-    const carouselObject = {
-      id: id, 
-      news_id: selectedNewsId,
-    };
-
-    const validData = carouselLanguageData.filter((data) => data !== null);
-    if (validData.length === 0) {
-      throw new Error("No valid data to update. Check file uploads and data entries.");
+    if (!isValid || errors.length > 0) {
+      alertMessage = "Please correct the errors before submitting.";
+      showAlert = true;
+      isLoading = false;
+      return;
     }
 
-    await carouselStore.updateCarouselData(
-      carouselObject,
-      validData,
-      supabase
-    );
+    try {
+      const carouselLanguageData = await Promise.all(uploads);
+      const carouselObject = {
+        id: id,
+        news_id: selectedNewsId,
+      };
 
-    showToast = true;
-    setTimeout(() => {
-      showToast = false;
-      goto("/dashboard/carousel");
-    }, 3000);
-  } catch (error) {
-    console.error("Error during advertisement update:", error);
-    alertMessage = "Update failed: " + error;
-    showAlert = true;
-  } finally {
-    isLoading = false;
+      const validData = carouselLanguageData.filter((data) => data !== null);
+      if (validData.length === 0) {
+        throw new Error(
+          "No valid data to update. Check file uploads and data entries."
+        );
+      }
+
+      await carouselStore.updateCarouselData(
+        carouselObject,
+        validData,
+        supabase
+      );
+
+      showToast = true;
+      setTimeout(() => {
+        showToast = false;
+        goto("/dashboard/carousel");
+      }, 3000);
+    } catch (error) {
+      console.error("Error during advertisement update:", error);
+      alertMessage = "Update failed: " + error;
+      showAlert = true;
+    } finally {
+      isLoading = false;
+    }
   }
-}
-
-
 
   function onNewsSelected(event: any) {
     let newsId = event.detail;
@@ -244,11 +245,10 @@ async function formSubmit() {
     });
   }
 
-
-   const getObjectUrl = (file: File | string | null): string => {
+  const getObjectUrl = (file: File | string | null): string => {
     if (file instanceof File) {
       return URL.createObjectURL(file);
-    } else if (typeof file === "string") { 
+    } else if (typeof file === "string") {
       return `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${file}`;
     }
     return "";
@@ -259,7 +259,9 @@ async function formSubmit() {
   <NewsDropdown bind:selectedNewsId on:newsChange={onNewsSelected} />
   <div class="my-2">
     <p class="text-gray-400">This carousel is linked to this news</p>
-    <a href={`/dashboard/news/${id}`} class="underline">{newsTitle}</a>
+    <a href={`/dashboard/news/${selectedNewsId}`} class="underline"
+      >{newsTitle}</a
+    >
   </div>
   <div class="border rounded w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
@@ -325,7 +327,7 @@ async function formSubmit() {
                 <div class="">
                   {#if formData[language]?.imageName}
                     <img
-                       src={getObjectUrl(formData[language].image)}
+                      src={getObjectUrl(formData[language].image)}
                       alt={`Image for ${language}`}
                       class="w-44 h-44 mt-2"
                     />

@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { FormDataSet } from "./../../../../models/newsModel.ts";
   import TagDropdown from "./../../../../lib/components/TagDropdown.svelte";
-  import LanguageNewsTabs from "./../../../../lib/components/languageNewsTabs.svelte";
-  import CategoryDropdown from "$lib/components/CategoryDropdown.svelte"; 
+  import LanguageNewsTabs from "./../../../../lib/components/languageNewsTabs.svelte"; 
   import { Button } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
@@ -12,6 +11,7 @@
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { newsStore } from "../../../../stores/newsStore";
+  import CategoryDropdownToNews from "$lib/components/CategoryDropdownToNews.svelte";
 
   let isLoading = false;
   let languages = Object.values(LanguageEnum);
@@ -192,7 +192,7 @@ function handleTagChange(event: { detail: number[] }): void {
   class="pt-5 lg:pt-10 flex flex-col justify-center items-center max-w-screen-lg mx-auto"
 >
   <div class="w-full mb-5 flex space-x-4">
-    <CategoryDropdown on:categoryChange={handleCategoryChange} />
+    <CategoryDropdownToNews on:categoryChange={handleCategoryChange} />
     <TagDropdown on:tagChange={handleTagChange} />
   </div>
   <div class="border rounded w-full">

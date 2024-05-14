@@ -21,10 +21,7 @@
   $: selectedCategoryIdsData = new Set(selectedCategoryIds);
   $: selectedSubCategoryIdsData = new Set(selectedSubCategoryIds);
 
-  onMount(() => {
-    console.log("Selected Category IDs:", selectedCategoryIds);
-    console.log("Selected Subcategory IDs:", selectedSubCategoryIds);
-  });
+ 
 
   async function fetchCategory(titleFilter?: string) {
     isLoading = true;
