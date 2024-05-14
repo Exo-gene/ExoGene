@@ -2,13 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-
+@font-face {
+	font-family: 'EnglishFont';
+	src: url('./lib/fonts/bahij_janna_regular.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'EnglishFont';
+	src: url('./lib/fonts/PlusJakartaSans_Bold.woff2') format('woff2');
+	font-weight: bold;
+	font-style: normal;
+}
 :root {
 /* Light theme colors */
+    --primary-background:#A5371B;
+    --primary-textColor:#D0D0D0;
     --background-color: white;
     --text-color: black;
-    --background-color-footer: #181818;
-    --text-color-footer: #B0B0B0;
     --toggleButtonColor: #B0B0B0; 
      --background-color-nav: #012853;
     --text-color-nav: #686868;
@@ -23,10 +34,10 @@
 
 [data-theme='dark'] {
     /* Dark theme colors */
+    --primary-background:#A5371B;
+    --primary-textColor:#D0D0D0;
     --background-color: #0c1a35;
     --text-color: #D0D0D0;
-    --background-color-footer: #181818;
-    --text-color-footer: #B0B0B0;
     --toggleButtonColor: #0c1a35;  
     --background-color-nav: #D0D0D0;
     --text-color-nav: #686868;
