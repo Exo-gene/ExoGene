@@ -3,10 +3,11 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte"; 
+  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import { carouselStore } from "../../../stores/carouselStore";
   import CustomTable from "$lib/components/CustomTable.svelte";
+  import PaginationControls from "$lib/components/PaginationControls.svelte";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -75,13 +76,18 @@
   $: carousel = $carouselStore[0]?.items;
 </script>
 
- 
 {#if isLoading}
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-   <InsertButton insertData={createCarousel} />
-   <CustomTable items={carousel} editData={editCarousel} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
-   <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCarousel} />
+    <InsertButton insertData={createCarousel} />
+    <CustomTable
+      items={carousel}
+      editData={editCarousel}
+      {handleDelete}
+      {tableHeaders}
+    />
+    <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
+    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCarousel} />
   </div>
 {/if}

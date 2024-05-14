@@ -1,25 +1,13 @@
 <script lang="ts">
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
-  import {
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
   import { subCategoriesStore } from "../../../stores/subcategoriesStore";
-  import { LanguageEnum } from "../../../models/languageEnum";
-  import { formatDateTime } from "$lib/utils/formatDateTime";
   import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
-  import PaginationControls from "$lib/components/PaginationControls.svelte";
-  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
-  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
+  import PaginationControls from "$lib/components/PaginationControls.svelte";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -87,13 +75,18 @@
   $: subcategories = $subCategoriesStore[0]?.items || [];
 </script>
 
- 
 {#if isLoading}
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-   <InsertButton insertData={createSubCategory} />
-   <CustomTable items={subcategories} editData={editSubCategory} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
-   <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteSubCategory} />
+    <InsertButton insertData={createSubCategory} />
+    <CustomTable
+      items={subcategories}
+      editData={editSubCategory}
+      {handleDelete}
+      {tableHeaders}
+    />
+    <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
+    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteSubCategory} />
   </div>
 {/if}

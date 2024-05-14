@@ -1,12 +1,13 @@
 <script lang="ts">
   import InsertButton from "../../../lib/components/InsertButton.svelte";
-  import { goto } from "$app/navigation"; 
+  import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import { advertisementStore } from "../../../stores/advertisementStore"; 
-  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte"; 
-  import LoadingIndicator from "$lib/components/LoadingIndicator.svelte"; 
+  import { advertisementStore } from "../../../stores/advertisementStore";
+  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
+  import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
+  import PaginationControls from "$lib/components/PaginationControls.svelte";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -78,13 +79,21 @@
   $: advertisements = $advertisementStore[0]?.items || [];
 </script>
 
- 
 {#if isLoading}
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-   <InsertButton insertData={createAdvertisement} />
-   <CustomTable items={advertisements} editData={editAdvertisement} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
-   <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteAdvertisement} />
+    <InsertButton insertData={createAdvertisement} />
+    <CustomTable
+      items={advertisements}
+      editData={editAdvertisement}
+      {handleDelete}
+      {tableHeaders}
+    />
+    <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
+    <ConfirmDeleteModal
+      bind:open={openModal}
+      on:confirm={deleteAdvertisement}
+    />
   </div>
 {/if}

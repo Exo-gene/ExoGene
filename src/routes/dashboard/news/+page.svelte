@@ -3,10 +3,11 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import { newsStore } from "../../../stores/newsStore"; 
-  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte"; 
+  import { newsStore } from "../../../stores/newsStore";
+  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
+  import PaginationControls from "$lib/components/PaginationControls.svelte";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -73,16 +74,20 @@
   $: totalPages = Math.ceil($newsStore[0]?.count / pageSize);
   let news = $newsStore[0]?.items;
   $: news = $newsStore[0]?.items || [];
-
 </script>
-
 
 {#if isLoading}
   <LoadingIndicator />
 {:else}
-   <div class="mx-2">
-   <InsertButton insertData={createNews} />
-   <CustomTable items={news} editData={editNews} {handleDelete} {tableHeaders} {currentPage} {totalPages} {previousPage} {nextPage}/>
-   <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteNews} />
+  <div class="mx-2">
+    <InsertButton insertData={createNews} />
+    <CustomTable
+      items={news}
+      editData={editNews}
+      {handleDelete}
+      {tableHeaders}
+    />
+    <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
+    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteNews} />
   </div>
 {/if}
