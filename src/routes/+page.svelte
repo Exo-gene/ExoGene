@@ -19,7 +19,7 @@
   <!-- Right: Login Form -->
   <div class="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
     <h1 class="text-2xl font-semibold mb-4">Login</h1>
-    <form action="#" method="POST">
+    <form method="POST">
       <!-- Username Input -->
       <div class="mb-4">
         <label for="username" class="block text-gray-600">Username</label>
