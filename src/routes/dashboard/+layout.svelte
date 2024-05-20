@@ -5,9 +5,11 @@
   import Navbar from "$lib/components/Navbar.svelte";
   import Sidebar from "$lib/components/DrawerComponent.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
+  import { UsersRepository } from "$lib/Repositories/Implementation/Users.Repository";
 
   let sidebarOpen: boolean = true;
   let isLoading: boolean = true;
+  const repository = new UsersRepository();
 
   onMount(async () => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -20,6 +22,8 @@
     //     policy: "create",
     //   }),
     // });
+    const data = await repository.getUsers();
+    console.log(data);
     isLoading = false;
   });
 </script>

@@ -9,11 +9,8 @@ export class SupabaseAuthResponse<T> {
 }
 
 export class SupabaseResponse<T> {
-  Data: {
-    data: T;
-    error: any | null;
-  } = {
-    data: {} as T,
-    error: null,
-  };
+  data: Array<T> = new Array<T>();
+  error: any | null = null;
+  status: number = 200;
+  statusText: string = "OK";
 }
