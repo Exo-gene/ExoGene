@@ -3,5 +3,4 @@ export class UserDto {
   name?: string;
   email: string = null!;
   image?: string;
-  created_at: string = null!;
 }

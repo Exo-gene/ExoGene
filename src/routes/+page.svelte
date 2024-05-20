@@ -1,11 +1,33 @@
-<script lang="ts" context="module">
+<script lang="ts">
   import { goto } from "$app/navigation";
   import "./styles.css";
   import "../app.css";
   import logo from "../lib/images/logo.png";
+  import { authStore } from "../stores/Auth.Store";
+  import { onMount } from "svelte";
+  import { LoginRequest } from "$lib/Models/Requests/Auth.Request.Model";
+
+  const loginRequest: LoginRequest = new LoginRequest();
 
   export async function navigateTo() {
     return goto("/dashboard/home");
+  }
+
+  onMount(async () => {
+    await CheckAuth();
+  });
+
+  async function CheckAuth() {
+    await authStore.getAuth();
+    if ($authStore) {
+      return goto("/dashboard/home");
+    }
+    console.log("Not Authenticated");
+  }
+
+  async function login(loginRequest: LoginRequest) {
+    console.log(loginRequest);
+    await authStore.login(loginRequest.email, loginRequest.password);
   }
 </script>
 
@@ -20,13 +42,14 @@
   <div class="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
     <h1 class="text-2xl font-semibold mb-4">Login</h1>
     <form method="POST">
-      <!-- Username Input -->
+      <!-- Email Input -->
       <div class="mb-4">
-        <label for="username" class="block text-gray-600">Username</label>
+        <label for="email" class="block text-gray-600">Email</label>
         <input
+          bind:value={loginRequest.email}
           type="text"
-          id="username"
-          name="username"
+          id="email"
+          name="email"
           class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-[#012853]"
           autocomplete="off"
         />
@@ -35,6 +58,7 @@
       <div class="mb-4">
         <label for="password" class="block text-gray-600">Password</label>
         <input
+          bind:value={loginRequest.password}
           type="password"
           id="password"
           name="password"
@@ -58,15 +82,15 @@
       </div>
       <!-- Login Button -->
       <button
-        on:click|preventDefault={() => navigateTo()}
+        on:click|preventDefault={() => login(loginRequest)}
         type="submit"
         class="bg-[#012853] hover:bg-[#205ba0] text-white font-semibold rounded-md py-2 px-4 w-full"
         >Login</button
       >
     </form>
     <!-- Sign up  Link -->
-    <div class="mt-6 text-[#012853] text-center">
+    <!-- <div class="mt-6 text-[#012853] text-center">
       <a href="#" class="hover:underline">Sign up Here</a>
-    </div>
+    </div> -->
   </div>
 </div>

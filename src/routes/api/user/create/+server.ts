@@ -17,22 +17,42 @@ const admin = supabase.auth.admin;
 
 export const POST: RequestHandler = async ({ locals, params, request }) => {
   try {
-    // const response = await admin.createUser({
-    //   email: "rovarkamil@hotmail.com",
-    //   password: "900mylife",
-    // }) as UserResponse;
-    // if (response.error) throw response.error;
-    // console.log("Data", response);
-    // await supabase.from("users").insert({
-    //   email: response.data.user.email,
-    //   user_id: response.data.user.id,
-    //   name:"Rovar Kamil"
-    // });
+    const response = (await admin.createUser({
+      email: "rovarkamil@hotmail.com",
+      password: "900mylife",
+    })) as UserResponse;
+    if (response.error) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Failed to create user",
+          data: { error: response.error },
+        })
+      );
+    }
+    const { error } = await supabase.auth.admin.generateLink({
+      type: "invite",
+      email: response.data.user.email as string,
+    });
+    if (error) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Failed to send invite",
+          data: { error },
+        })
+      );
+    }
+    await supabase.from("users").insert({
+      email: response.data.user.email,
+      user_id: response.data.user.id,
+      name: "Rovar Kamil",
+    });
     return new Response(
       JSON.stringify({
         success: true,
         message: "User created successfully",
-        // data: response,
+        data: response,
       })
     );
   } catch (error) {

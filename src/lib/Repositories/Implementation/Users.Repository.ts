@@ -27,7 +27,7 @@ export class UsersRepository implements IUsersRepository {
       const response = (await Supabase.client
         .from("users")
         .select("*")
-        .eq("id", id)) as SupabaseResponse<User>;
+        .eq("user_id::UUID", id)) as SupabaseResponse<User>;
       if (response.error) {
         throw response.error;
       }

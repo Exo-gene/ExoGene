@@ -6,12 +6,14 @@
   import Sidebar from "$lib/components/DrawerComponent.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import { UsersRepository } from "$lib/Repositories/Implementation/Users.Repository";
+  import { goto } from "$app/navigation";
+  import { authStore } from "../../stores/Auth.Store";
 
   let sidebarOpen: boolean = true;
   let isLoading: boolean = true;
-  const repository = new UsersRepository();
 
   onMount(async () => {
+    await CheckAuth();
     await new Promise((resolve) => setTimeout(resolve, 2000));
     // const response = await fetch("/api/user/create", {
     //   method: "POST",
@@ -22,10 +24,15 @@
     //     policy: "create",
     //   }),
     // });
-    const data = await repository.getUsers();
-    console.log(data);
     isLoading = false;
   });
+
+  async function CheckAuth() {
+    await authStore.getAuth();
+    if (!$authStore) {
+      return goto("/");
+    }
+  }
 </script>
 
 {#if isLoading}
