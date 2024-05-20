@@ -35,6 +35,8 @@
   </div>
   <nav class="flex flex-col gap-1 min-w-[240px] p-2 font-sans text-base font-normal text-gray-700">
  {#each navItems as item}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
     on:click={() => {
           updateActiveUrl(item.url);

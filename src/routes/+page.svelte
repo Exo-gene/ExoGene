@@ -27,7 +27,11 @@
 
   async function login(loginRequest: LoginRequest) {
     console.log(loginRequest);
-    await authStore.login(loginRequest.email, loginRequest.password);
+    const response = await authStore.login(loginRequest.email, loginRequest.password);
+    if(response){
+      await CheckAuth();
+      return goto("/dashboard/home");
+    }
   }
 </script>
 
