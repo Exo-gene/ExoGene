@@ -38,5 +38,10 @@ export const items = [
     label: "Setting",
     url: "/dashboard/setting",
     icon: "<i class='fa fa-users'></i>",
+  },
+  {
+    label: "Employees",
+    url: "/dashboard/employees",
+    icon: "<i class='fa fa-users'></i>",
   }
 ];

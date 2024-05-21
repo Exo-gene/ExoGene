@@ -8,7 +8,7 @@ export class PoliciesRepository implements IPoliciesRepository {
     try {
       const response = (await Supabase.client
         .from("policies")
-        .select("*")) as SupabaseResponse<Policy>;
+        .select("id:action,name,created_at")) as SupabaseResponse<Policy>;
       if (response.error) {
         throw response.error;
       }

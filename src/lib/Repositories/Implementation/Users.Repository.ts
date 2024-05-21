@@ -9,6 +9,40 @@ import type { User } from "$lib/Models/Entities/User.Entity.Model";
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export class UsersRepository implements IUsersRepository {
+  async createUser(user: CreateUserRequest, password: string): Promise<User> {
+    try {
+      const userRequest: UserRequest = {
+        name: user.name,
+        email: user.email,
+        image: user.image.url as string,
+        user_id: user.user_id,
+      };
+
+      const response = await fetch("/api/user/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user: userRequest, password: password }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      const data = (await response.json()) as {
+        success: boolean;
+        message: string;
+        user: User;
+      };
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      console.log("User", data);
+      return data.user;
+    } catch (error) {
+      throw error;
+    }
+  }
   async getUsers(): Promise<SupabaseResponse<User>> {
     try {
       const response = (await Supabase.client
@@ -17,6 +51,8 @@ export class UsersRepository implements IUsersRepository {
       if (response.error) {
         throw response.error;
       }
+      console.log("Users", response);
+
       return response;
     } catch (error) {
       throw error;
@@ -41,7 +77,7 @@ export class UsersRepository implements IUsersRepository {
       const userRequest: UserRequest = {
         name: user.name,
         email: user.email,
-        image: user.image,
+        image: user.image.url as string,
         user_id: user.user_id,
       };
       const response = (await Supabase.client

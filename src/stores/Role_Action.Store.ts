@@ -3,7 +3,7 @@ import { writable } from "svelte/store";
 import { RoleActionsRepository } from "../lib/Repositories/Implementation/Role_Actions.Repository";
 import type { Role_ActionDto } from "$lib/Models/DTOS/Role_Action.DTO.Model";
 import { Dto } from "$lib/Models/Conversion/ToDTO.Conversion.Model";
-import type { CreateRoleActionRequest } from "$lib/Models/Requests/Role_action.Request.Model";
+import type { CreateRoleActionRequest } from "$lib/Models/Requests/Role_Action.Request.Model";
 const roleActionsRepository = new RoleActionsRepository();
 
 const createRoleActionStore = () => {

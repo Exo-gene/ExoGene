@@ -2,7 +2,7 @@ import type { Role_Action } from "$lib/Models/Entities/Role_Action.Entity.Model"
 import type {
   CreateRoleActionRequest,
   RoleActionRequest,
-} from "$lib/Models/Requests/Role_action.Request.Model";
+} from "$lib/Models/Requests/Role_Action.Request.Model";
 import type { SupabaseResponse } from "$lib/Models/Responses/Supabase.Response.Model";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
@@ -32,7 +32,9 @@ export class RoleActionsRepository implements IRoleActionsRepository {
     try {
       const response = (await Supabase.client
         .from("role_actions")
-        .select("*,policies:policies_action (id:action,name,created_at)")) as SupabaseResponse<Role_Action>;
+        .select(
+          "*,policies:policies_action (id:action,name,created_at)"
+        )) as SupabaseResponse<Role_Action>;
       if (response.error) {
         throw response.error;
       }
@@ -60,9 +62,11 @@ export class RoleActionsRepository implements IRoleActionsRepository {
     roleId: string
   ): Promise<SupabaseResponse<Role_Action>> {
     try {
+      console.log("Role ID", roleId);
+
       const response = (await Supabase.client
         .from("role_actions")
-        .select("*,policies:action_id(*)")
+        .select("*,policies:policies_action (id:action,name,created_at)")
         .eq("role_id", roleId)) as SupabaseResponse<Role_Action>;
       if (response.error) {
         throw response.error;

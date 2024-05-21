@@ -27,11 +27,11 @@
   let selectedRolePolicies: {
     id: string;
     name: string;
-    policies: PolicyDto[];
+    policies: Array<PolicyDto>;
   } = {
     id: "",
     name: "",
-    policies: [],
+    policies: new Array<PolicyDto>(),
   };
   let deleteModal: boolean = false;
   let roleOptions: CreateRoleRequest = new CreateRoleRequest();
@@ -51,8 +51,8 @@
     try {
       await policyStore.getAll();
       await roleStore.getAll();
-    //   await roleActionStore.getAll();
-    //   console.log("RoleActions",$roleActionStore.data);
+      //   await roleActionStore.getAll();
+      //   console.log("RoleActions",$roleActionStore.data);
     } finally {
       isLoading = false;
     }
@@ -65,8 +65,6 @@
 
   function groupByCategory(policies: PolicyDto[]) {
     groupedPolicies = {};
-    console.log(policies);
-    
     policies.forEach((policy) => {
       const categoryName = policy.name.match(actionRegex)![1];
       // Initialize the category array if it doesn't exist
@@ -76,6 +74,7 @@
       // Push the policy to the category array
       groupedPolicies[categoryName].push(policy);
     });
+    console.log("GroupedPolicies", groupedPolicies);
     return groupedPolicies;
   }
 
@@ -125,6 +124,24 @@
     }
   }
 
+  async function getPoliciesForRole(id: string) {
+    isLoading = true;
+    try {
+      const response = await roleActionStore.getRoleActionsByRole(id);
+      console.log("RoleActions", response);
+      selectedRolePolicies.policies = response?.map((roleAction) => {
+        return {
+          id: roleAction.policies?.id,
+          name: roleAction.policies?.name,
+        };
+      }) as Array<PolicyDto>;
+
+      console.log("SelectedRolePolicies", selectedRolePolicies);
+      groupByCategory($policyStore.data);
+    } finally {
+      isLoading = false;
+    }
+  }
   // $: {
   //   if (
   //     roleCreateOptions.name == "" ||
@@ -139,18 +156,20 @@
 <Modal
   title="Add your Policies"
   bind:open={roleModal}
-  backdropClass="h-80 dark:bg-ekhlas-table-dark"
+  backdropClass="h-80 dark:bg-white"
   class="h-[530px] w-96 "
   classDialog=" backdrop-blur-lg "
-  bodyClass="dark:bg-ekhlas-table-dark rounded-lg rounded-lg"
+  bodyClass="dark:bg-white rounded-lg rounded-lg"
 >
   <div class="w-full h-auto flex flex-wrap gap-3">
     <div class="w-full z-50 flex flex-row h-auto">
       <select
-        class="w-full rounded-tl-lg rounded-bl-lg h-10 dark:border-ekhals-main-dark"
+        class="w-full rounded-tl-lg rounded-bl-lg h-10 dark:border-white"
         bind:value={selectedRolePolicies}
         on:change={async () => {
-          console.log(selectedRolePolicies);
+          await getPoliciesForRole(selectedRolePolicies.id);
+          console.log("SelectedRolePolicies", selectedRolePolicies);
+          
         }}
       >
         {#if $roleStore}
@@ -188,7 +207,7 @@
       </Input>
     </form>
 
-    {#if selectedRolePolicies.policies.length > 0}
+    {#if selectedRolePolicies.policies}
       <div
         class="w-full h-60 flex flex-col gap-5 justify-start items-start bg-[#f1f1f1] dark:bg-ekhlas-background-dark rounded-lg p-4 text-black overflow-y-auto"
       >
@@ -249,7 +268,7 @@
 
       <!-- <Button color="alternative">Decline</Button> -->
     </div>
-  {:else if selectedRolePolicies.policies.length > 0}
+  {:else if selectedRolePolicies.policies}
     <div class="w-full h-auto flex justify-center items-center gap-3">
       <Button
         class="bg-ekhlas-primary hover:bg-[#ed9243] ease-in-out duration-300"
@@ -264,7 +283,7 @@
   transitionType="fly"
   {transitionParams}
   bind:hidden={drawerCondition}
-  class="w-1/3 dark:bg-ekhlas-table-dark dark:text-white"
+  class="w-1/3 dark:bg-white dark:text-white"
 >
   <CloseButton
     on:click={() => (drawerCondition = true)}
@@ -327,7 +346,7 @@
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
-            class="w-full h-12 bg-white dark:bg-ekhlas-table-dark rounded-lg flex justify-between items-center px-4 mt-2 overflow-y-auto"
+            class="w-full h-12 bg-white dark:bg-white rounded-lg flex justify-between items-center px-4 mt-2 overflow-y-auto"
           >
             <p class="dark:text-white">{role.name}</p>
 
@@ -373,7 +392,7 @@
 <Modal
   size="lg"
   bind:open={deleteModal}
-  bodyClass="dark:bg-ekhlas-table-dark rounded-lg"
+  bodyClass="dark:bg-white rounded-lg"
 >
   <div class="text-center">
     <ExclamationCircleOutline
