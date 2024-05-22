@@ -1,15 +1,19 @@
 <script lang="ts">
   import { Modal, Button } from "flowbite-svelte";
   import { createEventDispatcher } from "svelte";
+  import Toast from "./Toast.svelte";
 
   export let message: string = "Are you sure you want to delete this item?";
   export let open: boolean = false;
+  let showToast = false;
 
   const dispatch = createEventDispatcher();
 
   function confirmDeletion() {
     dispatch("confirm");
     open = false;
+    showToast = true;
+    setTimeout(() => (showToast = false), 3000);
   }
 
   function cancelDeletion() {
@@ -26,3 +30,6 @@
     >
   </svelte:fragment>
 </Modal>
+{#if showToast}
+  <Toast message="Item deleted successfully" type="success" />
+{/if}

@@ -1,35 +1,53 @@
-<script>
+<script lang="ts">
+  import { onMount } from "svelte";
   import "../styles.css";
   import "../../app.css";
   import Navbar from "$lib/components/Navbar.svelte";
-  import DrawerComponent from "$lib/components/DrawerComponent.svelte";
-  import { theme } from "../../stores/themStore";
-  import { onDestroy } from "svelte";
+  import Sidebar from "$lib/components/DrawerComponent.svelte";
+  import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
+  import { UsersRepository } from "$lib/Repositories/Implementation/Users.Repository";
+  import { goto } from "$app/navigation";
+  import { authStore } from "../../stores/Auth.Store";
 
-  let dataTheme = "light";
-  let isDrawerExpanded = true; // State to manage drawer width
+  let sidebarOpen: boolean = true;
+  let isLoading: boolean = true;
 
-  // Subscribe to theme changes
-  const unsubscribe = theme.subscribe((value) => {
-    dataTheme = value ? "dark" : "light";
+  onMount(async () => {
+    await CheckAuth();
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // const response = await fetch("/api/user/create", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     policy: "create",
+    //   }),
+    // });
+    isLoading = false;
   });
-  onDestroy(unsubscribe);
 
-  function toggleDrawer() {
-    isDrawerExpanded = !isDrawerExpanded;
+  async function CheckAuth() {
+    await authStore.getAuth();
+    if (!$authStore) {
+      return goto("/");
+    }
   }
 </script>
 
-<div class="app" data-theme={dataTheme}>
-  <Navbar />
-
-  <main
-    class="h-screen"
-    style="background-color: var(--background-color); color: var(--text-color)"
-  >
-    <slot />
-  </main>
-</div>
-
-<style>
-</style>
+{#if isLoading}
+  <LoadingIndicator />
+{:else}
+  <div class="flex h-screen">
+    <Sidebar {sidebarOpen} />
+    <div
+      class="flex-1 flex flex-col"
+      style="background-color: var(--background-color); color: var(--text-color)"
+    >
+      <Navbar bind:sidebarOpen />
+      <main class="p-4">
+        <slot></slot>
+      </main>
+    </div>
+  </div>
+{/if}

@@ -15,9 +15,6 @@
   import { page } from "$app/stores";
   import CategoryDropdownToNews from "$lib/components/CategoryDropdownToNews.svelte";
 
-
-
-  
   let isLoading = false;
   let languages = Object.values(LanguageEnum);
   let selectedCategoryIds: number[] = [];

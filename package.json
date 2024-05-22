@@ -11,26 +11,34 @@
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
 		"@neoconfetti/svelte": "^1.0.0",
-		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/kit": "^2.5.7",
-		"@sveltejs/vite-plugin-svelte": "^3.0.0",
+		"@sveltejs/adapter-auto": "^3.2.0",
+		"@sveltejs/kit": "^2.5.9",
+		"@sveltejs/vite-plugin-svelte": "^3.1.0",
 		"autoprefixer": "^10.4.19",
 		"flowbite": "^2.3.0",
 		"flowbite-svelte": "^0.46.1",
-		"flowbite-svelte-icons": "^2.0.0-next.7",
+		"flowbite-svelte-icons": "^1.6.1",
 		"postcss": "^8.4.38",
-		"svelte": "^4.2.7",
-		"svelte-check": "^3.6.0",
+		"svelte": "^4.2.17",
+		"svelte-check": "^3.7.1",
 		"svelte-preprocess": "^5.1.4",
 		"tailwindcss": "^3.4.3",
-		"tslib": "^2.4.1",
+		"tslib": "^2.6.2",
 		"typescript": "^5.4.5",
-		"vite": "^5.0.3"
+		"vite": "^5.2.11"
 	},
 	"type": "module",
 	"dependencies": {
-		"@ionic/core": "^8.0.1",
-		"@supabase/supabase-js": "^2.42.7",
-		"svelte-icons-pack": "^3.1.3"
+		"@ionic/core": "^8.1.2",
+		"@lottiefiles/svelte-lottie-player": "^0.3.1",
+		"@supabase/supabase-js": "^2.43.2",
+		"@tabler/icons-svelte": "^3.4.0",
+		"lodash-es": "^4.17.21",
+		"lottie-web": "^5.12.2",
+		"moment": "^2.30.1",
+		"svelte-icons": "^2.1.0",
+		"svelte-icons-pack": "^3.1.3",
+		"svelte-lottie": "^0.0.0",
+		"uuid": "^9.0.1"
 	}
 }
