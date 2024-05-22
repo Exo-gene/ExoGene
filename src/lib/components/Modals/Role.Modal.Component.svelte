@@ -83,7 +83,7 @@
     isLoading = true;
     try {
       const response = options.id
-        ? await update(options)
+        ? await roleStore.update(options)
         : await roleStore.create(options);
       if (response && response.id) {
         if (selectedPolicies.length > 0) {
@@ -102,14 +102,25 @@
     }
   }
 
-  async function update(options: CreateRoleRequest) {
+  async function updateRole(options: CreateRoleRequest) {
     isLoading = true;
     try {
-      const response = await roleStore.update(options);
-      if (response && response.id) {
+      if (options && options.id) {
+        if (selectedRolePolicies.policies.length > 0) {
+          selectedRolePolicies.policies.forEach(async (policy) => {
+            await roleActionStore.create({
+              role_id: options.id as string,
+              policies_action: policy.id,
+            });
+          });
+        }
         roleOptions = new CreateRoleRequest();
+        selectedRolePolicies = {
+          id: "",
+          name: "",
+          policies: [],
+        };
       }
-      return response;
     } finally {
       isLoading = false;
     }
@@ -119,6 +130,24 @@
 
   function handleSelectAll(policyCategory: string, checked: boolean) {
     selectAllStates[policyCategory] = checked;
+    if (checked) {
+      const newPolicies = groupedPolicies[policyCategory].filter(
+        (policy) =>
+          !selectedRolePolicies.policies.some((p) => p.id === policy.id)
+      );
+      selectedRolePolicies.policies = [
+        ...selectedRolePolicies.policies,
+        ...newPolicies,
+      ];
+    } else {
+      selectedRolePolicies.policies = selectedRolePolicies.policies.filter(
+        (policy) => {
+          return !groupedPolicies[policyCategory].some(
+            (p) => p.id === policy.id
+          );
+        }
+      );
+    }
   }
 
   async function deleteRole(id: string) {
@@ -177,7 +206,13 @@
         bind:value={selectedRolePolicies}
         on:change={async () => {
           await getPoliciesForRole(selectedRolePolicies.id);
-          console.log("SelectedRolePolicies", selectedRolePolicies);
+          roleOptions = {
+            id: selectedRolePolicies.id,
+            name: selectedRolePolicies.name,
+          };
+          selectedPolicies = selectedRolePolicies.policies.map(
+            (policy) => policy.id
+          );
         }}
       >
         {#if $roleStore}
@@ -269,8 +304,9 @@
   {#if isLoading}
     <div class="w-full h-auto flex justify-center items-center gap-3">
       <Button
+        disabled
         class="bg-ekhlas-ekhlas-main-dark hover:bg-ekhlas-main-dark ease-in-out duration-300 gap-3"
-        >{"update"}
+        >{"Update"}
         <Spinner color="red" />
       </Button>
 
@@ -279,8 +315,9 @@
   {:else if selectedRolePolicies.policies}
     <div class="w-full h-auto flex justify-center items-center gap-3">
       <Button
+        on:click={() => updateRole(roleOptions)}
         class="bg-ekhlas-primary hover:bg-[#ed9243] ease-in-out duration-300"
-        >{"update"}</Button
+        >{"Update"}</Button
       >
       <!-- <Button color="alternative">Decline</Button> -->
     </div>
@@ -299,15 +336,34 @@
     class="mb-4 dark:text-white"
   />
   <form action="#" class="mb-6">
-    <div class="mb-6">
-      <Label for="title" class="block mb-2">{"title"}</Label>
-      <Input
-        id="title"
-        name="title"
-        required
-        placeholder="Role Title"
-        bind:value={roleOptions.name}
-      />
+    <div class="w-full flex justify-center items-center gap-2">
+      <div class="mb-6 w-full">
+        <Label for="title" class="block mb-2">{"title"}</Label>
+        <Input
+          id="title"
+          name="title"
+          required
+          placeholder="Role Title"
+          bind:value={roleOptions.name}
+        />
+      </div>
+      {#if roleOptions.id}
+        <div
+          class="w-24 bg-red-600 h-9 flex justify-center items-center p-4 rounded-xl"
+        >
+          <button
+            on:click={() => {
+              roleOptions = new CreateRoleRequest();
+              selectedPolicies = [];
+              selectedRolePolicies = {
+                id: "",
+                name: "",
+                policies: [],
+              };
+            }}>Remove</button
+          >
+        </div>
+      {/if}
     </div>
     <div class="mb-6">
       <Label for="description" class="mb-2">{"policies"}</Label>
@@ -369,14 +425,13 @@
                     id: role.id,
                     name: role.name,
                   };
-                  selectedPolicies = $roleActionStore.data.map(
-                    (roleAction) => {
-                      if(roleAction.role_id === role.id) {
-                        return roleAction.policy_id;
-                      }else{
-                        return "";
-                      }}
-                  );
+                  selectedPolicies = $roleActionStore.data.map((roleAction) => {
+                    if (roleAction.role_id === role.id) {
+                      return roleAction.policy_id;
+                    } else {
+                      return "";
+                    }
+                  });
                 }}
                 class="bg-green-500 w-8 h-8 rounded-lg flex justify-center items-center cursor-pointer"
               >

@@ -21,12 +21,24 @@ const createRoleActionStore = () => {
         if (!roleAction.role_id || roleAction.role_id === "") {
           throw new Error("Role ID is required");
         }
-        if (roleAction.policies_action == null || roleAction.policies_action === "") {
+        if (
+          roleAction.policies_action == null ||
+          roleAction.policies_action === ""
+        ) {
           throw new Error("Action ID is required");
-        }        
+        }
+        if (roleAction.policies_action && roleAction.role_id) {
+          const check = await roleActionsRepository.checkRoleAction(
+            roleAction.policies_action,
+            roleAction.role_id
+          );
+          if (check) {
+            throw new Error("Role Action already exists");
+          }
+        }
         const data = await roleActionsRepository.createRoleAction(roleAction);
         console.log("Role Action Data", data);
-        
+
         const dto = Dto.ToRoleActionDto(data);
         update((store) => {
           if (store.data) {
@@ -41,6 +53,7 @@ const createRoleActionStore = () => {
         });
         return dto;
       } catch (error) {
+        console.log("Role Action Error", error);
         update((store) => {
           store.error = error;
           return store;
@@ -83,7 +96,6 @@ const createRoleActionStore = () => {
           throw error;
         }
         const dtos = data.map((entity) => Dto.ToRoleActionDto(entity));
-        set({ data: dtos, error: null, count: dtos.length });
         return dtos;
       } catch (error) {
         update((store) => {

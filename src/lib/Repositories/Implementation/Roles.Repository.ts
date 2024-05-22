@@ -65,11 +65,12 @@ export class RolesRepository implements IRolesRepository {
       const response = (await Supabase.client
         .from("roles")
         .update(roleRequest)
-        .eq("id", role.id!)) as PostgrestSingleResponse<Role>;
+        .eq("id", role.id!)
+        .select()) as SupabaseResponse<Role>;
       if (response.error) {
         throw response.error;
       }
-      return response.data!;
+      return response.data[0];
     } catch (error) {
       throw error;
     }

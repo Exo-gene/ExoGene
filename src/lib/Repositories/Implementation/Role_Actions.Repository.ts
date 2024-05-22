@@ -78,6 +78,24 @@ export class RoleActionsRepository implements IRoleActionsRepository {
       throw error;
     }
   }
+  async checkRoleAction(
+    actionId: string,
+    roleId: string
+  ): Promise<boolean> {
+    try {
+      const response = (await Supabase.client
+        .from("role_actions")
+        .select("*")
+        .eq("policies_action", actionId)
+        .eq("role_id", roleId)) as SupabaseResponse<Role_Action>;
+      if (response.error) {
+        throw response.error;
+      }
+      return response.data.length > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
   async updateRoleAction(
     roleAction: CreateRoleActionRequest
   ): Promise<Role_Action> {
