@@ -21,14 +21,16 @@ const createRoleActionStore = () => {
         if (!roleAction.role_id || roleAction.role_id === "") {
           throw new Error("Role ID is required");
         }
-        if (!roleAction.action_id || roleAction.action_id === "") {
+        if (roleAction.policies_action == null || roleAction.policies_action === "") {
           throw new Error("Action ID is required");
-        }
+        }        
         const data = await roleActionsRepository.createRoleAction(roleAction);
+        console.log("Role Action Data", data);
+        
         const dto = Dto.ToRoleActionDto(data);
         update((store) => {
           if (store.data) {
-            store.data.push(dto);
+            store.data = [...store.data, dto];
             store.count = store.data.length;
             return store;
           } else {
@@ -95,7 +97,7 @@ const createRoleActionStore = () => {
         if (!roleAction.role_id || roleAction.role_id === "") {
           throw new Error("Role ID is required");
         }
-        if (!roleAction.action_id || roleAction.action_id === "") {
+        if (!roleAction.policies_action || roleAction.policies_action === "") {
           throw new Error("Action ID is required");
         }
         const data = await roleActionsRepository.updateRoleAction(roleAction);

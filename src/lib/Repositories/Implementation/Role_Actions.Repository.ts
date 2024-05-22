@@ -15,15 +15,17 @@ export class RoleActionsRepository implements IRoleActionsRepository {
     try {
       const roleActionRequest: RoleActionRequest = {
         role_id: roleAction.role_id,
-        action_id: roleAction.action_id,
+        policies_action: roleAction.policies_action,
       };
+      console.log("Role Action Request", roleActionRequest);
       const response = (await Supabase.client
         .from("role_actions")
-        .insert(roleActionRequest)) as PostgrestSingleResponse<Role_Action>;
+        .insert(roleActionRequest)
+        .select()) as SupabaseResponse<Role_Action>;
       if (response.error) {
         throw response.error;
       }
-      return response.data!;
+      return response.data[0];
     } catch (error) {
       throw error;
     }
@@ -82,16 +84,17 @@ export class RoleActionsRepository implements IRoleActionsRepository {
     try {
       const roleActionRequest: RoleActionRequest = {
         role_id: roleAction.role_id,
-        action_id: roleAction.action_id,
+        policies_action: roleAction.policies_action,
       };
       const response = (await Supabase.client
         .from("role_actions")
         .update(roleActionRequest)
-        .eq("id", roleAction.id!)) as PostgrestSingleResponse<Role_Action>;
+        .eq("id", roleAction.id)
+        .select()) as SupabaseResponse<Role_Action>;
       if (response.error) {
         throw response.error;
       }
-      return response.data!;
+      return response.data[0];
     } catch (error) {
       throw error;
     }

@@ -54,7 +54,7 @@
   class="container mx-auto w-3/5 h-auto flex justify-start items-center mt-12"
 >
   <a
-    href="/employee/1"
+    href="/dashboard/employees/1"
     class="rounded-lg w-24 text-center bg-[#f1f1f1] dark:bg-ekhlas-main-dark dark:text-white py-3 border-2 dark:border-black ml-5 mt-12"
     >{"back"}</a
   >

@@ -23,7 +23,7 @@ export class Dto {
     }
   }
   static ToRoleDto(entity: Role): RoleDto {
-    try {
+    try {      
       return {
         id: entity.id,
         name: entity.name,
@@ -44,7 +44,7 @@ export class Dto {
   }
   static ToRoleActionDto(entity: Role_Action): Role_ActionDto {
     try {
-      console.log(entity.roles);
+      console.log(entity);
 
       return {
         id: entity.id,

@@ -15,13 +15,20 @@ export class User_RolesRepository implements IUser_RolesRepository {
         role_id: user_role.role_id,
         user_id: user_role.user_id,
       };
-      const response = (await Supabase.client
-        .from("user_roles")
+      const action = (await Supabase.client
+        .from("user_role")
         .insert(userRoleRequest)) as PostgrestSingleResponse<User_Role>;
+      if (action.error) {
+        throw action.error;
+      }
+      const response = (await Supabase.client
+        .from("user_role")
+        .select("*")
+        .eq("user_id", user_role.user_id)) as SupabaseResponse<User_Role>;
       if (response.error) {
         throw response.error;
       }
-      return response.data;
+      return response.data[0];
     } catch (error) {
       throw error;
     }
@@ -29,7 +36,7 @@ export class User_RolesRepository implements IUser_RolesRepository {
   async get(user_role_id: string): Promise<User_Role> {
     try {
       const response = (await Supabase.client
-        .from("user_roles")
+        .from("user_role")
         .select("*")
         .eq("id", user_role_id)) as SupabaseResponse<User_Role>;
       if (response.error) {
@@ -43,7 +50,7 @@ export class User_RolesRepository implements IUser_RolesRepository {
   async getAll(): Promise<SupabaseResponse<User_Role>> {
     try {
       const response = (await Supabase.client
-        .from("user_roles")
+        .from("user_role")
         .select("*")) as SupabaseResponse<User_Role>;
       if (response.error) {
         throw response.error;
@@ -56,7 +63,7 @@ export class User_RolesRepository implements IUser_RolesRepository {
   async getRoleByUserId(user_id: string): Promise<SupabaseResponse<User_Role>> {
     try {
       const response = (await Supabase.client
-        .from("user_roles")
+        .from("user_role")
         .select("*,roles:role_id(id,name)")
         .eq("user_id", user_id)) as SupabaseResponse<User_Role>;
       if (response.error) {
@@ -74,7 +81,7 @@ export class User_RolesRepository implements IUser_RolesRepository {
         user_id: user_role.user_id,
       };
       const response = (await Supabase.client
-        .from("user_roles")
+        .from("user_role")
         .update(userRoleRequest)
         .eq("id", user_role.id!)) as PostgrestSingleResponse<User_Role>;
       if (response.error) {

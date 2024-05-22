@@ -72,6 +72,20 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+  async getUserByEmail(email: string): Promise<User> {
+    try {
+      const response = (await Supabase.client
+        .from("users")
+        .select("*")
+        .eq("email", email)) as SupabaseResponse<User>;
+      if (response.error) {
+        throw response.error;
+      }
+      return response.data[0];
+    } catch (error) {
+      throw error;
+    }
+  }
   async updateUser(user: CreateUserRequest): Promise<User> {
     try {
       const userRequest: UserRequest = {

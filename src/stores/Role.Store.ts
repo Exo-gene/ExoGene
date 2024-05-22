@@ -26,8 +26,10 @@ const createRoleStore = () => {
         const dto = Dto.ToRoleDto(data);
         update((store) => {
           if (store.data) {
-            store.data.push(dto);
+            store.data = [...store.data, dto];
             store.count = store.data.length;
+            console.log("Role DTO", store);
+
             return store;
           } else {
             store.data = [dto];
@@ -35,6 +37,8 @@ const createRoleStore = () => {
             return store;
           }
         });
+        console.log("Role DTO", dto);
+
         return dto;
       } catch (error) {
         update((store) => {

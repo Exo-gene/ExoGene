@@ -27,6 +27,12 @@ const createUserStore = () => {
         if (user.image.url instanceof File) {
           user.image.url = await ImageToUrl(user.image.url);
         }
+        if(user.email){
+          const check = await usersRepository.getUserByEmail(user.email);
+          if(check){
+            throw new Error("User already exists");
+          }
+        }
         const data = await usersRepository.createUser(user, password);
         const dto = Dto.ToUserDto(data);
         update((store) => {

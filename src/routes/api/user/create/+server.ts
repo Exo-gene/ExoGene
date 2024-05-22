@@ -7,6 +7,8 @@ import {
 import { Enviroments } from "$lib/Env/Enviroments";
 import type { UserRequest } from "$lib/Models/Requests/User.Request.Model";
 import type { User } from "$lib/Models/Entities/User.Entity.Model";
+import { Supabase } from "$lib/Supabase/Supabase.Client";
+import type { SupabaseResponse } from "$lib/Models/Responses/Supabase.Response.Model";
 
 const supabase = createClient(
   Enviroments.supabase_url,
@@ -42,14 +44,25 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
       );
     }
     user.user_id = response.data.user.id;
-    const response_2 = (await supabase
+    const userTable = (await Supabase.client
       .from("users")
       .insert(user)) as PostgrestSingleResponse<User>;
+    if (userTable.error) {
+      throw userTable.error;
+    }
+    const responseTable = (await Supabase.client
+      .from("users")
+      .select("*")
+      .eq("user_id", user.user_id)) as SupabaseResponse<User>;
+    if (responseTable.error) {
+      throw responseTable.error;
+    }
+    userTable.data = responseTable.data[0];
     return new Response(
       JSON.stringify({
         success: true,
         message: "User created successfully",
-        user: response_2.data,
+        user: userTable.data,
       })
     );
   } catch (error) {

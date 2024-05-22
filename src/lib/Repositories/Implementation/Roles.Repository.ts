@@ -17,11 +17,14 @@ export class RolesRepository implements IRolesRepository {
 
       const response = (await Supabase.client
         .from("roles")
-        .insert(roleRequest)) as PostgrestSingleResponse<Role>;
+        .insert(roleRequest)
+        .select()) as SupabaseResponse<Role>;
+
+      console.log("Repository Data", response);
       if (response.error) {
         throw response.error;
       }
-      return response.data!;
+      return response.data[0];
     } catch (error) {
       throw error;
     }

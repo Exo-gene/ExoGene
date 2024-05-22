@@ -35,9 +35,10 @@
   };
   let deleteModal: boolean = false;
   let roleOptions: CreateRoleRequest = new CreateRoleRequest();
+  let selectedPolicies: Array<string> = new Array<string>();
   let drawerCondition: boolean = true;
   let transitionParams = {
-    x: -320,
+    x: 320,
     duration: 200,
     easing: sineIn,
   };
@@ -51,7 +52,7 @@
     try {
       await policyStore.getAll();
       await roleStore.getAll();
-      //   await roleActionStore.getAll();
+      await roleActionStore.getAll();
       //   console.log("RoleActions",$roleActionStore.data);
     } finally {
       isLoading = false;
@@ -85,7 +86,16 @@
         ? await update(options)
         : await roleStore.create(options);
       if (response && response.id) {
+        if (selectedPolicies.length > 0) {
+          selectedPolicies.forEach(async (policy) => {
+            await roleActionStore.create({
+              role_id: response.id,
+              policies_action: policy,
+            });
+          });
+        }
         roleOptions = new CreateRoleRequest();
+        selectedPolicies = [];
       }
     } finally {
       isLoading = false;
@@ -128,7 +138,6 @@
     isLoading = true;
     try {
       const response = await roleActionStore.getRoleActionsByRole(id);
-      console.log("RoleActions", response);
       selectedRolePolicies.policies = response?.map((roleAction) => {
         return {
           id: roleAction.policies?.id,
@@ -136,8 +145,8 @@
         };
       }) as Array<PolicyDto>;
 
-      console.log("SelectedRolePolicies", selectedRolePolicies);
       groupByCategory($policyStore.data);
+      return selectedRolePolicies.policies.map((policy) => policy.id);
     } finally {
       isLoading = false;
     }
@@ -169,7 +178,6 @@
         on:change={async () => {
           await getPoliciesForRole(selectedRolePolicies.id);
           console.log("SelectedRolePolicies", selectedRolePolicies);
-          
         }}
       >
         {#if $roleStore}
@@ -281,6 +289,7 @@
 
 <Drawer
   transitionType="fly"
+  placement="right"
   {transitionParams}
   bind:hidden={drawerCondition}
   class="w-1/3 dark:bg-white dark:text-white"
@@ -311,6 +320,7 @@
               };
             })
           : []}
+        bind:value={selectedPolicies}
         required
         size="lg"
       />
@@ -354,11 +364,19 @@
               class=" w-auto h-8 rounded-lg flex justify-center items-center gap-5"
             >
               <div
-                on:click={() => {
+                on:click={async () => {
                   roleOptions = {
                     id: role.id,
                     name: role.name,
                   };
+                  selectedPolicies = $roleActionStore.data.map(
+                    (roleAction) => {
+                      if(roleAction.role_id === role.id) {
+                        return roleAction.policy_id;
+                      }else{
+                        return "";
+                      }}
+                  );
                 }}
                 class="bg-green-500 w-8 h-8 rounded-lg flex justify-center items-center cursor-pointer"
               >
@@ -389,11 +407,7 @@
   </div>
 </Drawer>
 
-<Modal
-  size="lg"
-  bind:open={deleteModal}
-  bodyClass="dark:bg-white rounded-lg"
->
+<Modal size="lg" bind:open={deleteModal} bodyClass="dark:bg-white rounded-lg">
   <div class="text-center">
     <ExclamationCircleOutline
       class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"

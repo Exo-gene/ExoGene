@@ -8,7 +8,7 @@
 <button
   on:click={() => (roleModal = true)}
   class="w-80 h-60 bg-white dark:bg-ekhlas-main-light dark:text-white rounded-lg flex justify-center items-center text-center text-xl hover:bg-[#FB5B01A4] hover:dark:bg-ekhlas-table-light hover:text-white duration-300 ease-in-out"
-  >{"role"}</button
+  >{"Role Settings"}</button
 >
 
 <Role bind:isLoading bind:roleModal />
