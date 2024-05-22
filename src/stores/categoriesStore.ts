@@ -20,7 +20,7 @@ const createCategoriesStore = () => {
       pageSize: number,
       pageNum: number
     ) => {
-      let query = await supabase.rpc("get_paged_categories", {
+      let query = await supabase.rpc("get_paginated_categories", {
         page_size: pageSize,
         page_num: pageNum,
       });

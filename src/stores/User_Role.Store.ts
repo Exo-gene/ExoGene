@@ -23,6 +23,12 @@ const createUserRoleStore = () => {
           throw new Error("Role ID is required");
         if (!user_role.user_id || user_role.user_id === "")
           throw new Error("User ID is required");
+        if(user_role.role_id && user_role.user_id){
+          const check = await user_RolesRepository.checkRoleWithUserId(user_role.role_id,user_role.user_id);
+          if(check){
+            throw new Error("User Role already exists");
+          }
+        }
         const data = await user_RolesRepository.create(user_role);
         const dto = Dto.ToUserRoleDto(data);
         update((store) => {
