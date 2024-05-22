@@ -17,3 +17,6 @@ export interface SubCategoryLanguageModel {
   title: string;
   language: LanguageEnum;
 }
+export interface SubcategoryId {
+  subcategory_id: number;
+}
