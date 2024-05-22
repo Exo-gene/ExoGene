@@ -46,23 +46,16 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
     user.user_id = response.data.user.id;
     const userTable = (await Supabase.client
       .from("users")
-      .insert(user)) as PostgrestSingleResponse<User>;
+      .insert(user)
+      .select()) as SupabaseResponse<User>;
     if (userTable.error) {
       throw userTable.error;
     }
-    const responseTable = (await Supabase.client
-      .from("users")
-      .select("*")
-      .eq("user_id", user.user_id)) as SupabaseResponse<User>;
-    if (responseTable.error) {
-      throw responseTable.error;
-    }
-    userTable.data = responseTable.data[0];
     return new Response(
       JSON.stringify({
         success: true,
         message: "User created successfully",
-        user: userTable.data,
+        user: userTable.data[0],
       })
     );
   } catch (error) {
