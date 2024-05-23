@@ -2,7 +2,7 @@
   import { CreateUser_RoleRequest } from "$lib/Models/Requests/User_Role.Request.Model";
   import { onMount } from "svelte";
 
-  import { Spinner } from "flowbite-svelte";
+  import { Spinner, MultiSelect } from "flowbite-svelte";
 
   import { goto } from "$app/navigation";
   import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
@@ -10,11 +10,13 @@
   import { roleStore } from "../../../../../stores/Role.Store";
   import { userStore } from "../../../../../stores/User.Store";
   import { userRoleStore } from "../../../../../stores/User_Role.Store";
+  import { User_RoleDto } from "$lib/Models/DTOS/User_Role.DTO.Model";
   import { page } from "$app/stores";
 
   let userOptions: CreateUserRequest = new CreateUserRequest();
   let userRoleOptions: CreateUser_RoleRequest = new CreateUser_RoleRequest();
   let password: string = "";
+  let selected: string[] = [];
 
   let isLoading = true;
   onMount(async () => {
@@ -23,7 +25,7 @@
       const id = $page.params.id;
       const data = await userStore.get(id);
       console.log(data);
-      if(data && data.id) {
+      if (data && data.id) {
         userOptions = {
           id: data.id,
           name: data.name ? data.name : "",
@@ -34,13 +36,10 @@
           },
           user_id: data.user_id,
         };
-        const userRole = await userRoleStore.getRolesByUserId(data.id);
-        if(userRole && userRole[0].id) {
-          userRoleOptions = {
-            role_id: userRole[0].role_id,
-            user_id: userRole[0].user_id,
-          };
-        }
+        const userRole = (await userRoleStore.getRolesByUserId(
+          data.id
+        )) as Array<User_RoleDto>;
+        selected = userRole.map((role) => role.role_id);
       }
     } finally {
       isLoading = false;
@@ -116,20 +115,17 @@
     />
   </div> -->
   <div class="w-full flex flex-col h-auto gap-2">
-    <p class=" w-full h-4 rounded-lg dark:text-white">{"Role"}</p>
-    <select
-      bind:value={userRoleOptions.role_id}
-      name=""
-      id=""
-      class="rounded-lg dark:bg-ekhlas-main-dark dark:text-white"
-      required
-    >
-      {#if $roleStore}
-        {#each $roleStore.data as role}
-          <option value={role.id}>{role.name}</option>
-        {/each}
-      {/if}
-    </select>
+    <p class=" w-full h-4 rounded-lg dark:text-white">{"Roles"}</p>
+    <MultiSelect
+      items={$roleStore.data.map((role) => {
+        return {
+          name: role.name,
+          value: role.id,
+        };
+      })}
+      bind:value={selected}
+      size="lg"
+    />
   </div>
 
   {#if isLoading}

@@ -5,7 +5,6 @@
   import Navbar from "$lib/components/Navbar.svelte";
   import Sidebar from "$lib/components/DrawerComponent.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
-  import { UsersRepository } from "$lib/Repositories/Implementation/Users.Repository";
   import { goto } from "$app/navigation";
   import { authStore } from "../../stores/Auth.Store";
 
@@ -29,8 +28,6 @@
 
   async function CheckAuth() {
     await authStore.getAuth();
-    console.log($authStore);
-    
     if (!$authStore) {
       return goto("/");
     }
