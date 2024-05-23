@@ -58,6 +58,20 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+  async getUser(id: string): Promise<User> {
+    try {
+      const response = (await Supabase.client
+        .from("users")
+        .select("*")
+        .eq("id", id)) as SupabaseResponse<User>;
+      if (response.error) {
+        throw response.error;
+      }
+      return response.data[0];
+    } catch (error) {
+      throw error;
+    }
+  }
   async getUserById(id: string): Promise<User> {
     try {
       const response = (await Supabase.client
@@ -97,11 +111,12 @@ export class UsersRepository implements IUsersRepository {
       const response = (await Supabase.client
         .from("users")
         .update(userRequest)
-        .eq("id", user.id!)) as PostgrestSingleResponse<User>;
+        .eq("id::UUID", user.id!)
+        .select()) as SupabaseResponse<User>;
       if (response.error) {
         throw response.error;
       }
-      return response.data!;
+      return response.data[0];
     } catch (error) {
       throw error;
     }

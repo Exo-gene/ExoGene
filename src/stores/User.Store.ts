@@ -27,9 +27,9 @@ const createUserStore = () => {
         if (user.image.url instanceof File) {
           user.image.url = await ImageToUrl(user.image.url);
         }
-        if(user.email){
+        if (user.email) {
           const check = await usersRepository.getUserByEmail(user.email);
-          if(check){
+          if (check) {
             throw new Error("User already exists");
           }
         }
@@ -66,6 +66,19 @@ const createUserStore = () => {
     },
     get: async (id: string) => {
       try {
+        const data = await usersRepository.getUser(id);
+        console.log("User", data);
+        const dto = Dto.ToUserDto(data);
+        return dto;
+      } catch (error) {
+        update((store) => {
+          store.error = error;
+          return store;
+        });
+      }
+    },
+    getByUserId: async (id: string) => {
+      try {
         const data = await usersRepository.getUserById(id);
         const dto = Dto.ToUserDto(data);
         return dto;
@@ -76,8 +89,25 @@ const createUserStore = () => {
         });
       }
     },
-    updateUser: async (user: CreateUserRequest) => {
+    update: async (user: CreateUserRequest, password: string) => {
       try {
+        if (!user.id || user.id === "") throw new Error("User ID is required");
+        const document = await usersRepository.getUser(user.id);
+        if (!document) throw new Error("User not found");
+        if (user.email) {
+          const check = await usersRepository.getUserByEmail(user.email);
+          if (check && check.id !== user.id) {
+            user.email = document.email;
+          }
+        }
+        if (!user.email || user.email === "") {
+          user.email = document.email;
+        }
+        if (user.image.url instanceof File) {
+          user.image.url = await ImageToUrl(user.image.url);
+        }else{
+          user.image.url = document.image;
+        }
         const data = await usersRepository.updateUser(user);
         const dto = Dto.ToUserDto(data);
         update((store) => {

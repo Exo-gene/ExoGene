@@ -10,6 +10,7 @@
   import { roleStore } from "../../../../../stores/Role.Store";
   import { userStore } from "../../../../../stores/User.Store";
   import { userRoleStore } from "../../../../../stores/User_Role.Store";
+  import { page } from "$app/stores";
 
   let userOptions: CreateUserRequest = new CreateUserRequest();
   let userRoleOptions: CreateUser_RoleRequest = new CreateUser_RoleRequest();
@@ -19,24 +20,46 @@
   onMount(async () => {
     try {
       await roleStore.getAll();
+      const id = $page.params.id;
+      const data = await userStore.get(id);
+      console.log(data);
+      if(data && data.id) {
+        userOptions = {
+          id: data.id,
+          name: data.name ? data.name : "",
+          email: data.email,
+          image: {
+            localUrl: data.image,
+            url: "",
+          },
+          user_id: data.id,
+        };
+        const userRole = await userRoleStore.getRolesByUserId(data.id);
+        if(userRole && userRole[0].id) {
+          userRoleOptions = {
+            role_id: userRole[0].role_id,
+            user_id: userRole[0].user_id,
+          };
+        }
+      }
     } finally {
       isLoading = false;
     }
   });
 
-  async function create(
+  async function update(
     userOptions: CreateUserRequest,
     userRoleOptions: CreateUser_RoleRequest,
     password: string
   ) {
     isLoading = true;
     try {
-      const user = await userStore.create(userOptions, password);
+      const user = await userStore.update(userOptions, password);
       if (user && user.id) {
         userRoleOptions.user_id = user.id;
         const response = await userRoleStore.create(userRoleOptions);
         if (response && response.id) {
-          goto(`/employee/1`);
+          goto(`/dashboard/employees`);
         }
       }
     } finally {
@@ -83,7 +106,7 @@
       required
     />
   </div>
-  <div class="w-full flex flex-col h-auto gap-2">
+  <!-- <div class="w-full flex flex-col h-auto gap-2">
     <p class=" w-full h-4 rounded-lg dark:text-white">{"Password"}</p>
     <input
       type="password"
@@ -91,7 +114,7 @@
       bind:value={password}
       required
     />
-  </div>
+  </div> -->
   <div class="w-full flex flex-col h-auto gap-2">
     <p class=" w-full h-4 rounded-lg dark:text-white">{"Role"}</p>
     <select
@@ -121,8 +144,8 @@
     <button
       class="w-full h-12 bg-ekhlas-primary dark:hover:bg-[#FF9300] duration-300 ease-in-out rounded-lg text-white"
       on:click={() => {
-        create(userOptions, userRoleOptions, password);
-      }}>{"Add"}</button
+        update(userOptions, userRoleOptions, password);
+      }}>{"Update"}</button
     >
   {/if}
 </div>
