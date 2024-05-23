@@ -29,6 +29,8 @@
 
   async function CheckAuth() {
     await authStore.getAuth();
+    console.log($authStore);
+    
     if (!$authStore) {
       return goto("/");
     }

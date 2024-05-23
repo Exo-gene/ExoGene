@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { userRoleStore } from './../../../../stores/User_Role.Store';
+  import { userRoleStore } from "./../../../../stores/User_Role.Store";
   import { CreateUser_RoleRequest } from "$lib/Models/Requests/User_Role.Request.Model";
   import { onMount } from "svelte";
 
-  import { Spinner } from "flowbite-svelte";
-
-  import { goto } from "$app/navigation";
+  import { MultiSelect, Spinner } from "flowbite-svelte";
   import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
   import { roleStore } from "../../../../stores/Role.Store";
   import { userStore } from "../../../../stores/User.Store";
@@ -14,6 +12,7 @@
   let userOptions: CreateUserRequest = new CreateUserRequest();
   let userRoleOptions: CreateUser_RoleRequest = new CreateUser_RoleRequest();
   let password: string = "";
+  let selected: string[] = [];
 
   let isLoading = true;
   onMount(async () => {
@@ -33,16 +32,19 @@
     try {
       const user = await userStore.create(userOptions, password);
       if (user && user.id) {
-        userRoleOptions.user_id = user.id;
-        const response = await userRoleStore.create(userRoleOptions);
-        if (response && response.id) {
-          goto(`/employee/1`);
-        }
+        selected.forEach(async (role_id) => {
+          console.log("User Role",role_id);
+          
+          userRoleOptions.role_id = role_id;
+          userRoleOptions.user_id = user.id;
+          await userRoleStore.create(userRoleOptions);
+        });
       }
     } finally {
       isLoading = false;
     }
   }
+  $: console.log(selected);
 </script>
 
 <div class="w-full h-auto flex justify-center items-center mt-12">
@@ -54,7 +56,7 @@
   class="container mx-auto w-3/5 h-auto flex justify-start items-center mt-12"
 >
   <a
-    href="/dashboard/employees/1"
+    href="/dashboard/employees"
     class="rounded-lg w-24 text-center bg-[#f1f1f1] dark:bg-ekhlas-main-dark dark:text-white py-3 border-2 dark:border-black ml-5 mt-12"
     >{"back"}</a
   >
@@ -93,20 +95,28 @@
     />
   </div>
   <div class="w-full flex flex-col h-auto gap-2">
-    <p class=" w-full h-4 rounded-lg dark:text-white">{"Role"}</p>
-    <select
+    <p class=" w-full h-4 rounded-lg dark:text-white">{"Roles"}</p>
+    <!-- <select
       bind:value={userRoleOptions.role_id}
       name=""
       id=""
       class="rounded-lg dark:bg-ekhlas-main-dark dark:text-white"
       required
     >
-      {#if $roleStore}
-        {#each $roleStore.data as role}
-          <option value={role.id}>{role.name}</option>
-        {/each}
-      {/if}
-    </select>
+      {#each $roleStore.data as role}
+        <option value={role.id}>{role.name}</option>
+      {/each}
+    </select> -->
+    <MultiSelect
+      items={$roleStore.data.map((role) => {
+        return {
+          name: role.name,
+          value: role.id,
+        };
+      })}
+      bind:value={selected}
+      size="lg"
+    />
   </div>
 
   {#if isLoading}
@@ -119,7 +129,7 @@
     </button>
   {:else}
     <button
-      class="w-full h-12 bg-ekhlas-primary dark:hover:bg-[#FF9300] duration-300 ease-in-out rounded-lg text-white"
+      class="w-full h-12 bg-[#000000] dark:hover:bg-[#FF9300] duration-300 ease-in-out rounded-lg text-white"
       on:click={() => {
         create(userOptions, userRoleOptions, password);
       }}>{"Add"}</button

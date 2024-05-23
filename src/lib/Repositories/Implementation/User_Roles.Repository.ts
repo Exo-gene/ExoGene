@@ -14,6 +14,7 @@ export class User_RolesRepository implements IUser_RolesRepository {
         role_id: user_role.role_id,
         user_id: user_role.user_id,
       };
+      console.log("User Role Repository", userRoleRequest);
       const response = (await Supabase.client
         .from("user_role")
         .insert(userRoleRequest)
@@ -23,6 +24,7 @@ export class User_RolesRepository implements IUser_RolesRepository {
       }
       return response.data[0];
     } catch (error) {
+      console.log("Error", error);
       throw error;
     }
   }
