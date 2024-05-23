@@ -108,16 +108,20 @@ export class UsersRepository implements IUsersRepository {
         image: user.image.url as string,
         user_id: user.user_id,
       };
+
+      console.log("User Request", user);
+      
       const response = (await Supabase.client
         .from("users")
         .update(userRequest)
-        .eq("id::UUID", user.id!)
+        .eq("id", user.id!)
         .select()) as SupabaseResponse<User>;
       if (response.error) {
         throw response.error;
       }
       return response.data[0];
     } catch (error) {
+      console.log("Error", error);
       throw error;
     }
   }

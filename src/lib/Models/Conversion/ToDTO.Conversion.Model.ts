@@ -17,6 +17,7 @@ export class Dto {
         name: entity.name,
         email: entity.email,
         image: entity.image,
+        user_id: entity.user_id,
       };
     } catch (error) {
       throw error;

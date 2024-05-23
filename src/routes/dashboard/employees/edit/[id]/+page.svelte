@@ -32,7 +32,7 @@
             localUrl: data.image,
             url: "",
           },
-          user_id: data.id,
+          user_id: data.user_id,
         };
         const userRole = await userRoleStore.getRolesByUserId(data.id);
         if(userRole && userRole[0].id) {

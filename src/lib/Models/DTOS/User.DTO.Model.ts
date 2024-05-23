@@ -3,4 +3,5 @@ export class UserDto {
   name?: string;
   email: string = null!;
   image?: string;
+  user_id: string = null!;
 }
