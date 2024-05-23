@@ -23,6 +23,9 @@ const createAuthStore = () => {
         if (!data) {
           throw new Error("User not found");
         }
+        console.log("Data", data);
+        usersRepository.getUserByFunction(data.id);
+        
         const userData = await usersRepository.getUserById(data.id);
         if (!userData) {
           throw new Error("User not found in Table");

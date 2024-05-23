@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Policies } from './../../../lib/Models/Enums/Policies.Enum.Model.ts';
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
@@ -8,6 +9,8 @@
   import { carouselStore } from "../../../stores/carouselStore";
   import CustomTable from "$lib/components/CustomTable.svelte";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
+  import { authStore } from "../../../stores/Auth.Store";
+  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -80,7 +83,9 @@
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
+    {#if checkUserPolicies([Policies.CREATE_CAROUSEL],$authStore)}
     <InsertButton insertData={createCarousel} />
+    {/if}
     <CustomTable
       items={carousel}
       editData={editCarousel}

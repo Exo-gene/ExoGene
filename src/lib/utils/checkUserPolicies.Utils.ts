@@ -1,0 +1,15 @@
+import type { UserDto } from "$lib/Models/DTOS/User.DTO.Model";
+
+export function checkUserPolicies(premissions: number[], user: UserDto | null) {
+    // Check if $authStore and roles are defined
+    if (user?.roles) {
+      for (const role of user.roles) {
+        for (const policy of role.policies) {
+          if (premissions.includes(Number(policy.id))) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }

@@ -86,6 +86,20 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+  async getUserByFunction(user_id:string) {
+    try {
+      const response = (await Supabase.client
+        .rpc("get_user_by_userid_with_roles_policies", { input_user_id: user_id }));
+      if (response.error) {
+        throw response.error;
+      }
+      console.log("User", response);
+      
+      return response.data[0];
+    } catch (error) {
+      throw error;
+    }
+  }
   async getUserByEmail(email: string): Promise<User> {
     try {
       const response = (await Supabase.client

@@ -17,7 +17,6 @@ export class RoleActionsRepository implements IRoleActionsRepository {
         role_id: roleAction.role_id,
         policies_action: roleAction.policies_action,
       };
-      console.log("Role Action Request", roleActionRequest);
       const response = (await Supabase.client
         .from("role_actions")
         .insert(roleActionRequest)

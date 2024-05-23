@@ -105,6 +105,8 @@
   async function updateRole(options: CreateRoleRequest) {
     isLoading = true;
     try {
+      console.log(selectedRolePolicies);
+      
       if (options && options.id) {
         if (selectedRolePolicies.policies.length > 0) {
           selectedRolePolicies.policies.forEach(async (policy) => {
@@ -290,6 +292,22 @@
                   (p) => p.id === policy.id
                 )}
                 value={policy.id}
+                on:change={() => {
+                  if (
+                    selectedRolePolicies.policies.some(
+                      (p) => p.id === policy.id
+                    )
+                  ) {
+                    selectedRolePolicies.policies = selectedRolePolicies.policies.filter(
+                      (p) => p.id !== policy.id
+                    );
+                  } else {
+                    selectedRolePolicies.policies = [
+                      ...selectedRolePolicies.policies,
+                      policy,
+                    ];
+                  }
+                }}
               />
               <p class="text-justify dark:text-white">
                 {policy.name.replace(/_/g, " ")}

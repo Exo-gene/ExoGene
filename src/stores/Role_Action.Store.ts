@@ -27,17 +27,17 @@ const createRoleActionStore = () => {
         ) {
           throw new Error("Action ID is required");
         }
-        if (roleAction.policies_action && roleAction.role_id) {
+        if (roleAction.policies_action != null && roleAction.role_id) {
           const check = await roleActionsRepository.checkRoleAction(
             roleAction.policies_action,
             roleAction.role_id
           );
+          console.log("Check", check);
           if (check) {
-            throw new Error("Role Action already exists");
+            return null;
           }
         }
         const data = await roleActionsRepository.createRoleAction(roleAction);
-        console.log("Role Action Data", data);
 
         const dto = Dto.ToRoleActionDto(data);
         update((store) => {
