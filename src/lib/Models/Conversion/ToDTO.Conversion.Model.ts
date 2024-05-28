@@ -3,10 +3,10 @@ import type { RoleDto } from "../DTOS/Role.DTO.Model";
 import type { Role_ActionDto } from "../DTOS/Role_Action.DTO.Model";
 import type { UserDto } from "../DTOS/User.DTO.Model";
 import type { User_RoleDto } from "../DTOS/User_Role.DTO.Model";
-import { Policy } from "../Entities/Policy.Entity.Model";
-import { Role } from "../Entities/Role.Entity.Model";
+import { ActionPolicy, Policy } from "../Entities/Policy.Entity.Model";
+import { Role, RoleWithPolicies } from "../Entities/Role.Entity.Model";
 import type { Role_Action } from "../Entities/Role_Action.Entity.Model";
-import { User } from "../Entities/User.Entity.Model";
+import { User, UserWithRole } from "../Entities/User.Entity.Model";
 import type { User_Role } from "../Entities/User_Role.Entity.Model";
 
 export class Dto {
@@ -23,11 +23,36 @@ export class Dto {
       throw error;
     }
   }
-  static ToRoleDto(entity: Role): RoleDto {
-    try {      
+  static ToUserWithRoleDto(entity: UserWithRole): UserDto {
+    try {
       return {
         id: entity.id,
         name: entity.name,
+        email: entity.email,
+        image: entity.image,
+        user_id: entity.user_id,
+        roles: entity.roles.map((x) => Dto.ToRoleWithPoliciesDto(x)),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  static ToRoleDto(entity: Role): RoleDto {
+    try {
+      return {
+        id: entity.id,
+        name: entity.name,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  static ToRoleWithPoliciesDto(entity: RoleWithPolicies): RoleWithPolicies {
+    try {
+      return {
+        id: entity.id,
+        name: entity.name,
+        policies: entity.policies.map((x) => Dto.ToPolicyActionDto(x)),
       };
     } catch (error) {
       throw error;
@@ -43,9 +68,18 @@ export class Dto {
       throw error;
     }
   }
+  static ToPolicyActionDto(entity: ActionPolicy): PolicyDto {
+    try {
+      return {
+        id: entity.id,
+        name: entity.name,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
   static ToRoleActionDto(entity: Role_Action): Role_ActionDto {
     try {
-
       return {
         id: entity.id,
         role_id: entity.role_id,

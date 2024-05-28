@@ -14,15 +14,6 @@
   onMount(async () => {
     await CheckAuth();
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    // const response = await fetch("/api/user/create", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     policy: "create",
-    //   }),
-    // });
     isLoading = false;
   });
 

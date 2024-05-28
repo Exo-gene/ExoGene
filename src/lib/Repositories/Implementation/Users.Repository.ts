@@ -5,7 +5,7 @@ import type {
 import type { IUsersRepository } from "../Interface/I.Users.Repository";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
 import type { SupabaseResponse } from "$lib/Models/Responses/Supabase.Response.Model";
-import type { User } from "$lib/Models/Entities/User.Entity.Model";
+import type { User, UserWithRole } from "$lib/Models/Entities/User.Entity.Model";
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export class UsersRepository implements IUsersRepository {
@@ -86,16 +86,14 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
-  async getUserByFunction(user_id:string) {
+  async getUserByUserIdWithFunction(user_id:string) {
     try {
       const response = (await Supabase.client
-        .rpc("get_user_by_userid_with_roles_policies", { input_user_id: user_id }));
+        .rpc("get_user_by_userid_with_roles_policies", { input_user_id: user_id })) as PostgrestSingleResponse<UserWithRole>;
       if (response.error) {
         throw response.error;
       }
-      console.log("User", response);
-      
-      return response.data[0];
+      return response.data;
     } catch (error) {
       throw error;
     }
