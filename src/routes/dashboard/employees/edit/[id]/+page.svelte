@@ -56,8 +56,11 @@
       const user = await userStore.update(userOptions, password);
       if (user && user.id) {
         userRoleOptions.user_id = user.id;
-        const response = await userRoleStore.create(userRoleOptions);
-        if (response && response.id) {
+        const response = await userRoleStore.updateFunction({
+          user_id: user.id,
+          role_ids: selected,
+        });
+        if (response && response.length > 0) {
           goto(`/dashboard/employees`);
         }
       }

@@ -1,6 +1,9 @@
 import { Dto } from "$lib/Models/Conversion/ToDTO.Conversion.Model";
 import type { User_RoleDto } from "$lib/Models/DTOS/User_Role.DTO.Model";
-import type { CreateUser_RoleRequest } from "$lib/Models/Requests/User_Role.Request.Model";
+import type {
+  CreateUser_RoleRequest,
+  UpdateUser_RoleRequest,
+} from "$lib/Models/Requests/User_Role.Request.Model";
 import type { Store } from "$lib/Models/Responses/Store.Response.Model";
 import { User_RolesRepository } from "$lib/Repositories/Implementation/User_Roles.Repository";
 import { get, writable } from "svelte/store";
@@ -19,15 +22,18 @@ const createUserRoleStore = () => {
     set: (data: Store<User_RoleDto>) => set(data),
     create: async (user_role: CreateUser_RoleRequest) => {
       try {
-        console.log("User Role",user_role);
-        
+        console.log("User Role", user_role);
+
         if (!user_role.role_id || user_role.role_id === "")
           throw new Error("Role ID is required");
         if (!user_role.user_id || user_role.user_id === "")
           throw new Error("User ID is required");
-        if(user_role.role_id && user_role.user_id){
-          const check = await user_RolesRepository.checkRoleWithUserId(user_role.role_id,user_role.user_id);
-          if(check){
+        if (user_role.role_id && user_role.user_id) {
+          const check = await user_RolesRepository.checkRoleWithUserId(
+            user_role.role_id,
+            user_role.user_id
+          );
+          if (check) {
             throw new Error("User Role already exists");
           }
         }
@@ -106,6 +112,26 @@ const createUserRoleStore = () => {
           return store;
         });
         return dto;
+      } catch (error) {
+        update((store) => {
+          store.error = error;
+          return store;
+        });
+      }
+    },
+    updateFunction: async (user_role: UpdateUser_RoleRequest) => {
+      try {
+        if (!user_role.user_id || user_role.user_id === "")
+          throw new Error("User ID is required");
+
+        const data = await user_RolesRepository.updateFuction(user_role);
+        const dtos = data.map((entity) => Dto.ToUserRoleDto(entity));
+        update((store) => {
+          store.data = dtos;
+          store.count = dtos.length;
+          return store;
+        });
+        return dtos;
       } catch (error) {
         update((store) => {
           store.error = error;

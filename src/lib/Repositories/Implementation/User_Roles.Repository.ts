@@ -1,10 +1,12 @@
 import type { User_Role } from "$lib/Models/Entities/User_Role.Entity.Model";
 import type {
   CreateUser_RoleRequest,
+  UpdateUser_RoleRequest,
   User_RoleRequest,
 } from "$lib/Models/Requests/User_Role.Request.Model";
 import type { SupabaseResponse } from "$lib/Models/Responses/Supabase.Response.Model";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
+import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import type { IUser_RolesRepository } from "../Interface/I.User_Roles.Repository";
 
 export class User_RolesRepository implements IUser_RolesRepository {
@@ -102,6 +104,20 @@ export class User_RolesRepository implements IUser_RolesRepository {
         throw response.error;
       }
       return response.data[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+  async updateFuction(user_role: UpdateUser_RoleRequest): Promise<User_Role[]> {
+    try {
+      const response = (await Supabase.client.rpc("update_user_roles", {
+        _user_id: user_role.user_id,
+        _role_ids: user_role.role_ids,
+      })) as PostgrestSingleResponse<User_Role[]>;
+      if (response.error) {
+        throw response.error;
+      }
+      return response.data;
     } catch (error) {
       throw error;
     }

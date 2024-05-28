@@ -86,16 +86,19 @@
         ? await roleStore.update(options)
         : await roleStore.create(options);
       if (response && response.id) {
-        if (selectedPolicies.length > 0) {
-          selectedPolicies.forEach(async (policy) => {
-            await roleActionStore.create({
-              role_id: response.id,
-              policies_action: policy,
-            });
-          });
+        const response_2 = await roleActionStore.updateFunction({
+          role_id: response.id + "",
+          policies_ids: selectedPolicies,
+        });
+        if (response_2 && response_2.length > 0) {
+          roleOptions = new CreateRoleRequest();
+          selectedPolicies = [];
+          selectedRolePolicies = {
+            id: "",
+            name: "",
+            policies: [],
+          };
         }
-        roleOptions = new CreateRoleRequest();
-        selectedPolicies = [];
       }
     } finally {
       isLoading = false;
@@ -105,18 +108,13 @@
   async function updateRole(options: CreateRoleRequest) {
     isLoading = true;
     try {
-      console.log(selectedRolePolicies);
-      
-      if (options && options.id) {
-        if (selectedRolePolicies.policies.length > 0) {
-          selectedRolePolicies.policies.forEach(async (policy) => {
-            await roleActionStore.create({
-              role_id: options.id as string,
-              policies_action: policy.id,
-            });
-          });
-        }
+      const response = await roleActionStore.updateFunction({
+        role_id: options.id + "",
+        policies_ids: selectedRolePolicies.policies.map((policy) => policy.id),
+      });
+      if (response && response.length > 0) {
         roleOptions = new CreateRoleRequest();
+        selectedPolicies = [];
         selectedRolePolicies = {
           id: "",
           name: "",
@@ -298,9 +296,10 @@
                       (p) => p.id === policy.id
                     )
                   ) {
-                    selectedRolePolicies.policies = selectedRolePolicies.policies.filter(
-                      (p) => p.id !== policy.id
-                    );
+                    selectedRolePolicies.policies =
+                      selectedRolePolicies.policies.filter(
+                        (p) => p.id !== policy.id
+                      );
                   } else {
                     selectedRolePolicies.policies = [
                       ...selectedRolePolicies.policies,
@@ -334,7 +333,7 @@
     <div class="w-full h-auto flex justify-center items-center gap-3">
       <Button
         on:click={() => updateRole(roleOptions)}
-        class="bg-ekhlas-primary hover:bg-[#ed9243] ease-in-out duration-300"
+        class="bg-blue-600 hover:bg-[#ed9243] ease-in-out duration-300"
         >{"Update"}</Button
       >
       <!-- <Button color="alternative">Decline</Button> -->

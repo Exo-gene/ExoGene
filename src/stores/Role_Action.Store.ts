@@ -3,7 +3,7 @@ import { writable } from "svelte/store";
 import { RoleActionsRepository } from "../lib/Repositories/Implementation/Role_Actions.Repository";
 import type { Role_ActionDto } from "$lib/Models/DTOS/Role_Action.DTO.Model";
 import { Dto } from "$lib/Models/Conversion/ToDTO.Conversion.Model";
-import type { CreateRoleActionRequest } from "$lib/Models/Requests/Role_Action.Request.Model";
+import type { CreateRoleActionRequest, CreateRoleActionsFunctionRequest } from "$lib/Models/Requests/Role_Action.Request.Model";
 const roleActionsRepository = new RoleActionsRepository();
 
 const createRoleActionStore = () => {
@@ -124,6 +124,32 @@ const createRoleActionStore = () => {
           return store;
         });
         return dto;
+      } catch (error) {
+        update((store) => {
+          store.error = error;
+          return store;
+        });
+      }
+    },
+    updateFunction: async (roleAction: CreateRoleActionsFunctionRequest) => {
+      try {
+        if (!roleAction.role_id || roleAction.role_id === "") {
+          throw new Error("Role ID is required");
+        }
+        if (!roleAction.policies_ids || roleAction.policies_ids.length === 0) {
+          throw new Error("Action ID is required");
+        }
+        const data = await roleActionsRepository.updateRoleActionWithFunction(
+          roleAction
+        );
+        console.log("Data", data);
+        const dtos = data.map((entity) => Dto.ToRoleActionDto(entity));
+        update((store) => {
+          store.data = dtos;
+          store.count = dtos.length;
+          return store;
+        });
+        return dtos;
       } catch (error) {
         update((store) => {
           store.error = error;
