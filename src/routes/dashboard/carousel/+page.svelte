@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Policies } from './../../../lib/Models/Enums/Policies.Enum.Model.ts';
+	import { Policies } from './../../../lib/Models/Enums/Policies.Enum.Model';
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
