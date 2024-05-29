@@ -5,7 +5,10 @@ import type {
 import type { IUsersRepository } from "../Interface/I.Users.Repository";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
 import type { SupabaseResponse } from "$lib/Models/Responses/Supabase.Response.Model";
-import type { User, UserWithRole } from "$lib/Models/Entities/User.Entity.Model";
+import type {
+  User,
+  UserWithRole,
+} from "$lib/Models/Entities/User.Entity.Model";
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export class UsersRepository implements IUsersRepository {
@@ -86,10 +89,12 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
-  async getUserByUserIdWithFunction(user_id:string) {
+  async getUserByUserIdWithFunction(user_id: string) {
     try {
-      const response = (await Supabase.client
-        .rpc("get_user_by_userid_with_roles_policies", { input_user_id: user_id })) as PostgrestSingleResponse<UserWithRole>;
+      const response = (await Supabase.client.rpc(
+        "get_user_by_userid_with_roles_policies",
+        { input_user_id: user_id }
+      )) as PostgrestSingleResponse<UserWithRole>;
       if (response.error) {
         throw response.error;
       }
@@ -112,7 +117,7 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
-  async updateUser(user: CreateUserRequest): Promise<User> {
+  async updateUser(user: CreateUserRequest, password?: string): Promise<User> {
     try {
       const userRequest: UserRequest = {
         name: user.name,
@@ -121,17 +126,26 @@ export class UsersRepository implements IUsersRepository {
         user_id: user.user_id,
       };
 
-      console.log("User Request", user);
-      
-      const response = (await Supabase.client
+      const response = await fetch("/api/user/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user: userRequest, password: password }),
+      });
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const data = (await Supabase.client
         .from("users")
         .update(userRequest)
         .eq("id", user.id!)
         .select()) as SupabaseResponse<User>;
-      if (response.error) {
-        throw response.error;
+      if (data.error) {
+        throw data.error;
       }
-      return response.data[0];
+      return data.data[0];
     } catch (error) {
       console.log("Error", error);
       throw error;

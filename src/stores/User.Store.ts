@@ -67,7 +67,6 @@ const createUserStore = () => {
     get: async (id: string) => {
       try {
         const data = await usersRepository.getUser(id);
-        console.log("User", data);
         const dto = Dto.ToUserDto(data);
         return dto;
       } catch (error) {
@@ -97,6 +96,9 @@ const createUserStore = () => {
         if (user.email) {
           const check = await usersRepository.getUserByEmail(user.email);
           if (check && check.id !== user.id) {
+            throw new Error("User with email already exists");
+          }
+          if (check && check.id === user.id) {
             user.email = document.email;
           }
         }
@@ -105,10 +107,10 @@ const createUserStore = () => {
         }
         if (user.image.url instanceof File) {
           user.image.url = await ImageToUrl(user.image.url);
-        }else{
+        } else {
           user.image.url = document.image;
         }
-        const data = await usersRepository.updateUser(user);
+        const data = await usersRepository.updateUser(user, password);
         const dto = Dto.ToUserDto(data);
         update((store) => {
           store.data = store.data.map((user) => {

@@ -86,6 +86,7 @@
       editData={editCategory}
       {handleDelete}
       {tableHeaders}
+      pageName="category"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
     <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCategory} />

@@ -85,6 +85,7 @@
       editData={editTag}
       {handleDelete}
       {tableHeaders}
+      pageName="tag"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
     <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteTag} />

@@ -89,6 +89,7 @@
       editData={editAdvertisement}
       {handleDelete}
       {tableHeaders}
+      pageName="advertisement"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
     <ConfirmDeleteModal

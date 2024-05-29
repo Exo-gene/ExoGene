@@ -91,6 +91,7 @@
       editData={editCarousel}
       {handleDelete}
       {tableHeaders}
+      pageName="carousel"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
     <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteCarousel} />

@@ -86,6 +86,7 @@
       editData={editNews}
       {handleDelete}
       {tableHeaders}
+      pageName="news"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
     <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteNews} />

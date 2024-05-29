@@ -12,11 +12,15 @@
   import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
   import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import PaginationControls from "./PaginationControls.svelte";
+  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
+  import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
+  import { authStore } from "../../stores/Auth.Store";
 
   export let items: any = [];
   export let editData: any;
   export let handleDelete: (itemId: number) => void;
   export let tableHeaders;
+  export let pageName = "";
 </script>
 
 <Table>
@@ -57,15 +61,19 @@
         {/each}
 
         <TableBodyCell class="flex space-x-3">
-          <button
-            class="font-medium text-green-600 hover:underline dark:text-green-600"
-            on:click={() => editData(item.id)}
-          >
-            <IconEdit stroke={2} class="text-green-700" />
-          </button>
-          <button on:click={() => handleDelete(item.id)}
-            ><IconTrash stroke={2} class="text-red-700" /></button
-          >
+          {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
+            <button
+              class="font-medium text-green-600 hover:underline dark:text-green-600"
+              on:click={() => editData(item.id)}
+            >
+              <IconEdit stroke={2} class="text-green-700" />
+            </button>
+          {/if}
+          {#if checkUserPolicies([Policies[`DELETE_${pageName.toUpperCase()}`]], $authStore)}
+            <button on:click={() => handleDelete(item.id)}
+              ><IconTrash stroke={2} class="text-red-700" /></button
+            >
+          {/if}
         </TableBodyCell>
       </TableBodyRow>
     {/each}

@@ -108,7 +108,7 @@
       required
     />
   </div>
-  <!-- <div class="w-full flex flex-col h-auto gap-2">
+  <div class="w-full flex flex-col h-auto gap-2">
     <p class=" w-full h-4 rounded-lg dark:text-white">{"Password"}</p>
     <input
       type="password"
@@ -116,7 +116,7 @@
       bind:value={password}
       required
     />
-  </div> -->
+  </div>
   <div class="w-full flex flex-col h-auto gap-2">
     <p class=" w-full h-4 rounded-lg dark:text-white">{"Roles"}</p>
     <MultiSelect
