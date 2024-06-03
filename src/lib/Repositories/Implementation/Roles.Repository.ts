@@ -20,7 +20,7 @@ export class RolesRepository implements IRolesRepository {
         .insert(roleRequest)
         .select()) as SupabaseResponse<Role>;
 
-      console.log("Repository Data", response);
+      // console.log("Repository Data", response);
       if (response.error) {
         throw response.error;
       }
@@ -37,7 +37,7 @@ export class RolesRepository implements IRolesRepository {
       if (response.error) {
         throw response.error;
       }
-      console.log("Repository Data", response);
+      // console.log("Repository Data", response);
       return response;
     } catch (error) {
       throw error;

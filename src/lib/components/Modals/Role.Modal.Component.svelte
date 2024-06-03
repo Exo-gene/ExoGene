@@ -75,7 +75,7 @@
       // Push the policy to the category array
       groupedPolicies[categoryName].push(policy);
     });
-    console.log("GroupedPolicies", groupedPolicies);
+    // console.log("GroupedPolicies", groupedPolicies);
     return groupedPolicies;
   }
 

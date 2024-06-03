@@ -4,7 +4,7 @@ const storageRepository = new StorageRepository();
 
 export async function ImageToUrl(file: File): Promise<string> {
   try {
-    console.log(file);
+    // console.log(file);
     const storedImage = await storageRepository.createFile(file);
     return storedImage;
   } catch (error) {

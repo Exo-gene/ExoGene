@@ -64,7 +64,7 @@
 
     if (englishTranslation) {
       newsTitle = englishTranslation.title;
-      console.log("English News Title:", englishTranslation.title);
+      // console.log("English News Title:", englishTranslation.title);
     } else {
       console.log("No English translation available.");
     }

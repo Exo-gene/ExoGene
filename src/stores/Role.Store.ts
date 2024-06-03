@@ -28,7 +28,7 @@ const createRoleStore = () => {
           if (store.data) {
             store.data = [...store.data, dto];
             store.count = store.data.length;
-            console.log("Role DTO", store);
+            // console.log("Role DTO", store);
 
             return store;
           } else {
@@ -37,7 +37,7 @@ const createRoleStore = () => {
             return store;
           }
         });
-        console.log("Role DTO", dto);
+        // console.log("Role DTO", dto);
 
         return dto;
       } catch (error) {

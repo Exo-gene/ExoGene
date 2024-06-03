@@ -40,7 +40,7 @@ export class RoleActionsRepository implements IRoleActionsRepository {
       if (response.error) {
         throw response.error;
       }
-      console.log("Repository Data", response);
+      // console.log("Repository Data", response);
       return response;
     } catch (error) {
       throw error;
@@ -64,7 +64,7 @@ export class RoleActionsRepository implements IRoleActionsRepository {
     roleId: string
   ): Promise<SupabaseResponse<Role_Action>> {
     try {
-      console.log("Role ID", roleId);
+      // console.log("Role ID", roleId);
 
       const response = (await Supabase.client
         .from("role_actions")

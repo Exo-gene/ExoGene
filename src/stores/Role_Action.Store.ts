@@ -32,7 +32,7 @@ const createRoleActionStore = () => {
             roleAction.policies_action,
             roleAction.role_id
           );
-          console.log("Check", check);
+          // console.log("Check", check);
           if (check) {
             return null;
           }
@@ -142,7 +142,7 @@ const createRoleActionStore = () => {
         const data = await roleActionsRepository.updateRoleActionWithFunction(
           roleAction
         );
-        console.log("Data", data);
+        // console.log("Data", data);
         const dtos = data.map((entity) => Dto.ToRoleActionDto(entity));
         update((store) => {
           store.data = dtos;

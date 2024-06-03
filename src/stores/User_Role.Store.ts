@@ -22,7 +22,7 @@ const createUserRoleStore = () => {
     set: (data: Store<User_RoleDto>) => set(data),
     create: async (user_role: CreateUser_RoleRequest) => {
       try {
-        console.log("User Role", user_role);
+        // console.log("User Role", user_role);
 
         if (!user_role.role_id || user_role.role_id === "")
           throw new Error("Role ID is required");

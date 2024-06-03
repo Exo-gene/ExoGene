@@ -45,7 +45,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
         );
       }
     }
-    console.log("Password", password);
+    // console.log("Password", password);
 
     if (password || password !== "") {
       const response = (await admin.updateUserById(user.user_id, {

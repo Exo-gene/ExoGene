@@ -18,7 +18,7 @@
   let theme: any;
   onMount(() => {
     theme = localStorage.getItem("theme") || "light";
-    console.log("IN Navbar", $authStore);
+    // console.log("IN Navbar", $authStore);
   });
 
   $: currentLogo = theme === "light" ? logo_light : logo_dark;
@@ -28,19 +28,7 @@
     activeUrl = url;
   }
 
-  // function checkUserPolicy(premissions: number[]) {
-  //   // Check if $authStore and roles are defined
-  //   if ($authStore?.roles) {
-  //     for (const role of $authStore.roles) {
-  //       for (const policy of role.policies) {
-  //         if (premissions.includes(Number(policy.id))) {
-  //           return true;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return false;
-  // }
+ 
 </script>
 
 <div
@@ -62,7 +50,7 @@
     {#each navItems as item}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
-      {#if checkUserPolicies(item.policies,$authStore)}
+      {#if checkUserPolicies(item.policies, $authStore)}
         <div
           on:click={() => {
             updateActiveUrl(item.url);

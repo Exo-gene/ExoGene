@@ -33,7 +33,7 @@
       const user = await userStore.create(userOptions, password);
       if (user && user.id) {
         selected.forEach(async (role_id) => {
-          console.log("User Role",role_id);
+          // console.log("User Role",role_id);
           
           userRoleOptions.role_id = role_id;
           userRoleOptions.user_id = user.id;
@@ -44,7 +44,7 @@
       isLoading = false;
     }
   }
-  $: console.log(selected);
+  // $: console.log(selected);
 </script>
 
 <div class="w-full h-auto flex justify-center items-center mt-12">

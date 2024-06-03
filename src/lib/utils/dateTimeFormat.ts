@@ -4,7 +4,8 @@ export function toUtc(date: any) {
   const momentDate = moment.isMoment(date) ? date : moment(date);
   return momentDate.utc().format("YYYY-MM-DDTHH:mm:ss") + "Z";
 }
-export function toLocaleDate(date :any) {
+
+export function toLocaleDate(date: any) {
   return moment.utc(date).local().format("YYYY-MM-DD");
 }
 export function toLocaleDateFormat(date: any) {

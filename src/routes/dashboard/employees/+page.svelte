@@ -17,9 +17,9 @@
   import { authStore } from "../../../stores/Auth.Store";
 
   onMount(async () => {
-    console.log("Hello from the employees page");
+    // console.log("Hello from the employees page");
     await userStore.getAll();
-    console.log($userStore);
+    // console.log($userStore);
   });
 </script>
 

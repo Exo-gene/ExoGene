@@ -40,7 +40,7 @@ export class UsersRepository implements IUsersRepository {
       if (!data.success) {
         throw new Error(data.message);
       }
-      console.log("User", data);
+      // console.log("User", data);
       return data.user;
     } catch (error) {
       throw error;
@@ -54,7 +54,7 @@ export class UsersRepository implements IUsersRepository {
       if (response.error) {
         throw response.error;
       }
-      console.log("Users", response);
+      // console.log("Users", response);
 
       return response;
     } catch (error) {
