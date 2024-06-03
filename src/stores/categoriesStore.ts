@@ -16,13 +16,11 @@ const createCategoriesStore = () => {
       set(categories);
     },
     getCategoriesData: async (
-      supabase: SupabaseClient,
-      pageSize: number,
-      pageNum: number
+      supabase: SupabaseClient
     ) => {
       let query = await supabase.rpc("get_paginated_categories", {
-        page_size: pageSize,
-        page_num: pageNum,
+        page_size: 20,
+        page_num: 1,
       });
 
       if (query.error) {

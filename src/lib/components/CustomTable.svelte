@@ -11,7 +11,6 @@
   import { formatDateTime } from "$lib/utils/formatDateTime";
   import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
   import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
-  import PaginationControls from "./PaginationControls.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { authStore } from "../../stores/Auth.Store";

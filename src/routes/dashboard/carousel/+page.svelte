@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Policies } from './../../../lib/Models/Enums/Policies.Enum.Model';
+  import { Policies } from "./../../../lib/Models/Enums/Policies.Enum.Model";
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
@@ -83,8 +83,8 @@
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-    {#if checkUserPolicies([Policies.CREATE_CAROUSEL],$authStore)}
-    <InsertButton insertData={createCarousel} />
+    {#if checkUserPolicies([Policies.CREATE_CAROUSEL], $authStore)}
+      <InsertButton insertData={createCarousel} />
     {/if}
     <CustomTable
       items={carousel}
