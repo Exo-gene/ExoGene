@@ -20,7 +20,7 @@ const createEventStore = () => {
       pageSize: number,
       pageNum: number
     ) => {
-      let query = await supabase.rpc("get_paged_events", {
+      let query = await supabase.rpc("get_paginated_events", {
         page_size: pageSize,
         page_num: pageNum,
       });
@@ -29,7 +29,7 @@ const createEventStore = () => {
         console.error("Error fetching events:", query.error);
         set([]);
       } else {
-        set(query.data || []);
+         set(query.data || []);
       }
     },
     deleteEventData: async (eventId: number, supabase: SupabaseClient) => {
