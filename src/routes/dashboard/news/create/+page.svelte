@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { FormDataSet } from "./../../../../models/newsModel.ts";
   import TagDropdown from "./../../../../lib/components/TagDropdown.svelte";
-  import LanguageNewsTabs from "./../../../../lib/components/languageNewsTabs.svelte"; 
-  import { Button } from "flowbite-svelte";
+  import LanguageNewsTabs from "./../../../../lib/components/languageNewsTabs.svelte";
+  import { Button, Label, Input } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
@@ -21,8 +21,11 @@
   let showToast = false;
   let alertMessage = "";
   let showAlert = false;
+  let repeat_view_count: any;
+  let end_date: any;
+  let start_date: any;
+  let view_count_interval: any;
 
-  
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
@@ -42,8 +45,8 @@
     },
     {}
   );
-  
-function handleFileChange(
+
+  function handleFileChange(
     event: Event,
     language: string,
     type: "image" | "video"
@@ -72,12 +75,12 @@ function handleFileChange(
         formData[language].videoName = "";
       }
     }
-}
+  }
 
-function getRandomString(): string {
+  function getRandomString(): string {
     return uuidv4().split("-")[0];
-}
-async function uploadFile(
+  }
+  async function uploadFile(
     file: File,
     language: LanguageEnum
   ): Promise<string> {
@@ -98,35 +101,13 @@ async function uploadFile(
     }
 
     return `news-files/${fileName}`;
-}
-async function formSubmit() {
+  }
+  async function formSubmit() {
     let isValid = true;
     const uploads: Promise<string>[] = [];
     isLoading = true;
 
-    for (const language of languages) {
-      if (!formData[language].title?.trim()) {
-        formData[language].titleError = "Title is required";
-        isValid = false;
-      }
-      if (!formData[language].subtitle?.trim()) {
-        formData[language].subtitleError = "Subtitle is required";
-        isValid = false;
-      }
-      if (!formData[language].description?.trim()) {
-        formData[language].descriptionError = "Description is required";
-        isValid = false;
-      }
-      if (!formData[language].image && !formData[language].video) {
-        formData[language].fileError = "Either image or video is required";
-        isValid = false;
-      } else {
-        const file = formData[language].image || formData[language].video;
-        const uploadPromise = uploadFile(file as File, language);
-        uploads.push(uploadPromise);
-      }
-    }
-
+    // Validate selected categories
     if (!selectedCategoryIds.length) {
       alertMessage =
         "At least one category is required. Please select a category before submitting.";
@@ -139,6 +120,7 @@ async function formSubmit() {
       return;
     }
 
+    // Prepare data for insertion
     try {
       const filePaths = await Promise.all(uploads);
       const newsLanguageData = languages.map((language, index) => ({
@@ -149,7 +131,12 @@ async function formSubmit() {
         language,
       }));
 
-      const newsObject = {};
+      const newsObject = {
+        start_date: start_date,
+        end_date: end_date,
+        repeat_view_count: repeat_view_count,
+        view_count_interval: view_count_interval,
+      };
 
       const categoryData = selectedCategoryIds.map((id) => ({
         category_id: id,
@@ -159,15 +146,23 @@ async function formSubmit() {
       }));
       const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
 
-      await newsStore.insertNewsData(
-        newsObject,
-        newsLanguageData,
-        categoryData,
-        subcategoryData,
-        tagData,
-        supabase
+      // Call the stored procedure
+      const { data, error } = await supabase.rpc(
+        "insert_news_and_related_data",
+        {
+          news_data: newsObject,
+          news_lang_data: newsLanguageData,
+          category_ids_data: categoryData,
+          subcategory_ids_data: subcategoryData,
+          tag_ids_data: tagData,
+        }
       );
 
+      if (error) {
+        throw error;
+      }
+
+      // Show success toast
       showToast = true;
       setTimeout(() => {
         showToast = false;
@@ -178,14 +173,17 @@ async function formSubmit() {
     } finally {
       isLoading = false;
     }
-}
-function handleCategoryChange(event: CustomEvent<{ categoryIds: number[]; subcategoryIds: number[]; }>): void {
-  selectedCategoryIds = event.detail.categoryIds;
-  selectedSubCategoryIds = event.detail.subcategoryIds;
-}
-function handleTagChange(event: { detail: number[] }): void {
+  }
+
+  function handleCategoryChange(
+    event: CustomEvent<{ categoryIds: number[]; subcategoryIds: number[] }>
+  ): void {
+    selectedCategoryIds = event.detail.categoryIds;
+    selectedSubCategoryIds = event.detail.subcategoryIds;
+  }
+  function handleTagChange(event: { detail: number[] }): void {
     selectedTagIds = event.detail;
-}
+  }
 </script>
 
 <div
@@ -197,6 +195,41 @@ function handleTagChange(event: { detail: number[] }): void {
   </div>
   <div class="border rounded w-full">
     <LanguageNewsTabs {languages} {formData} {handleFileChange} />
+
+    <!-- ////////// -->
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <Label for="start_date" class="mb-2">Start Date</Label>
+        <Input type="date" id="start_date" bind:value={start_date} required />
+      </div>
+      <div>
+        <Label for="end_date" class="mb-2">End Date</Label>
+        <Input type="date" id="end_date" bind:value={end_date} required />
+      </div>
+    </div>
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <Label for="repeat_view_count" class="mb-2">Repeat View Count</Label>
+        <Input
+          type="number"
+          id="repeat_view_count"
+          bind:value={repeat_view_count}
+          required
+        />
+      </div>
+      <div>
+        <Label for="view_count_interval" class="mb-2"
+          >View Count Interval (HH:MM)</Label
+        >
+        <Input
+          type="time"
+          id="view_count_interval"
+          bind:value={view_count_interval}
+          required
+        />
+      </div>
+    </div>
+    <!--  -->
     <div class="flex justify-end p-4">
       <Button on:click={formSubmit}>Submit</Button>
     </div>

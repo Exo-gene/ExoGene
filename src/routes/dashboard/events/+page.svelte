@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { eventStore } from './../../../stores/eventsStore.ts';
+  import { eventStore } from "./../../../stores/eventsStore.ts";
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
   import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
-  import LoadingIndicator from "$lib/components/LoadingIndicator.svelte"; 
+  import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
 
@@ -85,7 +85,7 @@
       editData={editEvent}
       {handleDelete}
       {tableHeaders}
-      pageName="event"
+      pageName="events"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
     <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteEvent} />
