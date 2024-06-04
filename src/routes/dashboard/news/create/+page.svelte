@@ -6,11 +6,9 @@
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
-  // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
   import { LanguageEnum } from "../../../../models/languageEnum";
-  import { newsStore } from "../../../../stores/newsStore";
   import CategoryDropdownToNews from "$lib/components/CategoryDropdownToNews.svelte";
 
   let isLoading = false;
@@ -40,6 +38,7 @@
         titleError: "",
         subtitleError: "",
         descriptionError: "",
+        additionalFiles: [],
       };
       return acc;
     },
@@ -80,6 +79,7 @@
   function getRandomString(): string {
     return uuidv4().split("-")[0];
   }
+
   async function uploadFile(
     file: File,
     language: LanguageEnum
@@ -102,10 +102,45 @@
 
     return `news-files/${fileName}`;
   }
+
   async function formSubmit() {
     let isValid = true;
     const uploads: Promise<string>[] = [];
     isLoading = true;
+
+    for (const language of languages) {
+      // Validate title, subtitle, and description
+      if (!formData[language].title) {
+        formData[language].titleError = "Title is required";
+        isValid = false;
+      }
+      if (!formData[language].subtitle) {
+        formData[language].subtitleError = "Subtitle is required";
+        isValid = false;
+      }
+      if (!formData[language].description) {
+        formData[language].descriptionError = "Description is required";
+        isValid = false;
+      }
+
+      // Validate file
+      if (!formData[language].image && !formData[language].video) {
+        formData[language].fileError = "Either image or video is required";
+        isValid = false;
+      } else {
+        const file = formData[language].image || formData[language].video;
+        const uploadPromise = uploadFile(file as File, language);
+        uploads.push(uploadPromise);
+      }
+
+      // Upload additional files
+      for (const additionalFile of formData[language].additionalFiles) {
+        if (additionalFile.file instanceof File) {
+          const uploadPromise = uploadFile(additionalFile.file, language);
+          uploads.push(uploadPromise);
+        }
+      }
+    }
 
     // Validate selected categories
     if (!selectedCategoryIds.length) {
@@ -123,13 +158,32 @@
     // Prepare data for insertion
     try {
       const filePaths = await Promise.all(uploads);
-      const newsLanguageData = languages.map((language, index) => ({
-        file: filePaths[index],
-        title: formData[language].title as string,
-        subtitle: formData[language].subtitle as string,
-        description: formData[language].description as string,
-        language,
-      }));
+      let fileIndex = 0;
+
+      const newsLanguageData = languages.map((language) => {
+        const mainFile = filePaths[fileIndex++];
+        const additionalFiles = formData[language].additionalFiles.map(
+          (additionalFile) => {
+            if (additionalFile.file instanceof File) {
+              return {
+                file: filePaths[fileIndex++],
+                title: additionalFile.title,
+                language: additionalFile.language,
+              };
+            }
+            return additionalFile;
+          }
+        );
+
+        return {
+          file: mainFile,
+          title: formData[language].title as string,
+          subtitle: formData[language].subtitle as string,
+          description: formData[language].description as string,
+          language,
+          additional_files: additionalFiles,
+        };
+      });
 
       const newsObject = {
         start_date: start_date,
@@ -181,6 +235,7 @@
     selectedCategoryIds = event.detail.categoryIds;
     selectedSubCategoryIds = event.detail.subcategoryIds;
   }
+
   function handleTagChange(event: { detail: number[] }): void {
     selectedTagIds = event.detail;
   }
@@ -195,41 +250,44 @@
   </div>
   <div class="border rounded w-full">
     <LanguageNewsTabs {languages} {formData} {handleFileChange} />
-
     <!-- ////////// -->
-    <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <Label for="start_date" class="mb-2">Start Date</Label>
-        <Input type="date" id="start_date" bind:value={start_date} required />
+    <div class="p-4 flex space-x-3 border-t-2 rounded w-full">
+      <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label for="start_date" class="mb-2">Start Date</Label>
+          <Input type="date" id="start_date" bind:value={start_date} required />
+        </div>
+        <div>
+          <Label for="end_date" class="mb-2">End Date</Label>
+          <Input type="date" id="end_date" bind:value={end_date} required />
+        </div>
       </div>
-      <div>
-        <Label for="end_date" class="mb-2">End Date</Label>
-        <Input type="date" id="end_date" bind:value={end_date} required />
+      <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label for="repeat_view_count" class="mb-2">Repeat View Count</Label>
+          <Input
+            type="number"
+            id="repeat_view_count"
+            bind:value={repeat_view_count}
+            required
+          />
+        </div>
+        <div>
+          <Label for="view_count_interval" class="mb-2"
+            >View Count Interval (HH:MM)</Label
+          >
+          <Input
+            type="number"
+            id="view_count_interval"
+            bind:value={view_count_interval}
+            placeholder="HH:MM"
+            pattern="[0-9]{2}:[0-9]{2}"
+            required
+          />
+        </div>
       </div>
     </div>
-    <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <Label for="repeat_view_count" class="mb-2">Repeat View Count</Label>
-        <Input
-          type="number"
-          id="repeat_view_count"
-          bind:value={repeat_view_count}
-          required
-        />
-      </div>
-      <div>
-        <Label for="view_count_interval" class="mb-2"
-          >View Count Interval (HH:MM)</Label
-        >
-        <Input
-          type="time"
-          id="view_count_interval"
-          bind:value={view_count_interval}
-          required
-        />
-      </div>
-    </div>
-    <!--  -->
+    <!---->
     <div class="flex justify-end p-4">
       <Button on:click={formSubmit}>Submit</Button>
     </div>

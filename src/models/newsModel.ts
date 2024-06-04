@@ -9,7 +9,7 @@ export interface NewsModel {
   remainingItems: number;
 }
 export interface NewsDataModel {
-  id: number; 
+  id: number;
 }
 
 export interface NewsLanguageModel {
@@ -26,6 +26,12 @@ export interface NewsLanguageModelToUpdate {
   created_at: Date;
 }
 
+export interface AdditionalFile {
+  file: File | string;
+  title: string;
+  language: string;
+}
+
 export interface FormData {
   title: string | null;
   subtitle: string | null;
@@ -38,6 +44,7 @@ export interface FormData {
   titleError: string;
   subtitleError: string;
   descriptionError: string;
+  additionalFiles: AdditionalFile[];  
 }
 
 export interface FormDataSet {
