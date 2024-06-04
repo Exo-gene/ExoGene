@@ -2,18 +2,17 @@
   import type { FormDataSet } from "./../../../../models/newsModel.ts";
   import TagDropdown from "./../../../../lib/components/TagDropdown.svelte";
   import LanguageNewsTabs from "./../../../../lib/components/languageNewsTabs.svelte";
-  import { Button } from "flowbite-svelte";
+  import { Button, Input, Label } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
-  // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
-  import { LanguageEnum } from "../../../../models/languageEnum";
-  import { newsStore } from "../../../../stores/newsStore";
+  import { LanguageEnum } from "../../../../models/languageEnum"; 
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import CategoryDropdownToNews from "$lib/components/CategoryDropdownToNews.svelte";
+  import { toLocaleDateFormat, toUtc } from "$lib/utils/dateTimeFormat.js";
 
   let isLoading = false;
   let languages = Object.values(LanguageEnum);
@@ -23,6 +22,10 @@
   let showToast = false;
   let alertMessage = "";
   let showAlert = false;
+  let repeat_view_count: any;
+  let end_date: any;
+  let start_date: any;
+  let view_count_interval: any;
   const id = +$page.params.newsId;
 
   let formData: FormDataSet = languages.reduce(
@@ -39,41 +42,50 @@
         titleError: "",
         subtitleError: "",
         descriptionError: "",
+        additionalFiles: [],
       };
       return acc;
     },
     {}
   );
+  
+  
+onMount(async () => {
+  try {
+    isLoading = true;
+    const { data, error } = await supabase.rpc("get_news_by_id", {
+      news_id: id,
+    });
 
-  onMount(async () => {
-    try {
-      isLoading = true;
-      const { data, error } = await supabase.rpc("get_news_by_id", {
-        news_id: id,
-      });
+    if (error) {
+      console.error("Error fetching newsData:", error);
+      alertMessage = "Failed to load news data";
+      showAlert = true;
+      return;
+    }
 
-      if (error) {
-        console.error("Error fetching newsData:", error);
-        alertMessage = "Failed to load news data";
-        showAlert = true;
-        return;
-      }
+    if (data) {
+      // Populate main news data
+      start_date = toLocaleDateFormat(data.start_date);
+      end_date = toLocaleDateFormat(data.end_date);
+      repeat_view_count = data.repeat_view_count;
+      view_count_interval = data.view_count_interval;
 
-      if (data && Array.isArray(data.translations)) {
-        data.translations.forEach(
-          (translation: {
-            language: LanguageEnum;
-            title: string;
-            subtitle: string;
-            description: string;
-            file: string;
-          }) => {
-            const languageData = formData[translation.language];
-            if (languageData) {
-              languageData.title = translation.title;
-              languageData.subtitle = translation.subtitle;
-              languageData.description = translation.description;
+      // Populate categories, subcategories, and tags
+      selectedCategoryIds = data.categories?.map(c => c.category_id) || [];
+      selectedSubCategoryIds = data.subcategories?.map(sc => sc.subcategory_id) || [];
+      selectedTagIds = data.tags?.map(t => t.tag_id) || [];
 
+      // Populate translations
+      if (Array.isArray(data.translations)) {
+        data.translations.forEach(translation => {
+          const languageData = formData[translation.language];
+          if (languageData) {
+            languageData.title = translation.title;
+            languageData.subtitle = translation.subtitle;
+            languageData.description = translation.description;
+
+            if (translation.file) {
               const fileParts = translation.file.split("/");
               const fileName = fileParts[fileParts.length - 1];
               const fileExtension = fileName.split(".").pop()?.toLowerCase();
@@ -86,51 +98,75 @@
                 languageData.videoName = fileName;
               }
             }
-          }
-        );
 
-        // Use optional chaining and fallback to empty array
-        selectedCategoryIds =
-          data.categories?.map((c: any) => c.category_id).filter(Boolean) || [];
-        selectedSubCategoryIds =
-          data.subcategories
-            ?.map((sc: any) => sc.subcategory_id)
-            .filter(Boolean) || [];
-        selectedTagIds = data.tags?.map((t: any) => t.tag_id) || [];
+            console.log("languageData", translation.additional_files);
+            // Parse additional files
+            if (translation.additional_files && Array.isArray(translation.additional_files)) {
+              languageData.additionalFiles = translation.additional_files.map(fileItem => {
+                try {
+                  // Ensure that fileItem is a string
+                  if (typeof fileItem === 'string') {
+                    // Fix the incorrect format of additional_files
+                    const sanitizedString = fileItem
+                      .replace(/\\"/g, '"')  // Replace escaped quotes with regular quotes
+                      .replace(/^"/, '')    // Remove leading quote
+                      .replace(/"$/, '');   // Remove trailing quote
+                    return JSON.parse(sanitizedString);
+                  } else if (Array.isArray(fileItem)) {
+                    // Handle array of strings case
+                    const jsonString = `{${fileItem.join(',')}}`;
+                    return JSON.parse(jsonString);
+                  }
+                  return null;
+                } catch (e) {
+                  console.error("Error parsing additional file:", fileItem, e);
+                  return null;
+                }
+              }).filter(file => file !== null); // Filter out any failed parses
+            }
+          }
+        });
       }
-    } catch (err) {
-      console.error("Error in onMount:", err);
-      alertMessage = "An unexpected error occurred";
-      showAlert = true;
-    } finally {
-      isLoading = false;
     }
-  });
+  } catch (err) {
+    console.error("Error in onMount:", err);
+    alertMessage = "An unexpected error occurred";
+    showAlert = true;
+  } finally {
+    isLoading = false;
+  }
+});
+
+
 
   function handleFileChange(
     event: Event,
-    language: LanguageEnum,
+    language: string,
     type: "image" | "video"
-  ): void {
-    const input = event.target as HTMLInputElement;
-    if (input && input.files && input.files[0]) {
-      const file = input.files[0];
-      const newData = { ...formData[language] };
+  ) {
+    const input = event.target as HTMLInputElement | null;
 
+    if (input && input.files && input.files.length > 0) {
       if (type === "image") {
-        newData.image = file;
-        newData.imageName = file.name;
-        newData.video = null;
-        newData.videoName = "";
+        formData[language].image = input.files[0];
+        formData[language].imageName = input.files[0].name;
+        formData[language].video = null;
+        formData[language].videoName = "";
       } else if (type === "video") {
-        newData.video = file;
-        newData.videoName = file.name;
-        newData.image = null;
-        newData.imageName = "";
+        formData[language].video = input.files[0];
+        formData[language].videoName = input.files[0].name;
+        formData[language].image = null;
+        formData[language].imageName = "";
       }
-
-      newData.fileError = "";
-      formData = { ...formData, [language]: newData };
+      formData[language].fileError = "";
+    } else {
+      if (type === "image") {
+        formData[language].image = null;
+        formData[language].imageName = "";
+      } else if (type === "video") {
+        formData[language].video = null;
+        formData[language].videoName = "";
+      }
     }
   }
 
@@ -138,130 +174,189 @@
     return uuidv4().split("-")[0];
   }
 
-  async function uploadFile(file: File, language: LanguageEnum) {
-    if (!file || !file.name) {
-      console.error("No file provided for upload");
-      throw new Error("No file provided for upload");
-    }
-
-    const fileExtension = file.name.split(".").pop();
-    const randomPart = getRandomString();
-    const fileName = `${language}_${randomPart}.${fileExtension}`;
-
-    const { data, error } = await supabase.storage
-      .from("news-files")
-      .upload(fileName, file, { cacheControl: "3600", upsert: false });
-
-    if (error) {
-      console.error("Error uploading file:", error);
-      throw error;
-    }
-
-    return `news-files/${fileName}`;
+async function uploadFile(file: File, language: LanguageEnum): Promise<string> {
+  if (!file || !file.name) {
+    console.error("Invalid file:", file);
+    throw new Error("Invalid file provided for upload");
   }
 
-  async function formSubmit(): Promise<void> {
+  const fileExtension = file.name.split(".").pop() || "";
+  const randomPart = getRandomString();
+  const fileName = `${language}_${randomPart}.${fileExtension}`;
+
+  const { data, error } = await supabase.storage
+    .from("news-files")
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+
+  return `news-files/${fileName}`;
+}
+
+async function formSubmit() {
     let isValid = true;
-    const uploads: Promise<string | null>[] = [];
+    const uploads: Promise<string>[] = [];
     isLoading = true;
 
-    for (const language of languages) {
-      const langData = formData[language];
-      if (!langData.title?.trim()) {
-        langData.titleError = "Title is required";
-        isValid = false;
-      }
-      if (!langData.subtitle?.trim()) {
-        langData.subtitleError = "Subtitle is required";
-        isValid = false;
-      }
-      if (!langData.description?.trim()) {
-        langData.descriptionError = "Description is required";
-        isValid = false;
-      }
-
-      // Check if image or video fields are empty and if their names are also empty
-      if (
-        !langData.image &&
-        !langData.video &&
-        !langData.imageName &&
-        !langData.videoName
-      ) {
-        langData.fileError = "Either image or video is required";
-        isValid = false;
-      } else {
-        // Determine what to push to uploads based on the type of image or video
-        const file = langData.image || langData.video;
-        if (file instanceof File) {
-          // File needs to be uploaded
-          const uploadPromise = uploadFile(file, language).catch((error) => {
-            console.error("Upload failed for", language, ":", error);
-            return null;
-          });
-          uploads.push(uploadPromise);
-        } else if (typeof file === "string") {
-          // File is already a string (likely a path), push it wrapped in a Promise
-          uploads.push(Promise.resolve(file));
-        } else {
-          // No file is selected, and no path is provided
-          uploads.push(Promise.resolve(null));
-        }
-      }
+    // Validate the view_count_interval
+    const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timePattern.test(view_count_interval)) {
+        alertMessage = "Invalid time format for View Count Interval. Please use HH:MM.";
+        showAlert = true;
+        isLoading = false;
+        return;
     }
 
+    let isAnyLanguageFilled = false;
+
+    for (const language of languages) {
+        const { title, subtitle, description, image, video, additionalFiles } = formData[language];
+
+        if (title || subtitle || description || image || video) {
+            isAnyLanguageFilled = true;
+
+            if (!title) {
+                formData[language].titleError = "Title is required";
+                isValid = false;
+            }
+            if (!subtitle) {
+                formData[language].subtitleError = "Subtitle is required";
+                isValid = false;
+            }
+            if (!description) {
+                formData[language].descriptionError = "Description is required";
+                isValid = false;
+            }
+            if (!image && !video) {
+                formData[language].fileError = "Either image or video is required";
+                isValid = false;
+            } else {
+                const file = image || video;
+                const uploadPromise = uploadFile(file as File, language);
+                uploads.push(uploadPromise);
+            }
+
+            // Upload additional files
+            for (const additionalFile of additionalFiles) {
+                if (additionalFile.file instanceof File) {
+                    const uploadPromise = uploadFile(additionalFile.file, language);
+                    uploads.push(uploadPromise);
+                }
+            }
+        }
+    }
+
+    // Ensure at least one language has the required fields filled
+    if (!isAnyLanguageFilled) {
+        alertMessage = "At least one language must have title, subtitle, description, and file (image or video).";
+        showAlert = true;
+        isLoading = false;
+        return;
+    }
+
+    // Validate selected categories
     if (!selectedCategoryIds.length) {
-      alertMessage =
-        "At least one category is required. Please select a category before submitting.";
-      showAlert = true;
-      isValid = false;
+        alertMessage = "At least one category is required. Please select a category before submitting.";
+        showAlert = true;
+        isValid = false;
     }
 
     if (!isValid) {
-      isLoading = false;
-      return;
+        isLoading = false;
+        return;
     }
 
+    // Prepare data for insertion
     try {
-      const filePaths = await Promise.all(uploads);
-      const newsLanguageData = languages.map((language, index) => ({
-        file:
-          filePaths[index] ||
-          formData[language].image ||
-          formData[language].video,
-        title: formData[language].title!,
-        subtitle: formData[language].subtitle!,
-        description: formData[language].description!,
-        language,
-      }));
+        const filePaths = await Promise.all(uploads);
+        let fileIndex = 0;
 
-      const categoryData = selectedCategoryIds.map((id) => ({
-        category_id: id,
-      }));
-      const subcategoryData = selectedSubCategoryIds.map((id) => ({
-        subcategory_id: id,
-      }));
-      const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
+        const newsLanguageData = languages.map((language) => {
+            const mainFile = filePaths[fileIndex++];
+            const additionalFiles = formData[language].additionalFiles.map((additionalFile) => {
+                if (additionalFile.file instanceof File) {
+                    return {
+                        file: filePaths[fileIndex++],
+                        title: additionalFile.title,
+                        language: additionalFile.language,
+                    };
+                }
+                return additionalFile;
+            });
 
-      await newsStore.updateNewsData(
-        id,
-        newsLanguageData,
-        categoryData,
-        subcategoryData,
-        tagData,
-        supabase
-      );
+            // Properly format the additional_files as a JSON array string
+            const additionalFilesString = JSON.stringify(additionalFiles);
 
-      showToast = true;
-      setTimeout(() => {
-        showToast = false;
-        goto("/dashboard/news");
-      }, 3000);
+            return {
+                file: mainFile,
+                title: formData[language].title as string,
+                subtitle: formData[language].subtitle as string,
+                description: formData[language].description as string,
+                language,
+                additional_files: additionalFilesString, // Properly formatted JSON array string
+            };
+        });
+
+        const newsObject = {
+            start_date: toUtc(start_date),
+            end_date: toUtc(end_date),
+            repeat_view_count: repeat_view_count,
+            view_count_interval: view_count_interval,
+        };
+
+        const categoryData = selectedCategoryIds.map((id) => ({
+            category_id: id,
+        }));
+        const subcategoryData = selectedSubCategoryIds.map((id) => ({
+            subcategory_id: id,
+        }));
+        const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
+
+        // Call the stored procedure
+        const { data, error } = await supabase.rpc(
+            "update_news_and_related_data",
+            {
+                existing_news_id: id,
+                news_data: newsObject,
+                news_lang_data: newsLanguageData,
+                category_ids_data: categoryData,
+                subcategory_ids_data: subcategoryData,
+                tag_ids_data: tagData,
+            }
+        );
+
+        if (error) {
+            throw error;
+        }
+
+        // Show success toast
+        showToast = true;
+        setTimeout(() => {
+            showToast = false;
+            goto("/dashboard/news");
+        }, 3000);
     } catch (error) {
-      console.error("Error during news insertion:", error);
+        console.error("Error during news update:", error);
+        alertMessage = "An error occurred during the update. Please try again.";
+        showAlert = true;
     } finally {
-      isLoading = false;
+        isLoading = false;
     }
-  }
+}
+
+
+
+
+
+
+
+
 
   function handleCategoryChange(
     event: CustomEvent<{ categoryIds: number[]; subcategoryIds: number[] }>
@@ -291,6 +386,47 @@
     </div>
     <div class="border rounded w-full">
       <LanguageNewsTabs {languages} {formData} {handleFileChange} />
+        <!-- ////////// -->
+    <div class="p-4 flex space-x-3 border-t-2 rounded w-full">
+      <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label for="start_date" class="mb-2">Start Date</Label>
+          <Input type="date" id="start_date" bind:value={start_date} required />
+        </div>
+        <div>
+          <Label for="end_date" class="mb-2">End Date</Label>
+          <Input type="date" id="end_date" bind:value={end_date} required />
+        </div>
+      </div>
+      <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label for="repeat_view_count" class="mb-2">Repeat View Count</Label>
+          <Input
+            type="number"
+            id="repeat_view_count"
+            bind:value={repeat_view_count}
+            required
+          />
+        </div>
+      <div>
+  <Label for="view_count_interval" class="mb-2">View Count Interval (HH:MM)</Label>
+  <Input
+    type="text"
+    id="view_count_interval"
+    bind:value={view_count_interval}
+    placeholder="HH:MM"
+    pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+    required
+    class="w-full"
+  />
+  {#if view_count_interval && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(view_count_interval)}
+    <p class="text-red-500">Invalid time format. Please use HH:MM.</p>
+  {/if}
+</div>
+
+      </div>
+    </div>
+    <!---->
       <div class="flex justify-end p-4">
         <Button on:click={formSubmit}>Submit</Button>
       </div>
