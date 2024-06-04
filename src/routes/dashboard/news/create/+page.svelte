@@ -10,6 +10,7 @@
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import CategoryDropdownToNews from "$lib/components/CategoryDropdownToNews.svelte";
+  import { toUtc } from "$lib/utils/dateTimeFormat.js";
 
   let isLoading = false;
   let languages = Object.values(LanguageEnum);
@@ -210,8 +211,8 @@ async function formSubmit() {
         });
 
         const newsObject = {
-            start_date: start_date,
-            end_date: end_date,
+            start_date: toUtc(start_date),
+            end_date: toUtc(end_date),
             repeat_view_count: repeat_view_count,
             view_count_interval: view_count_interval,
         };
