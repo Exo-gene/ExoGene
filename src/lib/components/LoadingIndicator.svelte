@@ -1,5 +1,5 @@
 <script>
-  import imageGIF from "../images/animation.gif";
+  import imageGIF from "../images/animation1.gif";
 </script>
 
 <div class="gif-container">

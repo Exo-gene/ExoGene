@@ -29,7 +29,8 @@
     --tableHeaderColor: #012853;
     --tableHeaderBackgroundColor: #B0B0B0;   
     --tableColor: #181818;
-    --tableBackgroundColor: #D0D0D0;   
+    --tableBackgroundColor: #D0D0D0;  
+    --titleColor: #686868; 
 }
 
 [data-theme='dark'] {
@@ -47,6 +48,7 @@
      --tableHeaderColor: #012853;
     --tableHeaderBackgroundColor: #B0B0B0;  
     --tableColor: #181818;
-    --tableBackgroundColor: #D0D0D0;    
+    --tableBackgroundColor: #D0D0D0; 
+     --titleColor: #D0D0D0;    
     
 }
