@@ -18,7 +18,7 @@
 
     const params = {
       page_num: 1,
-      page_size: 3,
+      page_size: 8,
       filter_title: titleFilter || undefined,
     };
 
@@ -46,11 +46,17 @@
     searchTerm = item.title;
 
     // Using event dispatcher instead of direct call
-    dispatch('newsChange', item.id);
+    dispatch("newsChange", item.id);
   }
 
   function isSelected(id: number): boolean {
     return selectedNewsId === id;
+  }
+
+  function truncate(text: string, maxLength: number) {
+    return text.length > maxLength
+      ? text.substring(0, maxLength) + "..."
+      : text;
   }
 </script>
 
@@ -73,10 +79,9 @@
         class="flex items-center justify-between"
         on:click={(event) => handleSelection(item, event)}
       >
-        {item.title}
+        {truncate(item.title, 30)}
         {isSelected(item.id) ? " (Selected)" : ""}
       </DropdownItem>
     {/each}
   </Dropdown>
 </div>
-

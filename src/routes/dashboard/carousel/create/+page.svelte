@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FullPageLoadingIndicator from './../../../../lib/components/FullPageLoadingIndicator.svelte';
+  import FullPageLoadingIndicator from "./../../../../lib/components/FullPageLoadingIndicator.svelte";
   import { carouselStore } from "../../../../stores/carouselStore";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { supabase } from "$lib/supabaseClient";
@@ -12,6 +12,7 @@
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
   import type { FormDataSet } from "../../../../models/carouselModel";
+  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
 
   let selectedNewsId: number = 0;
   let showAlert = false;
@@ -20,9 +21,7 @@
   let isLoading = false;
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
 
- 
-
- let formData: FormDataSet = languages.reduce(
+  let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
         image: null,
@@ -32,7 +31,7 @@
         title: "",
         description: "",
         descriptionError: "",
-        news_id:null,
+        news_id: null,
       };
       return acc;
     },
@@ -40,7 +39,7 @@
   );
 
   function handleFileChange(event: Event, language: LanguageEnum) {
-     const input = event.target as HTMLInputElement;  
+    const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       formData[language].image = input.files[0];
       formData[language].imageName = input.files[0].name;
@@ -89,38 +88,38 @@
       isValid = false;
     }
 
-  for (const language of languages) {
-  if (!formData[language].image) {
-    formData[language].imageError = "Image is required";
-    isValid = false;
-  }
-  if (!formData[language].title.trim()) {
-    formData[language].titleError = "Title is required";
-    isValid = false;
-  }
-  if (!formData[language].description.trim()) {
-    formData[language].descriptionError = "Description is required";
-    isValid = false;
-  }
-  if (isValid && formData[language].image) {
-    // Ensure the image is not null and is a File before calling uploadFile
-    const file = formData[language].image;
-    if (file instanceof File) {
-      const uploadPromise = uploadFile(file, language);
-      uploads.push(uploadPromise);
-    } else {
-       console.error(`Expected a File, but received ${typeof file}`);
-      isValid = false;
+    for (const language of languages) {
+      if (!formData[language].image) {
+        formData[language].imageError = "Image is required";
+        isValid = false;
+      }
+      if (!formData[language].title.trim()) {
+        formData[language].titleError = "Title is required";
+        isValid = false;
+      }
+      if (!formData[language].description.trim()) {
+        formData[language].descriptionError = "Description is required";
+        isValid = false;
+      }
+      if (isValid && formData[language].image) {
+        // Ensure the image is not null and is a File before calling uploadFile
+        const file = formData[language].image;
+        if (file instanceof File) {
+          const uploadPromise = uploadFile(file, language);
+          uploads.push(uploadPromise);
+        } else {
+          console.error(`Expected a File, but received ${typeof file}`);
+          isValid = false;
+        }
+      }
     }
-  }
-}
 
-if (!isValid) {
-  isLoading = false;
-  return;
-}
+    if (!isValid) {
+      isLoading = false;
+      return;
+    }
 
-     if (!isValid) {
+    if (!isValid) {
       isLoading = false;
       return;
     }
@@ -134,11 +133,11 @@ if (!isValid) {
         title: formData[language].title,
         description: formData[language].description,
         language,
-        }));
+      }));
 
       const carouselObject = {
         news_id: selectedNewsId,
-       };
+      };
 
       await carouselStore.insertCarouselData(
         carouselObject,
@@ -153,108 +152,137 @@ if (!isValid) {
       }, 3000);
     } catch (error) {
       console.error("Error during carousel insertion:", error);
-     } finally {
+    } finally {
       isLoading = false;
     }
   }
 
   function onNewsSelected(event: any) {
-    selectedNewsId =event.detail  ;
+    selectedNewsId = event.detail;
     showAlert = false;
   }
 </script>
 
- {#if isLoading}
-    <FullPageLoadingIndicator />
-  {:else}
-<div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
-  <NewsDropdown {selectedNewsId} on:newsChange={onNewsSelected} />
-  <div class="border rounded w-full">
-    <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
-      {#each languages as language}
-        <TabItem title={language} open={language === LanguageEnum.EN}>
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            <b>Enter data for {language}:</b>
-            <div class="mb-6 flex justify-between items-start">
-              <div class="mb-6">
-                <div>
-                  <Label for={`title-${language}`}>Title</Label>
-                  <div class:error={formData[language].titleError}>
-                    <Input
-                      id={`title-${language}`}
-                      bind:value={formData[language].title}
-                      placeholder="Enter title"
-                      on:input={() => {
-                        formData[language].titleError = "";
-                      }}
-                    />
+{#if isLoading}
+  <FullPageLoadingIndicator />
+{:else}
+  <div
+    class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto"
+  >
+    <NewsDropdown {selectedNewsId} on:newsChange={onNewsSelected} />
+    <div class="w-full">
+      <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
+        {#each languages as language}
+          <TabItem title={language} open={language === LanguageEnum.EN}>
+            <div class="text-sm">
+              <b style="color: var(--titleColor);">Enter data for {language}:</b
+              >
+              <div class="mb-6 flex justify-between items-start">
+                <div class="my-4">
+                  <div class="mb-4">
+                    <Label
+                      style="color: var(--titleColor);"
+                      for={`title-${language}`}>Title</Label
+                    >
+                    <div class:error={formData[language].titleError}>
+                      <Input
+                        id={`title-${language}`}
+                        bind:value={formData[language].title}
+                        placeholder="Enter title"
+                        on:input={() => {
+                          formData[language].titleError = "";
+                        }}
+                      />
+                    </div>
+                    {#if formData[language].titleError}
+                      <p class="text-red-500">
+                        {formData[language].titleError}
+                      </p>
+                    {/if}
                   </div>
-                  {#if formData[language].titleError}
-                    <p class="text-red-500">{formData[language].titleError}</p>
-                  {/if}
-                </div>
-                <div>
-                  <Label for={`description-${language}`}>Description</Label>
-                  <div class:error={formData[language].descriptionError}>
-                    <Input
-                      id={`description-${language}`}
-                      bind:value={formData[language].description}
-                      placeholder="Enter description"
-                      on:input={() => {
-                        formData[language].descriptionError = "";
-                      }}
-                    />
+                  <div class="mb-4">
+                    <Label
+                      style="color: var(--titleColor);"
+                      for={`description-${language}`}>Description</Label
+                    >
+                    <div class:error={formData[language].descriptionError}>
+                      <Input
+                        id={`description-${language}`}
+                        bind:value={formData[language].description}
+                        placeholder="Enter description"
+                        on:input={() => {
+                          formData[language].descriptionError = "";
+                        }}
+                      />
+                    </div>
+                    {#if formData[language].descriptionError}
+                      <p class="text-red-500">
+                        {formData[language].descriptionError}
+                      </p>
+                    {/if}
                   </div>
-                  {#if formData[language].descriptionError}
-                    <p class="text-red-500">
-                      {formData[language].descriptionError}
-                    </p>
-                  {/if}
-                </div>
-                <div>
-                  <Label for={`image-${language}`}>Image</Label>
-                  <Input
-                   type="file"
-                   accept="image/*"
-                    id={`image-${language}`}
-                    on:change={(event) => handleFileChange(event, language)}
-                  />
-                  {#if formData[language].imageName}
-                    <span>Selected File: {formData[language].imageName}</span>
-                  {/if}
+                  <div class="mb-4">
+                    <label class="text-titleColor" for={`image-${language}`}
+                      >Image</label
+                    >
+                    <div
+                      class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id={`image-${language}`}
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        on:change={(event) => handleFileChange(event, language)}
+                      />
+                      <div
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                      >
+                        <IconUpload
+                          stroke={2}
+                          class="mx-auto mb-4 w-12 h-12 "
+                          style="color: var(--titleColor); "
+                        />
 
-                  {#if formData[language].imageError}
-                    <p class="text-red-500">{formData[language].imageError}</p>
-                  {/if}
+                        <p style="color: var(--titleColor);">
+                          Drop your image here, or <span
+                            class="text-titleColor underline">browse</span
+                          >
+                        </p>
+                        <p class="text-gray-500 text-sm mt-2">
+                          Supports: JPG, JPEG2000, PNG
+                        </p>
+                      </div>
+                    </div>
+
+                    {#if formData[language].imageName}
+                      <span class="block mt-2 text-sm text-gray-700"
+                        >Selected File: {formData[language].imageName}</span
+                      >
+                    {/if}
+
+                    {#if formData[language].imageError}
+                      <p class="text-red-500 mt-2">
+                        {formData[language].imageError}
+                      </p>
+                    {/if}
+                  </div>
                 </div>
-              </div>
-              <div class="">
-                <!-- {#if formData[language]?.imageName}
-                  <img
-                    src={`${formData[language].image}`}
-                    alt={`Image for ${language}`}
-                    class="w-44 h-44 mt-2"
-                  />
-                {/if} -->
               </div>
             </div>
-          </div>
-        </TabItem>
-      {/each}
-    </Tabs>
-    <div class="flex justify-end p-4">
-      <Button on:click={formSubmit}>Submit</Button>
+          </TabItem>
+        {/each}
+      </Tabs>
+      <div class="flex justify-end p-4">
+        <Button on:click={formSubmit}>Submit</Button>
+      </div>
     </div>
   </div>
-</div>
 {/if}
-
 
 {#if showToast}
-  <Toast message="New news has been inserted successfully" type="success" />
+  <Toast message="New carousel has been inserted successfully" type="success" />
 {/if}
-
-
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   {#if showAlert}

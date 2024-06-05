@@ -10,6 +10,7 @@ export interface NewsModel {
 }
 export interface NewsDataModel {
   id: number;
+  title: string;
 }
 
 export interface NewsLanguageModel {
@@ -44,7 +45,7 @@ export interface FormData {
   titleError: string;
   subtitleError: string;
   descriptionError: string;
-  additionalFiles: AdditionalFile[];  
+  additionalFiles: AdditionalFile[];
 }
 
 export interface FormDataSet {

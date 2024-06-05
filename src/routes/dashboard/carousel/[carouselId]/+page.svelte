@@ -13,6 +13,7 @@
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
   import { page } from "$app/stores";
   import type { FormDataSet } from "../../../../models/carouselModel";
+  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
 
   const id = +$page.params.carouselId;
   let selectedNewsId: number = 0;
@@ -263,16 +264,19 @@
       >{newsTitle}</a
     >
   </div>
-  <div class="border rounded w-full">
+  <div class="w-full">
     <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
       {#each languages as language}
         <TabItem title={language} open={language === LanguageEnum.EN}>
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            <b>Enter data for {language}:</b>
+            <b style="color: var(--titleColor);">Enter data for {language}:</b>
             <div class="mb-6 flex justify-between items-start">
-              <div class="mb-6">
-                <div>
-                  <Label for={`title-${language}`}>Title</Label>
+              <div class="my-4">
+                <div class="mb-4">
+                  <Label
+                    style="color: var(--titleColor);"
+                    for={`title-${language}`}>Title</Label
+                  >
                   <div class:error={formData[language].titleError}>
                     <Input
                       id={`title-${language}`}
@@ -287,8 +291,11 @@
                     <p class="text-red-500">{formData[language].titleError}</p>
                   {/if}
                 </div>
-                <div>
-                  <Label for={`description-${language}`}>Description</Label>
+                <div class="mb-4">
+                  <Label
+                    style="color: var(--titleColor);"
+                    for={`description-${language}`}>Description</Label
+                  >
                   <div class:error={formData[language].descriptionError}>
                     <Input
                       id={`description-${language}`}
@@ -305,31 +312,58 @@
                     </p>
                   {/if}
                 </div>
-                <div class="mb-6 flex justify-between items-start">
-                  <div>
-                    <Label for={`image-${language}`}>Image</Label>
-                    <Input
+                <div class="mb-4">
+                  <label class="text-titleColor" for={`image-${language}`}
+                    >Image</label
+                  >
+                  <div
+                    class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                  >
+                    <input
                       type="file"
                       accept="image/*"
                       id={`image-${language}`}
+                      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       on:change={(event) => handleFileChange(event, language)}
                     />
-                    {#if formData[language]?.imageName}
-                      <span>Selected File: {formData[language].imageName}</span>
-                    {/if}
-                    {#if formData[language]?.imageError}
-                      <p class="text-red-500">
-                        {formData[language].imageError}
+                    <div
+                      class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                    >
+                      <IconUpload
+                        stroke={2}
+                        class="mx-auto mb-4 w-12 h-12 "
+                        style="color: var(--titleColor); "
+                      />
+
+                      <p style="color: var(--titleColor);">
+                        Drop your image here, or <span
+                          class="text-titleColor underline">browse</span
+                        >
                       </p>
-                    {/if}
+                      <p class="text-gray-500 text-sm mt-2">
+                        Supports: JPG, JPEG2000, PNG
+                      </p>
+                    </div>
                   </div>
+
+                  {#if formData[language].imageName}
+                    <span class="block mt-2 text-sm text-gray-700"
+                      >Selected File: {formData[language].imageName}</span
+                    >
+                  {/if}
+
+                  {#if formData[language].imageError}
+                    <p class="text-red-500 mt-2">
+                      {formData[language].imageError}
+                    </p>
+                  {/if}
                 </div>
                 <div class="">
                   {#if formData[language]?.imageName}
                     <img
                       src={getObjectUrl(formData[language].image)}
                       alt={`Image for ${language}`}
-                      class="w-44 h-44 mt-2"
+                      class="w-44 h-44 mt-2 rounded"
                     />
                   {/if}
                 </div>
