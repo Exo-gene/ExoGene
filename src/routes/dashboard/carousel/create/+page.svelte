@@ -280,6 +280,8 @@
   </div>
 {/if}
 
+
+
 {#if showToast}
   <Toast message="New carousel has been inserted successfully" type="success" />
 {/if}
