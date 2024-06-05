@@ -8,7 +8,7 @@
   import Toast from "$lib/components/Toast.svelte";
   import { v4 as uuidv4 } from "uuid";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
-  import { LanguageEnum } from "../../../../models/languageEnum"; 
+  import { LanguageEnum } from "../../../../models/languageEnum";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import CategoryDropdownToNews from "$lib/components/CategoryDropdownToNews.svelte";
@@ -48,96 +48,103 @@
     },
     {}
   );
-  
-  
-onMount(async () => {
-  try {
-    isLoading = true;
-    const { data, error } = await supabase.rpc("get_news_by_id", {
-      news_id: id,
-    });
 
-    if (error) {
-      console.error("Error fetching newsData:", error);
-      alertMessage = "Failed to load news data";
-      showAlert = true;
-      return;
-    }
+  onMount(async () => {
+    try {
+      isLoading = true;
+      const { data, error } = await supabase.rpc("get_news_by_id", {
+        news_id: id,
+      });
 
-    if (data) {
-      // Populate main news data
-      start_date = toLocaleDateFormat(data.start_date);
-      end_date = toLocaleDateFormat(data.end_date);
-      repeat_view_count = data.repeat_view_count;
-      view_count_interval = data.view_count_interval;
+      if (error) {
+        console.error("Error fetching newsData:", error);
+        alertMessage = "Failed to load news data";
+        showAlert = true;
+        return;
+      }
 
-      // Populate categories, subcategories, and tags
-      selectedCategoryIds = data.categories?.map(c => c.category_id) || [];
-      selectedSubCategoryIds = data.subcategories?.map(sc => sc.subcategory_id) || [];
-      selectedTagIds = data.tags?.map(t => t.tag_id) || [];
+      if (data) {
+        // Populate main news data
+        start_date = toLocaleDateFormat(data.start_date);
+        end_date = toLocaleDateFormat(data.end_date);
+        repeat_view_count = data.repeat_view_count;
+        view_count_interval = data.view_count_interval;
 
-      // Populate translations
-      if (Array.isArray(data.translations)) {
-        data.translations.forEach(translation => {
-          const languageData = formData[translation.language];
-          if (languageData) {
-            languageData.title = translation.title;
-            languageData.subtitle = translation.subtitle;
-            languageData.description = translation.description;
+        // Populate categories, subcategories, and tags
+        selectedCategoryIds = data.categories?.map((c) => c.category_id) || [];
+        selectedSubCategoryIds =
+          data.subcategories?.map((sc) => sc.subcategory_id) || [];
+        selectedTagIds = data.tags?.map((t) => t.tag_id) || [];
 
-            if (translation.file) {
-              const fileParts = translation.file.split("/");
-              const fileName = fileParts[fileParts.length - 1];
-              const fileExtension = fileName.split(".").pop()?.toLowerCase();
+        // Populate translations
+        if (Array.isArray(data.translations)) {
+          data.translations.forEach((translation) => {
+            const languageData = formData[translation.language];
+            if (languageData) {
+              languageData.title = translation.title;
+              languageData.subtitle = translation.subtitle;
+              languageData.description = translation.description;
 
-              if (["jpg", "png", "jpeg"].includes(fileExtension!)) {
-                languageData.image = translation.file;
-                languageData.imageName = fileName;
-              } else if (["mp4", "avi"].includes(fileExtension!)) {
-                languageData.video = translation.file;
-                languageData.videoName = fileName;
+              if (translation.file) {
+                const fileParts = translation.file.split("/");
+                const fileName = fileParts[fileParts.length - 1];
+                const fileExtension = fileName.split(".").pop()?.toLowerCase();
+
+                if (["jpg", "png", "jpeg"].includes(fileExtension!)) {
+                  languageData.image = translation.file;
+                  languageData.imageName = fileName;
+                } else if (["mp4", "avi"].includes(fileExtension!)) {
+                  languageData.video = translation.file;
+                  languageData.videoName = fileName;
+                }
+              }
+
+              console.log("languageData", translation.additional_files);
+              // Parse additional files
+              if (
+                translation.additional_files &&
+                Array.isArray(translation.additional_files)
+              ) {
+                languageData.additionalFiles = translation.additional_files
+                  .map((fileItem) => {
+                    try {
+                      // Ensure that fileItem is a string
+                      if (typeof fileItem === "string") {
+                        // Fix the incorrect format of additional_files
+                        const sanitizedString = fileItem
+                          .replace(/\\"/g, '"') // Replace escaped quotes with regular quotes
+                          .replace(/^"/, "") // Remove leading quote
+                          .replace(/"$/, ""); // Remove trailing quote
+                        return JSON.parse(sanitizedString);
+                      } else if (Array.isArray(fileItem)) {
+                        // Handle array of strings case
+                        const jsonString = `{${fileItem.join(",")}}`;
+                        return JSON.parse(jsonString);
+                      }
+                      return null;
+                    } catch (e) {
+                      console.error(
+                        "Error parsing additional file:",
+                        fileItem,
+                        e
+                      );
+                      return null;
+                    }
+                  })
+                  .filter((file) => file !== null); // Filter out any failed parses
               }
             }
-
-            console.log("languageData", translation.additional_files);
-            // Parse additional files
-            if (translation.additional_files && Array.isArray(translation.additional_files)) {
-              languageData.additionalFiles = translation.additional_files.map(fileItem => {
-                try {
-                  // Ensure that fileItem is a string
-                  if (typeof fileItem === 'string') {
-                    // Fix the incorrect format of additional_files
-                    const sanitizedString = fileItem
-                      .replace(/\\"/g, '"')  // Replace escaped quotes with regular quotes
-                      .replace(/^"/, '')    // Remove leading quote
-                      .replace(/"$/, '');   // Remove trailing quote
-                    return JSON.parse(sanitizedString);
-                  } else if (Array.isArray(fileItem)) {
-                    // Handle array of strings case
-                    const jsonString = `{${fileItem.join(',')}}`;
-                    return JSON.parse(jsonString);
-                  }
-                  return null;
-                } catch (e) {
-                  console.error("Error parsing additional file:", fileItem, e);
-                  return null;
-                }
-              }).filter(file => file !== null); // Filter out any failed parses
-            }
-          }
-        });
+          });
+        }
       }
+    } catch (err) {
+      console.error("Error in onMount:", err);
+      alertMessage = "An unexpected error occurred";
+      showAlert = true;
+    } finally {
+      isLoading = false;
     }
-  } catch (err) {
-    console.error("Error in onMount:", err);
-    alertMessage = "An unexpected error occurred";
-    showAlert = true;
-  } finally {
-    isLoading = false;
-  }
-});
-
-
+  });
 
   function handleFileChange(
     event: Event,
@@ -174,189 +181,209 @@ onMount(async () => {
     return uuidv4().split("-")[0];
   }
 
-async function uploadFile(file: File, language: LanguageEnum): Promise<string> {
-  if (!file || !file.name) {
-    console.error("Invalid file:", file);
-    throw new Error("Invalid file provided for upload");
+  async function uploadFile(
+    file: File,
+    language: LanguageEnum
+  ): Promise<string> {
+    if (!file || !file.name) {
+      console.error("Invalid file:", file);
+      throw new Error("Invalid file provided for upload");
+    }
+
+    const fileExtension = file.name.split(".").pop() || "";
+    const randomPart = getRandomString();
+    const fileName = `${language}_${randomPart}.${fileExtension}`;
+
+    const { data, error } = await supabase.storage
+      .from("news-files")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+
+    return `news-files/${fileName}`;
   }
 
-  const fileExtension = file.name.split(".").pop() || "";
-  const randomPart = getRandomString();
-  const fileName = `${language}_${randomPart}.${fileExtension}`;
-
-  const { data, error } = await supabase.storage
-    .from("news-files")
-    .upload(fileName, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-
-  if (error) {
-    console.error("Error uploading file:", error);
-    throw error;
-  }
-
-  return `news-files/${fileName}`;
-}
-
-async function formSubmit() {
+  async function formSubmit() {
     let isValid = true;
     const uploads: Promise<string>[] = [];
     isLoading = true;
 
-    // Validate the view_count_interval
+    // Validate the view_count_interval if provided
     const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (!timePattern.test(view_count_interval)) {
-        alertMessage = "Invalid time format for View Count Interval. Please use HH:MM.";
+    if (view_count_interval && !timePattern.test(view_count_interval)) {
+      alertMessage =
+        "Invalid time format for View Count Interval. Please use HH:MM.";
+      showAlert = true;
+      isLoading = false;
+      return;
+    }
+
+    // Validate start and end dates, repeat view count, and view count interval
+    if (start_date || end_date || repeat_view_count || view_count_interval) {
+      if (
+        !start_date ||
+        !end_date ||
+        !repeat_view_count ||
+        !view_count_interval
+      ) {
+        alertMessage =
+          "If Start Date is chosen, End Date, Repeat View Count, and View Count Interval must also be chosen.";
         showAlert = true;
         isLoading = false;
         return;
+      }
     }
 
     let isAnyLanguageFilled = false;
 
     for (const language of languages) {
-        const { title, subtitle, description, image, video, additionalFiles } = formData[language];
+      const { title, subtitle, description, image, video, additionalFiles } =
+        formData[language];
 
-        if (title || subtitle || description || image || video) {
-            isAnyLanguageFilled = true;
+      if (title || subtitle || description || image || video) {
+        isAnyLanguageFilled = true;
 
-            if (!title) {
-                formData[language].titleError = "Title is required";
-                isValid = false;
-            }
-            if (!subtitle) {
-                formData[language].subtitleError = "Subtitle is required";
-                isValid = false;
-            }
-            if (!description) {
-                formData[language].descriptionError = "Description is required";
-                isValid = false;
-            }
-            if (!image && !video) {
-                formData[language].fileError = "Either image or video is required";
-                isValid = false;
-            } else {
-                const file = image || video;
-                const uploadPromise = uploadFile(file as File, language);
-                uploads.push(uploadPromise);
-            }
-
-            // Upload additional files
-            for (const additionalFile of additionalFiles) {
-                if (additionalFile.file instanceof File) {
-                    const uploadPromise = uploadFile(additionalFile.file, language);
-                    uploads.push(uploadPromise);
-                }
-            }
+        if (!title) {
+          formData[language].titleError = "Title is required";
+          isValid = false;
         }
+        if (!subtitle) {
+          formData[language].subtitleError = "Subtitle is required";
+          isValid = false;
+        }
+        if (!description) {
+          formData[language].descriptionError = "Description is required";
+          isValid = false;
+        }
+        if (!image && !video) {
+          formData[language].fileError = "Either image or video is required";
+          isValid = false;
+        } else {
+          const file = image || video;
+          if (file instanceof File) {
+            const uploadPromise = uploadFile(file, language);
+            uploads.push(uploadPromise);
+          }
+        }
+
+        // Upload additional files
+        for (const additionalFile of additionalFiles) {
+          if (additionalFile.file instanceof File) {
+            const uploadPromise = uploadFile(additionalFile.file, language);
+            uploads.push(uploadPromise);
+          }
+        }
+      }
     }
 
-    // Ensure at least one language has the required fields filled
     if (!isAnyLanguageFilled) {
-        alertMessage = "At least one language must have title, subtitle, description, and file (image or video).";
-        showAlert = true;
-        isLoading = false;
-        return;
+      alertMessage =
+        "At least one language must have title, subtitle, description, and file (image or video).";
+      showAlert = true;
+      isLoading = false;
+      return;
     }
 
     // Validate selected categories
     if (!selectedCategoryIds.length) {
-        alertMessage = "At least one category is required. Please select a category before submitting.";
-        showAlert = true;
-        isValid = false;
+      alertMessage =
+        "At least one category is required. Please select a category before submitting.";
+      showAlert = true;
+      isValid = false;
     }
 
     if (!isValid) {
-        isLoading = false;
-        return;
+      isLoading = false;
+      return;
     }
 
     // Prepare data for insertion
     try {
-        const filePaths = await Promise.all(uploads);
-        let fileIndex = 0;
+      const filePaths = await Promise.all(uploads);
+      let fileIndex = 0;
 
-        const newsLanguageData = languages.map((language) => {
-            const mainFile = filePaths[fileIndex++];
-            const additionalFiles = formData[language].additionalFiles.map((additionalFile) => {
-                if (additionalFile.file instanceof File) {
-                    return {
-                        file: filePaths[fileIndex++],
-                        title: additionalFile.title,
-                        language: additionalFile.language,
-                    };
-                }
-                return additionalFile;
-            });
-
-            // Properly format the additional_files as a JSON array string
-            const additionalFilesString = JSON.stringify(additionalFiles);
-
-            return {
-                file: mainFile,
-                title: formData[language].title as string,
-                subtitle: formData[language].subtitle as string,
-                description: formData[language].description as string,
-                language,
-                additional_files: additionalFilesString, // Properly formatted JSON array string
-            };
-        });
-
-        const newsObject = {
-            start_date: toUtc(start_date),
-            end_date: toUtc(end_date),
-            repeat_view_count: repeat_view_count,
-            view_count_interval: view_count_interval,
-        };
-
-        const categoryData = selectedCategoryIds.map((id) => ({
-            category_id: id,
-        }));
-        const subcategoryData = selectedSubCategoryIds.map((id) => ({
-            subcategory_id: id,
-        }));
-        const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
-
-        // Call the stored procedure
-        const { data, error } = await supabase.rpc(
-            "update_news_and_related_data",
-            {
-                existing_news_id: id,
-                news_data: newsObject,
-                news_lang_data: newsLanguageData,
-                category_ids_data: categoryData,
-                subcategory_ids_data: subcategoryData,
-                tag_ids_data: tagData,
+      const newsLanguageData = languages.map((language) => {
+        const mainFile = filePaths[fileIndex++];
+        const additionalFiles = formData[language].additionalFiles.map(
+          (additionalFile) => {
+            if (additionalFile.file instanceof File) {
+              return {
+                file: filePaths[fileIndex++],
+                title: additionalFile.title,
+                language: additionalFile.language,
+              };
             }
+            return additionalFile;
+          }
         );
 
-        if (error) {
-            throw error;
+        // Properly format the additional_files as a JSON array string
+         const additionalFilesArray = additionalFiles.map((file) =>
+          JSON.stringify(file).replace(/"/g, '\\"')
+        );
+        const additionalFilesString = `{${additionalFilesArray.join(",")}}`;
+        return {
+          file: mainFile,
+          title: formData[language].title as string,
+          subtitle: formData[language].subtitle as string,
+          description: formData[language].description as string,
+          language,
+          additional_files: additionalFilesString,
+        };
+      });
+
+      const newsObject = {
+        start_date: start_date ? toUtc(start_date) : null,
+        end_date: end_date ? toUtc(end_date) : null,
+        repeat_view_count: repeat_view_count || null,
+        view_count_interval: view_count_interval || null,
+      };
+
+      const categoryData = selectedCategoryIds.map((id) => ({
+        category_id: id,
+      }));
+      const subcategoryData = selectedSubCategoryIds.map((id) => ({
+        subcategory_id: id,
+      }));
+      const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
+
+      // Call the stored procedure
+      const { data, error } = await supabase.rpc(
+        "update_news_and_related_data",
+        {
+          existing_news_id: id,
+          news_data: newsObject,
+          news_lang_data: newsLanguageData,
+          category_ids_data: categoryData,
+          subcategory_ids_data: subcategoryData,
+          tag_ids_data: tagData,
         }
+      );
 
-        // Show success toast
-        showToast = true;
-        setTimeout(() => {
-            showToast = false;
-            goto("/dashboard/news");
-        }, 3000);
+      if (error) {
+        throw error;
+      }
+
+      // Show success toast
+      showToast = true;
+      setTimeout(() => {
+        showToast = false;
+        goto("/dashboard/news");
+      }, 3000);
     } catch (error) {
-        console.error("Error during news update:", error);
-        alertMessage = "An error occurred during the update. Please try again.";
-        showAlert = true;
+      console.error("Error during news update:", error);
+      alertMessage = "An error occurred during the update. Please try again.";
+      showAlert = true;
     } finally {
-        isLoading = false;
+      isLoading = false;
     }
-}
-
-
-
-
-
-
-
-
+  }
 
   function handleCategoryChange(
     event: CustomEvent<{ categoryIds: number[]; subcategoryIds: number[] }>
@@ -386,47 +413,54 @@ async function formSubmit() {
     </div>
     <div class="border rounded w-full">
       <LanguageNewsTabs {languages} {formData} {handleFileChange} />
-        <!-- ////////// -->
-    <div class="p-4 flex space-x-3 border-t-2 rounded w-full">
-      <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label for="start_date" class="mb-2">Start Date</Label>
-          <Input type="date" id="start_date" bind:value={start_date} required />
+      <!-- ////////// -->
+      <div class="p-4 flex space-x-3 border-t-2 rounded w-full">
+        <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label for="start_date" class="mb-2">Start Date</Label>
+            <Input
+              type="date"
+              id="start_date"
+              bind:value={start_date}
+              required
+            />
+          </div>
+          <div>
+            <Label for="end_date" class="mb-2">End Date</Label>
+            <Input type="date" id="end_date" bind:value={end_date} required />
+          </div>
         </div>
-        <div>
-          <Label for="end_date" class="mb-2">End Date</Label>
-          <Input type="date" id="end_date" bind:value={end_date} required />
+        <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label for="repeat_view_count" class="mb-2">Repeat View Count</Label
+            >
+            <Input
+              type="number"
+              id="repeat_view_count"
+              bind:value={repeat_view_count}
+              required
+            />
+          </div>
+          <div>
+            <Label for="view_count_interval" class="mb-2"
+              >View Count Interval (HH:MM)</Label
+            >
+            <Input
+              type="text"
+              id="view_count_interval"
+              bind:value={view_count_interval}
+              placeholder="HH:MM"
+              pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+              required
+              class="w-full"
+            />
+            {#if view_count_interval && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(view_count_interval)}
+              <p class="text-red-500">Invalid time format. Please use HH:MM.</p>
+            {/if}
+          </div>
         </div>
       </div>
-      <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label for="repeat_view_count" class="mb-2">Repeat View Count</Label>
-          <Input
-            type="number"
-            id="repeat_view_count"
-            bind:value={repeat_view_count}
-            required
-          />
-        </div>
-      <div>
-  <Label for="view_count_interval" class="mb-2">View Count Interval (HH:MM)</Label>
-  <Input
-    type="text"
-    id="view_count_interval"
-    bind:value={view_count_interval}
-    placeholder="HH:MM"
-    pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-    required
-    class="w-full"
-  />
-  {#if view_count_interval && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(view_count_interval)}
-    <p class="text-red-500">Invalid time format. Please use HH:MM.</p>
-  {/if}
-</div>
-
-      </div>
-    </div>
-    <!---->
+      <!---->
       <div class="flex justify-end p-4">
         <Button on:click={formSubmit}>Submit</Button>
       </div>
