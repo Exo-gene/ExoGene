@@ -27,14 +27,12 @@
   function updateActiveUrl(url: string) {
     activeUrl = url;
   }
-
- 
 </script>
 
 <div
   class="{sidebarOpen
     ? 'w-64'
-    : 'w-20'} transition-all ease-in-out duration-300 h-full"
+    : 'w-20'} transition-all ease-in-out duration-300 min-h-full"
   style="background-color: var(--background-color-nav);color: var(--text-color-nav)"
 >
   <div class="mb-2 p-4 border">

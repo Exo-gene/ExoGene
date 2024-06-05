@@ -13,7 +13,7 @@
   let itemIdToDelete: number | null = null;
   let currentPage = 1;
   let totalPages = 1;
-  const pageSize = 2;
+  const pageSize = 16;
   let isLoading = true;
 
   // Fetch initial data

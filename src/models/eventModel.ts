@@ -11,8 +11,8 @@ export interface EventModel {
 
 export interface EventDataModel {
   id: number;
-  start_date: Date;
-  end_date: Date;
+  start_date: Date | string;
+  end_date: Date | string;
   repeat_annually: boolean;
 }
 

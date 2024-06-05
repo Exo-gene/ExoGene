@@ -28,7 +28,7 @@
 {#if isLoading}
   <LoadingIndicator />
 {:else}
-  <div class="flex h-screen">
+  <div class="flex min-h-screen">
     <Sidebar {sidebarOpen} />
     <div
       class="flex-1 flex flex-col"

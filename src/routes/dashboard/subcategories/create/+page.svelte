@@ -1,7 +1,7 @@
-<script lang="ts">  
-	import FullPageLoadingIndicator from './../../../../lib/components/FullPageLoadingIndicator.svelte';
-	import  type{CategoryDataModel}  from './../../../../models/categoryModel.ts';
-	import  CategoryDropdown  from '$lib/components/CategoryDropdown.svelte';
+<script lang="ts">
+  import FullPageLoadingIndicator from "./../../../../lib/components/FullPageLoadingIndicator.svelte";
+  import type { CategoryDataModel } from "./../../../../models/categoryModel.ts";
+  import CategoryDropdown from "$lib/components/CategoryDropdown.svelte";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
@@ -17,8 +17,6 @@
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
   let isLoading = false;
 
-
-  
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
@@ -31,7 +29,6 @@
     {}
   );
 
- 
   async function formSubmit() {
     let isValid = true;
     isLoading = true;
@@ -48,18 +45,18 @@
       isValid = false;
     }
 
-     if (!isValid) {
+    if (!isValid) {
       isLoading = false;
       return;
     }
- 
+
     try {
-       const subcategoryLanguageData = languages.map((language, index) => ({
-        title: formData[language].title as string, 
+      const subcategoryLanguageData = languages.map((language, index) => ({
+        title: formData[language].title as string,
         language,
       }));
-       const subcategoryObject = {category_id:selectedCategoryId};
- 
+      const subcategoryObject = { category_id: selectedCategoryId };
+
       await subCategoriesStore.insertSubCategoryData(
         subcategoryObject,
         subcategoryLanguageData,
@@ -73,7 +70,7 @@
       }, 1000);
     } catch (error) {
       console.error("Error during subcategory insertion:", error);
-     } finally {
+    } finally {
       isLoading = false;
     }
   }
@@ -95,49 +92,58 @@
 
   function handleCategoryChange(event: { detail: number }): void {
     selectedCategoryId = event.detail;
-}
+  }
 </script>
 
- {#if isLoading}
-    <FullPageLoadingIndicator />
-  {:else}
-<div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
-  <div class="w-44 mb-5">
-  <CategoryDropdown  {selectedCategoryId} on:categoryChange={handleCategoryChange} />
-  </div>
-  <div class="border rounded w-full">
-    <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
-      {#each languages as language}
-        <TabItem title={language} open={language === LanguageEnum.EN}>
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            <b>Enter data for {language}:</b>
-            <div class="mb-6">
-              <Label for={`title-${language}`}>Title</Label>
-              <div class:error={formData[language].titleError}>
-                <Input
-                  id={`title-${language}`}
-                  bind:value={formData[language].title}
-                  placeholder="Enter title"
-                  on:input={() => {
-                    formData[language].titleError = "";
-                  }}
-                />
+{#if isLoading}
+  <FullPageLoadingIndicator />
+{:else}
+  <div class="pt-5 lg:pt-10 flex justify-center w-full">
+    <div class="max-w-screen-md w-full">
+      <div class="w-44 mb-5">
+        <CategoryDropdown
+          {selectedCategoryId}
+          on:categoryChange={handleCategoryChange}
+        />
+      </div>
+      <div class="w-full">
+        <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
+          {#each languages as language}
+            <TabItem title={language} open={language === LanguageEnum.EN}>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                <b style="color: var(--titleColor);"
+                  >Enter data for {language}:</b
+                >
+                <div class="my-4">
+                  <Label
+                    style="color: var(--titleColor);"
+                    for={`title-${language}`}>Title</Label
+                  >
+                  <div class:error={formData[language].titleError}>
+                    <Input
+                      id={`title-${language}`}
+                      bind:value={formData[language].title}
+                      placeholder="Enter title"
+                      on:input={() => {
+                        formData[language].titleError = "";
+                      }}
+                    />
+                  </div>
+                  {#if formData[language].titleError}
+                    <p class="text-red-500">{formData[language].titleError}</p>
+                  {/if}
+                </div>
               </div>
-              {#if formData[language].titleError}
-                <p class="text-red-500">{formData[language].titleError}</p>
-              {/if}
-            </div>
-          </div>
-        </TabItem>
-      {/each}
-    </Tabs>
-    <div class="flex justify-end p-4">
-      <Button on:click={formSubmit}>Submit</Button>
+            </TabItem>
+          {/each}
+        </Tabs>
+        <div class="flex justify-end p-4">
+          <Button on:click={formSubmit}>Submit</Button>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 {/if}
-
 
 {#if showToast}
   <Toast

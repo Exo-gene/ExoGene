@@ -9,12 +9,13 @@ export interface CategoryModel {
   remainingitems: number;
 }
 export interface CategoryDataModel {
-  id: number; 
+  id: number;
+  title: string;
 }
 
 export interface CategoryLanguageModel {
   title: string;
-  language: LanguageEnum; 
+  language: LanguageEnum;
 }
 
 export interface CategoryLanguageModelToUpdate {
@@ -25,8 +26,6 @@ export interface CategoryLanguageModelToUpdate {
 export interface categoryId {
   category_id: number;
 }
-
-
 
 export interface FormData {
   title: string | null;
@@ -41,5 +40,3 @@ export interface LanguageObject {
   title: string;
   language: LanguageEnum;
 }
-
- 

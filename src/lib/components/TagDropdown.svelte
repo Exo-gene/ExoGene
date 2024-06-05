@@ -21,7 +21,7 @@
 
     const params = {
       page_num: 1,
-      page_size: 3,
+      page_size: 10,
       filter_title: titleFilter || undefined,
     };
 

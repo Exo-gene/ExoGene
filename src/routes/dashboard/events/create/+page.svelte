@@ -1,7 +1,7 @@
 <script lang="ts">
   import FullPageLoadingIndicator from "./../../../../lib/components/FullPageLoadingIndicator.svelte";
   import { LanguageEnum } from "../../../../models/languageEnum";
-  import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
+  import { Tabs, TabItem, Label, Input, Button, Select } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
@@ -116,8 +116,10 @@
     <div class="max-w-screen-md w-full">
       <div class="flex items-center gap-3">
         <div class="mb-4">
-          <Label for="start-date">Start Date and Time</Label>
-          <input
+          <Label style="color: var(--titleColor);" class="mb-2" for="start-date"
+            >Start Date and Time</Label
+          >
+          <Input
             class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
             type="datetime-local"
             id="start-date"
@@ -128,8 +130,10 @@
           {/if}
         </div>
         <div class="mb-4">
-          <Label for="end-date">End Date and Time</Label>
-          <input
+          <Label style="color: var(--titleColor);" class="mb-2" for="end-date"
+            >End Date and Time</Label
+          >
+          <Input
             class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
             type="datetime-local"
             id="end-date"
@@ -140,15 +144,19 @@
           {/if}
         </div>
         <div class="mb-4">
-          <Label for="repeat-annually">Repeat Annually</Label>
-          <select
+          <Label
+            style="color: var(--titleColor);"
+            class="mb-2"
+            for="repeat-annually">Repeat Annually</Label
+          >
+          <Select
             id="repeat-annually"
             bind:value={repeat_annually}
             class="form-select px-4 py-2 rounded-md border-2 border-gray-300"
           >
             <option value="false">No</option>
             <option value="true">Yes</option>
-          </select>
+          </Select>
           {#if repeatAnnuallyError}
             <p class="text-red-500">{repeatAnnuallyError}</p>
           {/if}
@@ -158,9 +166,14 @@
         {#each languages as language}
           <TabItem title={language} open={language === LanguageEnum.EN}>
             <div class="text-sm text-gray-500 dark:text-gray-400">
-              <b>Enter data for {language}:</b>
-              <div class="mb-6">
-                <Label for={`title-${language}`}>Title</Label>
+              <b style="color: var(--titleColor);">Enter data for {language}:</b
+              >
+              <div class="my-2">
+                <Label
+                  style="color: var(--titleColor);"
+                  class="mb-2"
+                  for={`title-${language}`}>Title</Label
+                >
                 <div class:error={formData[language].titleError}>
                   <Input
                     id={`title-${language}`}
@@ -177,7 +190,11 @@
               </div>
 
               <div class="mb-6">
-                <Label for={`description-${language}`}>Description</Label>
+                <Label
+                  style="color: var(--titleColor);"
+                  class="mb-2"
+                  for={`description-${language}`}>Description</Label
+                >
                 <div class:error={formData[language].descriptionError}>
                   <Input
                     id={`description-${language}`}

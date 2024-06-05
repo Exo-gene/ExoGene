@@ -1,7 +1,7 @@
 <script lang="ts">
   import LanguageTabs from "./../../../../lib/components/LanguageTabs.svelte";
   import PositionSelect from "./../../../../lib/components/PositionSelect.svelte";
-  import { Button, Label } from "flowbite-svelte";
+  import { Button, Input, Label } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
@@ -15,7 +15,7 @@
   import type { FormDataSet } from "../../../../models/advertisementModel";
   import CategoryDropdown from "$lib/components/CategoryDropdown.svelte";
 
-  let isLoading = false; 
+  let isLoading = false;
   let positions = Object.values(PositionEnum);
   let languages = Object.values(LanguageEnum);
   let selectedCategoryId: number;
@@ -25,29 +25,27 @@
   let selectedPosition = PositionEnum.LEFT;
   let showToast = false;
 
-
- let formData: FormDataSet = languages.reduce(
+  let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
-      image: null,
-      video: null,
-      imageName: "",
-      videoName: "",
-      fileError: "",
-      category_id: null,
+        image: null,
+        video: null,
+        imageName: "",
+        videoName: "",
+        fileError: "",
+        category_id: null,
       };
       return acc;
     },
     {}
   );
 
-
   function handleFileChange(
     event: Event,
     language: LanguageEnum,
     type: "image" | "video"
   ) {
-     const input = event.target as HTMLInputElement;  
+    const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       if (type === "image") {
         formData[language].image = input.files[0];
@@ -105,17 +103,16 @@
       const filePaths = await Promise.all(uploads);
       const advertisementLanguageData = languages.map((language, index) => ({
         file: filePaths[index],
-        language, 
+        language,
       }));
 
       const advertisementObject = {
         start_date: toUtc(start_date),
         end_date: toUtc(end_date),
         position: selectedPosition,
-        category_id: selectedCategoryId, 
+        category_id: selectedCategoryId,
       };
 
-   
       await advertisementStore.insertAdvertisementData(
         advertisementObject,
         advertisementLanguageData,
@@ -156,50 +153,52 @@
 
     return `advertisement-files/${fileName}`;
   }
-
 </script>
 
- {#if isLoading}
-    <FullPageLoadingIndicator />
-  {:else}
-<div
-  class="pt-5 lg:pt-10 flex flex-col justify-center items-center max-w-screen-lg mx-auto"
->
-  <div class="w-full mb-5 flex space-x-4">
-    <div class="mb-4">
-      <Label for="start-date">Start Date</Label>
-      <input
-        class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
-        type="date"
-        id="start-date"
-        bind:value={start_date}
-      />
-    </div>
+{#if isLoading}
+  <FullPageLoadingIndicator />
+{:else}
+  <div
+    class="pt-5 lg:pt-10 flex flex-col justify-center items-center max-w-screen-lg mx-auto"
+  >
+    <div class="w-full mb-5 flex space-x-4">
+      <div class="mb-4">
+        <Label for="start-date">Start Date</Label>
+        <Input 
+          class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+          type="date"
+          id="start-date"
+          bind:value={start_date}
+        />
+      </div>
 
-    <div class="mb-4">
-      <Label for="end-date">End Date</Label>
-      <input
-        class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
-        type="date"
-        id="end-date"
-        bind:value={end_date}
-      />
+      <div class="mb-4">
+        <Label for="end-date">End Date</Label>
+        <Input
+          class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+          type="date"
+          id="end-date"
+          bind:value={end_date}
+        />
+      </div>
+      <PositionSelect {positions} {selectPosition} {selectedPosition} />
+      <div class="mt-3">
+        <CategoryDropdown
+          {selectedCategoryId}
+          on:categoryChange={handleCategoryChange}
+        />
+      </div>
     </div>
-    <PositionSelect {positions} {selectPosition} {selectedPosition} />
-  <div class="mt-3">
-    <CategoryDropdown  {selectedCategoryId} on:categoryChange={handleCategoryChange} />
-  </div>
-  </div>
-  <div class="border rounded w-full">
-    <LanguageTabs {languages} {formData} {handleFileChange} />
-    <div class="flex justify-end p-4">
-      <Button on:click={formSubmit}>Submit</Button>
+    <div class="w-full">
+      <LanguageTabs {languages} {formData} {handleFileChange} />
+      <div class="flex justify-end p-4">
+        <Button on:click={formSubmit}>Submit</Button>
+      </div>
     </div>
+    {#if isLoading}
+      <FullPageLoadingIndicator />
+    {/if}
   </div>
-  {#if isLoading}
-    <FullPageLoadingIndicator />
-  {/if}
-</div>
 {/if}
 {#if showToast}
   <Toast

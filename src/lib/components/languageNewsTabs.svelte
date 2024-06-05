@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { Tabs, TabItem, Input, Label, Textarea } from "flowbite-svelte";
+  import {
+    Tabs,
+    TabItem,
+    Input,
+    Label,
+    Textarea,
+    Button,
+  } from "flowbite-svelte";
   import { LanguageEnum } from "../../models/languageEnum";
   import type { FormDataSet, AdditionalFile } from "../../models/newsModel";
   import { onDestroy, onMount } from "svelte";
@@ -11,10 +18,12 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
+  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
+  import IconPlus from "@tabler/icons-svelte/IconPlus.svelte";
 
   export let languages: LanguageEnum[];
   export let formData: FormDataSet;
- 
+
   export let handleFileChange: (
     event: Event,
     language: LanguageEnum,
@@ -129,13 +138,17 @@
   }
 </script>
 
-<Tabs tabStyle="underline" contentClass="tabs-background">
+<Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
   {#each languages as language (language)}
     <TabItem title={language} open={language === LanguageEnum.EN}>
       <div class="text-sm text-gray-500 dark:text-gray-400 p-2">
         <div>
-          <div>
-            <Label for={`title-${language}`}>Title</Label>
+          <div class="mb-4">
+            <Label
+              style="color: var(--titleColor);"
+              class="mb-2"
+              for={`title-${language}`}>Title</Label
+            >
             <div class:error={formData[language].titleError}>
               <Input
                 id={`title-${language}`}
@@ -150,8 +163,12 @@
               {/if}
             </div>
           </div>
-          <div>
-            <Label for={`subtitle-${language}`}>Subtitle</Label>
+          <div class="mb-4">
+            <Label
+              style="color: var(--titleColor);"
+              class="mb-2"
+              for={`subtitle-${language}`}>Subtitle</Label
+            >
             <div class:error={formData[language].subtitleError}>
               <Input
                 id={`subtitle-${language}`}
@@ -166,8 +183,12 @@
               {/if}
             </div>
           </div>
-          <div>
-            <Label for={`description-${language}`}>Description</Label>
+          <div class="mb-4">
+            <Label
+              style="color: var(--titleColor);"
+              class="mb-2"
+              for={`description-${language}`}>Description</Label
+            >
             <div class:error={formData[language].descriptionError}>
               <Textarea
                 id={`description-${language}`}
@@ -191,21 +212,46 @@
               language.
             </p>
             <div>
-              <b>Enter image file for {language}:</b>
-              <Input
-                type="file"
-                accept="image/*"
-                id={`image-${language}`}
-                on:change={(event) =>
-                  handleFileChange(event, language, "image")}
-              />
+              <b style="color: var(--titleColor);"
+                >Enter image file for {language}:</b
+              >
+              <div
+                class="my-2 relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+              >
+                <Input
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  type="file"
+                  accept="image/*"
+                  id={`image-${language}`}
+                  on:change={(event) =>
+                    handleFileChange(event, language, "image")}
+                />
+                <div
+                  class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                >
+                  <IconUpload
+                    stroke={2}
+                    class="mx-auto mb-4 w-12 h-12 "
+                    style="color: var(--titleColor); "
+                  />
+
+                  <p style="color: var(--titleColor);">
+                    Drop your image here, or <span
+                      class="text-titleColor underline">browse</span
+                    >
+                  </p>
+                  <p class="text-gray-500 text-sm mt-2">
+                    Supports: JPG, JPEG2000, PNG
+                  </p>
+                </div>
+              </div>
               {#if formData[language].image}
                 <!-- Display image based on whether it's a File object or a string path -->
                 <div class="relative mt-2 border">
                   <img
                     src={getObjectUrl(formData[language].image)}
                     alt={`Image for ${language}`}
-                    class="w-44 h-44"
+                    class="w-44 h-44 rounded"
                   />
                   <button
                     class="absolute -top-2 -right-2 bg-red-500 text-white rounded p-2"
@@ -220,21 +266,44 @@
             </div>
             <div class="border border-gray-500 my-3 rounded"></div>
             <div>
-              <b>Enter video file for {language}:</b>
-              <Input
-                type="file"
-                accept="video/*"
-                id={`video-${language}`}
-                on:change={(event) =>
-                  handleFileChange(event, language, "video")}
-              />
+              <b style="color: var(--titleColor);"
+                >Enter video file for {language}:</b
+              >
+              <div
+                class="my-2 relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+              >
+                <Input
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  type="file"
+                  accept="video/*"
+                  id={`video-${language}`}
+                  on:change={(event) =>
+                    handleFileChange(event, language, "video")}
+                />
+                <div
+                  class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                >
+                  <IconUpload
+                    stroke={2}
+                    class="mx-auto mb-4 w-12 h-12 "
+                    style="color: var(--titleColor); "
+                  />
+
+                  <p style="color: var(--titleColor);">
+                    Drop your video here, or <span
+                      class="text-titleColor underline">browse</span
+                    >
+                  </p>
+                  <p class="text-gray-500 text-sm mt-2">Supports:Mp4</p>
+                </div>
+              </div>
               {#if formData[language].video}
                 <!-- Display video based on whether it's a File object or a string path -->
                 <div class="relative mt-2 border rounded">
                   <video
                     src={getObjectUrl(formData[language].video)}
                     alt={`Video for ${language}`}
-                    class="w-44 h-44"
+                    class="w-44 h-44 rounded"
                     controls
                   >
                     Your browser does not support the video tag.
@@ -257,56 +326,78 @@
         </div>
 
         <!-- Additional file section -->
-        <div class="p-4 flex space-x-3 border-t-2 rounded w-full">
+        <div class="p-4 w-full border rounded my-10">
           <div class="my-5">
-            <div class="flex space-x-10">
-              <input type="file" id={`additional-file-${language}`} />
+            <label class="text-titleColor">Add additional files</label>
+            <div class="flex space-x-4 mt-4">
+              <input
+                type="file"
+                id={`additional-file-${language}`}
+                class="p-2 border rounded"
+              />
               <Input
                 type="text"
                 id={`additional-title-${language}`}
                 placeholder="Enter title"
+                class="p-2 border rounded flex-grow"
               />
-              <button class="p-3 bg-gray-200" on:click={() => addFile(language)}
-                >Add</button
-              >
+              <Button class="p-2 rounded" on:click={() => addFile(language)}>
+                <IconPlus stroke={2} />
+              </Button>
             </div>
-            <div class="border my-5">
-              <Table>
-                <TableHead
-                  class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400"
-                >
-                  <TableHeadCell>File</TableHeadCell>
-                  <TableHeadCell>Title</TableHeadCell>
-                  <TableHeadCell>Action</TableHeadCell>
-                </TableHead>
-                <TableBody tableBodyClass="divide-y">
+            <div class="border my-5 overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100 dark:bg-gray-700">
+                  <tr>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >File</th
+                    >
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >Title</th
+                    >
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >Action</th
+                    >
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
                   {#each formData[language].additionalFiles as additionalFile, index}
-                    <TableBodyRow>
-                      <TableBodyCell>
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
                         <a
                           href={getObjectUrl(additionalFile.file)}
                           target="_blank"
+                          class="text-blue-500 underline"
                         >
                           {additionalFile.file instanceof File
                             ? additionalFile.file.name
                             : additionalFile.file}
                         </a>
-                      </TableBodyCell>
-                      <TableBodyCell>{additionalFile.title}</TableBodyCell>
-                      <TableBodyCell>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap"
+                        >{additionalFile.title}</td
+                      >
+                      <td class="px-6 py-4 whitespace-nowrap">
                         <button
                           class="text-red-500"
                           on:click={() => removeAdditionalFile(language, index)}
                           >Remove</button
                         >
-                      </TableBodyCell>
-                    </TableBodyRow>
+                      </td>
+                    </tr>
                   {/each}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
+
         <!-- End additional file section -->
       </div>
     </TabItem>

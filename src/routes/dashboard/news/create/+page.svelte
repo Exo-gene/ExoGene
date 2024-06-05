@@ -6,7 +6,7 @@
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
-    // @ts-ignore
+  // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
   import { LanguageEnum } from "../../../../models/languageEnum";
@@ -278,10 +278,10 @@
     <CategoryDropdownToNews on:categoryChange={handleCategoryChange} />
     <TagDropdown on:tagChange={handleTagChange} />
   </div>
-  <div class="border rounded w-full">
+  <div class="w-full">
     <LanguageNewsTabs {languages} {formData} {handleFileChange} />
     <!-- ////////// -->
-    <div class="p-4 flex space-x-3 border-t-2 rounded w-full">
+    <div class="p-4 flex space-x-3 w-full">
       <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label for="start_date" class="mb-2">Start Date</Label>
