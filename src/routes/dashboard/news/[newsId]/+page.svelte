@@ -71,15 +71,20 @@
         view_count_interval = data.view_count_interval;
 
         // Populate categories, subcategories, and tags
-        selectedCategoryIds = data.categories?.map((c) => c.category_id) || [];
+        selectedCategoryIds =
+          data.categories?.map((c: { category_id: number }) => c.category_id) ||
+          [];
         selectedSubCategoryIds =
-          data.subcategories?.map((sc) => sc.subcategory_id) || [];
-        selectedTagIds = data.tags?.map((t) => t.tag_id) || [];
+          data.subcategories?.map(
+            (sc: { subcategory_id: number }) => sc.subcategory_id
+          ) || [];
+        selectedTagIds =
+          data.tags?.map((t: { tag_id: number }) => t.tag_id) || [];
 
         // Populate translations
         if (Array.isArray(data.translations)) {
-          data.translations.forEach((translation) => {
-            const languageData = formData[translation.language];
+          data.translations.forEach((translation: any) => {
+            const languageData = formData[translation.language as LanguageEnum];
             if (languageData) {
               languageData.title = translation.title;
               languageData.subtitle = translation.subtitle;
@@ -99,22 +104,21 @@
                 }
               }
 
-              console.log("languageData", translation.additional_files);
               // Parse additional files
               if (
                 translation.additional_files &&
                 Array.isArray(translation.additional_files)
               ) {
                 languageData.additionalFiles = translation.additional_files
-                  .map((fileItem) => {
+                  .map((fileItem: any) => {
                     try {
                       // Ensure that fileItem is a string
                       if (typeof fileItem === "string") {
                         // Fix the incorrect format of additional_files
                         const sanitizedString = fileItem
-                          .replace(/\\"/g, '"') // Replace escaped quotes with regular quotes
-                          .replace(/^"/, "") // Remove leading quote
-                          .replace(/"$/, ""); // Remove trailing quote
+                          .replace(/\\"/g, '"')
+                          .replace(/^"/, "")
+                          .replace(/"$/, "");
                         return JSON.parse(sanitizedString);
                       } else if (Array.isArray(fileItem)) {
                         // Handle array of strings case
@@ -131,7 +135,7 @@
                       return null;
                     }
                   })
-                  .filter((file) => file !== null); // Filter out any failed parses
+                  .filter((file: any) => file !== null); // Filter out any failed parses
               }
             }
           });
@@ -145,7 +149,6 @@
       isLoading = false;
     }
   });
-
   function handleFileChange(
     event: Event,
     language: string,
@@ -224,22 +227,6 @@
       return;
     }
 
-    // Validate start and end dates, repeat view count, and view count interval
-    if (start_date || end_date || repeat_view_count || view_count_interval) {
-      if (
-        !start_date ||
-        !end_date ||
-        !repeat_view_count ||
-        !view_count_interval
-      ) {
-        alertMessage =
-          "If Start Date is chosen, End Date, Repeat View Count, and View Count Interval must also be chosen.";
-        showAlert = true;
-        isLoading = false;
-        return;
-      }
-    }
-
     let isAnyLanguageFilled = false;
 
     for (const language of languages) {
@@ -261,15 +248,12 @@
           formData[language].descriptionError = "Description is required";
           isValid = false;
         }
-        if (!image && !video) {
-          formData[language].fileError = "Either image or video is required";
-          isValid = false;
-        } else {
-          const file = image || video;
-          if (file instanceof File) {
-            const uploadPromise = uploadFile(file, language);
-            uploads.push(uploadPromise);
-          }
+
+        // Upload the main file if it's a new File object
+        const mainFile = image || video;
+        if (mainFile instanceof File) {
+          const uploadPromise = uploadFile(mainFile, language);
+          uploads.push(uploadPromise);
         }
 
         // Upload additional files
@@ -303,13 +287,15 @@
       return;
     }
 
-    // Prepare data for insertion
     try {
       const filePaths = await Promise.all(uploads);
       let fileIndex = 0;
 
       const newsLanguageData = languages.map((language) => {
-        const mainFile = filePaths[fileIndex++];
+        const mainFile = formData[language].image || formData[language].video;
+        const mainFilePath =
+          mainFile instanceof File ? filePaths[fileIndex++] : mainFile;
+
         const additionalFiles = formData[language].additionalFiles.map(
           (additionalFile) => {
             if (additionalFile.file instanceof File) {
@@ -324,12 +310,13 @@
         );
 
         // Properly format the additional_files as a JSON array string
-         const additionalFilesArray = additionalFiles.map((file) =>
+        const additionalFilesArray = additionalFiles.map((file) =>
           JSON.stringify(file).replace(/"/g, '\\"')
         );
         const additionalFilesString = `{${additionalFilesArray.join(",")}}`;
+
         return {
-          file: mainFile,
+          file: mainFilePath,
           title: formData[language].title as string,
           subtitle: formData[language].subtitle as string,
           description: formData[language].description as string,
@@ -353,7 +340,6 @@
       }));
       const tagData = selectedTagIds.map((id) => ({ tag_id: id }));
 
-      // Call the stored procedure
       const { data, error } = await supabase.rpc(
         "update_news_and_related_data",
         {
@@ -370,7 +356,6 @@
         throw error;
       }
 
-      // Show success toast
       showToast = true;
       setTimeout(() => {
         showToast = false;
