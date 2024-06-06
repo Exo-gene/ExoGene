@@ -71,7 +71,7 @@
         />
       </div>
       <!-- Remember Me Checkbox -->
-      <div class="mb-4 flex items-center">
+      <!-- <div class="mb-4 flex items-center">
         <input
           type="checkbox"
           id="remember"
@@ -79,10 +79,10 @@
           class="text-[#012853]"
         />
         <label for="remember" class="text-gray-600 ml-2">Remember Me</label>
-      </div>
+      </div> -->
       <!-- Forgot Password Link -->
       <div class="mb-6 text-[#012853]">
-        <a href="#" class="hover:underline">Forgot Password?</a>
+        <!-- <a href="#" class="hover:underline">Forgot Password?</a> -->
       </div>
       <!-- Login Button -->
       <button

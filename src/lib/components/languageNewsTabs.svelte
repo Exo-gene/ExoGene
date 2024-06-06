@@ -52,10 +52,10 @@
     const titleInput = document.getElementById(
       `additional-title-${language}`
     ) as HTMLInputElement;
-    if (fileInput.files && fileInput.files.length > 0 && titleInput.value) {
+    if (fileInput.files && fileInput.files.length > 0) {
       const newFile = {
         file: fileInput.files[0],
-        title: titleInput.value,
+        title: titleInput.value || "",
         language: language,
       };
       formData[language].additionalFiles.push(newFile);
@@ -211,122 +211,139 @@
               Note: Only one file (image or video) can be entered for each
               language.
             </p>
-            <div>
-              <b style="color: var(--titleColor);"
-                >Enter image file for {language}:</b
-              >
-              <div
-                class="my-2 relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
-              >
-                <Input
-                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  type="file"
-                  accept="image/*"
-                  id={`image-${language}`}
-                  on:change={(event) =>
-                    handleFileChange(event, language, "image")}
-                />
-                <div
-                  class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
-                >
-                  <IconUpload
-                    stroke={2}
-                    class="mx-auto mb-4 w-12 h-12 "
-                    style="color: var(--titleColor); "
-                  />
 
-                  <p style="color: var(--titleColor);">
-                    Drop your image here, or <span
-                      class="text-titleColor underline">browse</span
-                    >
-                  </p>
-                  <p class="text-gray-500 text-sm mt-2">
-                    Supports: JPG, JPEG2000, PNG
-                  </p>
+            <div class="flex items-start">
+              <div class="mr-4">
+                <b style="color: var(--titleColor);"
+                  >Enter image file for {language}:</b
+                >
+                <div
+                  class="my-2 relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                >
+                  <Input
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    type="file"
+                    accept="image/*"
+                    id={`image-${language}`}
+                    on:change={(event) =>
+                      handleFileChange(event, language, "image")}
+                  />
+                  <div
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                  >
+                    <IconUpload
+                      stroke={2}
+                      class="mx-auto mb-4 w-12 h-12"
+                      style="color: var(--titleColor);"
+                    />
+                    <p style="color: var(--titleColor);">
+                      Drop your image here, or <span
+                        class="text-titleColor underline">browse</span
+                      >
+                    </p>
+                    <p class="text-gray-500 text-sm mt-2">
+                      Supports: JPG, JPEG2000, PNG
+                    </p>
+                  </div>
                 </div>
               </div>
-              {#if formData[language].image}
-                <!-- Display image based on whether it's a File object or a string path -->
-                <div class="relative mt-2 border">
-                  <img
-                    src={getObjectUrl(formData[language].image)}
-                    alt={`Image for ${language}`}
-                    class="w-44 h-44 rounded"
-                  />
-                  <button
-                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded p-2"
-                    on:click={() => removeImage(language)}
-                  >
-                    &times;
-                  </button>
-                </div>
-              {:else}
-                <p>No image selected for {language}</p>
-              {/if}
+
+              <div style="height: 200px;">
+                {#if formData[language].image}
+                  <!-- Display image based on whether it's a File object or a string path -->
+                  <div class="relative mt-8 border rounded">
+                    <img
+                      src={getObjectUrl(formData[language].image)}
+                      alt={`Image for ${language}`}
+                      class="w-44 h-40 rounded"
+                    />
+                    <button
+                      class="absolute -top-2 -right-2 bg-red-500 text-white rounded p-2"
+                      on:click={() => removeImage(language)}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                {:else}
+                  <p class="flex items-center justify-center h-full">
+                    No image selected for {language}
+                  </p>
+                {/if}
+              </div>
             </div>
+
             <div class="border border-gray-500 my-3 rounded"></div>
-            <div>
-              <b style="color: var(--titleColor);"
-                >Enter video file for {language}:</b
-              >
-              <div
-                class="my-2 relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
-              >
-                <Input
-                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  type="file"
-                  accept="video/*"
-                  id={`video-${language}`}
-                  on:change={(event) =>
-                    handleFileChange(event, language, "video")}
-                />
-                <div
-                  class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
-                >
-                  <IconUpload
-                    stroke={2}
-                    class="mx-auto mb-4 w-12 h-12 "
-                    style="color: var(--titleColor); "
-                  />
 
-                  <p style="color: var(--titleColor);">
-                    Drop your video here, or <span
-                      class="text-titleColor underline">browse</span
-                    >
-                  </p>
-                  <p class="text-gray-500 text-sm mt-2">Supports:Mp4</p>
+            <div class="flex items-start">
+              <div class="mr-4">
+                <b style="color: var(--titleColor);"
+                  >Enter video file for {language}:</b
+                >
+                <div
+                  class="my-2 relative w-full h-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                >
+                  <Input
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    type="file"
+                    accept="video/*"
+                    id={`video-${language}`}
+                    on:change={(event) =>
+                      handleFileChange(event, language, "video")}
+                  />
+                  <div
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300 h-full"
+                  >
+                    <IconUpload
+                      stroke={2}
+                      class="mx-auto mb-4 w-12 h-12"
+                      style="color: var(--titleColor);"
+                    />
+                    <p style="color: var(--titleColor);">
+                      Drop your video here, or <span
+                        class="text-titleColor underline">browse</span
+                      >
+                    </p>
+                    <p class="text-gray-500 text-sm mt-2">Supports: Mp4</p>
+                  </div>
                 </div>
               </div>
-              {#if formData[language].video}
-                <!-- Display video based on whether it's a File object or a string path -->
-                <div class="relative mt-2 border rounded">
-                  <video
-                    src={getObjectUrl(formData[language].video)}
-                    alt={`Video for ${language}`}
-                    class="w-44 h-44 rounded"
-                    controls
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                  <button
-                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded p-2"
-                    on:click={() => removeVideo(language)}
-                  >
-                    &times;
-                  </button>
-                </div>
-              {:else}
-                <p>No video selected for {language}</p>
-              {/if}
+
+              <div style="height: 200px;">
+                {#if formData[language].video}
+                  <!-- Display video based on whether it's a File object or a string path -->
+                  <div class="relative mt-8 border rounded">
+                    <video
+                      src={getObjectUrl(formData[language].video)}
+                      alt={`Video for ${language}`}
+                      class="w-44 h-40 rounded"
+                      controls
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                    <button
+                      class="absolute -top-2 -right-2 bg-red-500 text-white rounded p-2"
+                      on:click={() => removeVideo(language)}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                {:else}
+                  <p class="flex items-center justify-center h-full">
+                    No video selected for {language}
+                  </p>
+                {/if}
+              </div>
             </div>
+
             {#if formData[language].fileError}
               <p class="text-red-500">{formData[language].fileError}</p>
             {/if}
           </div>
         </div>
 
+        <div class="border border-gray-500 my-3 mx-4 rounded"></div>
         <!-- Additional file section -->
-        <div class="p-4 w-full border rounded my-10">
+        <div class="p-4 w-full">
           <div class="my-5">
             <label class="text-titleColor">Add additional files</label>
             <div class="flex space-x-4 mt-4">
@@ -370,25 +387,38 @@
                   {#each formData[language].additionalFiles as additionalFile, index}
                     <tr>
                       <td class="px-6 py-4 whitespace-nowrap">
-                        <a
-                          href={getObjectUrl(additionalFile.file)}
-                          target="_blank"
-                          class="text-blue-500 underline"
-                        >
-                          {additionalFile.file instanceof File
-                            ? additionalFile.file.name
-                            : additionalFile.file}
-                        </a>
+                        {#if additionalFile.file && additionalFile.file.type && additionalFile.file.type.startsWith("image/")}
+                          <img
+                            src={getObjectUrl(additionalFile.file)}
+                            alt={additionalFile.title || "Additional file"}
+                            class="w-20 h-20 object-cover rounded"
+                          />
+                        {:else if additionalFile.file && additionalFile.file.type && additionalFile.file.type.startsWith("video/")}
+                          <video
+                            src={getObjectUrl(additionalFile.file)}
+                            class="w-20 h-20 object-cover rounded"
+                            controls
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        {:else}
+                          <img
+                            src={getObjectUrl(additionalFile.file)}
+                            alt={additionalFile.title || "Additional file"}
+                            class="w-20 h-20 object-cover rounded"
+                          />
+                        {/if}
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap"
-                        >{additionalFile.title}</td
-                      >
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        {additionalFile.title}
+                      </td>
                       <td class="px-6 py-4 whitespace-nowrap">
                         <button
                           class="text-red-500"
                           on:click={() => removeAdditionalFile(language, index)}
-                          >Remove</button
                         >
+                          Remove
+                        </button>
                       </td>
                     </tr>
                   {/each}
@@ -397,7 +427,6 @@
             </div>
           </div>
         </div>
-
         <!-- End additional file section -->
       </div>
     </TabItem>

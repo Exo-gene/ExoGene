@@ -1,41 +1,56 @@
 <script lang="ts">
   import logo_dark from "../images/logo.png";
   import logo_light from "../images/logo_light.png";
-  import logo_sidebar from "../images/logoSidebar.png";
+  import logo_sidebar from "../images/tiwar.png";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { items } from "./navbarItems";
-  import { onMount } from "svelte";
   import { authStore } from "../../stores/Auth.Store";
   import { checkUserPolicies } from "../utils/checkUserPolicies.Utils";
+  import { onMount } from "svelte";
 
   export let sidebarOpen: boolean;
   let navItems = items;
   let activeUrl: string;
-  let currentLogo = logo_dark; // Default logo
+  let currentLogo = logo_dark;
+ 
+  // Function to detect current theme based on document attribute
+  function getCurrentTheme() {
+    return document.documentElement.getAttribute("data-theme") || "light";
+  }
 
-  // Reactive statement to update the logo based on sidebar state
-  let theme: any;
-  onMount(() => {
-    theme = localStorage.getItem("theme") || "light";
-    // console.log("IN Navbar", $authStore);
-  });
-
+  // Reactive statement to update the logo based on current theme
+  $: theme = getCurrentTheme();
   $: currentLogo = theme === "light" ? logo_light : logo_dark;
-  ////////detect active URL/////////
+
+  // Function to detect active URL
   $: activeUrl = $page.url.pathname;
   function updateActiveUrl(url: string) {
     activeUrl = url;
   }
+
+  // Listen for changes to the theme attribute
+  onMount(() => {
+    const observer = new MutationObserver(() => {
+      theme = getCurrentTheme();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    return () => observer.disconnect();
+  });
 </script>
 
 <div
   class="{sidebarOpen
     ? 'w-64'
     : 'w-20'} transition-all ease-in-out duration-300 min-h-full"
-  style="background-color: var(--background-color-nav);color: var(--text-color-nav)"
+  style="background-color: var(--background-color-nav); color: var(--text-color-nav)"
 >
-  <div class="mb-2 p-4 border">
+  <div class="mb-2 p-4">
     <img
       src={sidebarOpen ? currentLogo : logo_sidebar}
       alt="Logo"

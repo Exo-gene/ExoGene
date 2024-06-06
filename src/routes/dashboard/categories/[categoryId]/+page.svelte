@@ -20,6 +20,7 @@
 
   // fetch data from db
   onMount(async () => {
+     isLoading = true;
     let query = await supabase.rpc("get_category_by_id", {
       input_category_id: id,
     });
@@ -34,6 +35,7 @@
         }
       });
     }
+        isLoading = false;
   });
 
   let formData: FormDataSet = languages.reduce(

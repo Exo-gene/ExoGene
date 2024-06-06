@@ -281,7 +281,7 @@
   <div class="w-full">
     <LanguageNewsTabs {languages} {formData} {handleFileChange} />
     <!-- ////////// -->
-    <div class="p-4 flex space-x-3 w-full">
+    <div class="p-4 flex space-x-3 w-full my-2">
       <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label for="start_date" class="mb-2">Start Date</Label>

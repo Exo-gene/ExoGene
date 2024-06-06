@@ -1,15 +1,14 @@
 <script lang="ts">
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
-  import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import Toast from "$lib/components/Toast.svelte";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
   import type {
-    AboutLanguageModel,
+    ContactLanguageModel,
     FormDataSet,
-  } from "../../../models/aboutModel";
-  import { aboutStore } from "../../../stores/aboutStore";
+  } from "../../../models/contactModel";
+  import { contactStore } from "../../../stores/contactStore";
   import { LanguageEnum } from "../../../models/languageEnum";
 
   const id = 1;
@@ -19,17 +18,23 @@
 
   // fetch data from db
   onMount(async () => {
-    let query = await supabase.rpc("get_about_by_id", {
-      input_about_id: id,
+    isLoading = true;
+    let query = await supabase.rpc("get_contact_by_id", {
+      input_contact_id: id,
     });
-
+    isLoading = false;
     if (query && query.data) {
+      const contactTranslations = query.data[0].contact_translations;
+
       languages.forEach((language) => {
-        const translation = query.data[0].about_translations.find(
-          (t: AboutLanguageModel) => t.language === language
+        const translation = contactTranslations.find(
+          (t: ContactLanguageModel) => t.language === language
         );
         if (translation) {
-          formData[language].description = translation.description;
+          formData[language].location = translation.location;
+          formData[language].email = translation.email;
+          formData[language].phoneNumber1 = translation.phoneNumber1;
+          formData[language].phoneNumber2 = translation.phoneNumber2;
         }
       });
     }
@@ -38,8 +43,14 @@
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
-        description: "",
-        descriptionError: "",
+        location: "",
+        locationError: "",
+        email: "",
+        emailError: "",
+        phoneNumber1: "",
+        phoneNumber1Error: "",
+        phoneNumber2: "",
+        phoneNumber2Error: "",
       };
       return acc;
     },
@@ -52,8 +63,20 @@
 
     // Perform validation for each language
     languages.forEach((language) => {
-      if (!formData[language].description) {
-        formData[language].descriptionError = "Description is required";
+      if (!formData[language].location) {
+        formData[language].locationError = "Location is required";
+        isValid = false;
+      }
+      if (!formData[language].email) {
+        formData[language].emailError = "Email is required";
+        isValid = false;
+      }
+      if (!formData[language].phoneNumber1) {
+        formData[language].phoneNumber1Error = "Phone number 1 is required";
+        isValid = false;
+      }
+      if (!formData[language].phoneNumber2) {
+        formData[language].phoneNumber2Error = "Phone number 2 is required";
         isValid = false;
       }
     });
@@ -64,15 +87,18 @@
     }
 
     try {
-      const aboutLanguageData = languages.map((language, index) => ({
-        description: formData[language].description as string,
+      const contactLanguageData = languages.map((language, index) => ({
+        location: formData[language].location as string,
+        email: formData[language].email as string,
+        phoneNumber1: formData[language].phoneNumber1 as string,
+        phoneNumber2: formData[language].phoneNumber2 as string,
         language,
       }));
       const aboutObject = { id };
 
-      await aboutStore.updateAboutData(
+      await contactStore.updateContactData(
         aboutObject,
-        aboutLanguageData,
+        contactLanguageData,
         supabase
       );
 
@@ -92,27 +118,100 @@
   <FullPageLoadingIndicator />
 {:else}
   <div class="pt-5 lg:pt-10 flex justify-center w-full">
-    <div class="max-w-screen-md w-full border rounded">
+    <div class="max-w-screen-md w-full">
       <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex  ">
         {#each languages as language}
           <TabItem title={language} open={language === LanguageEnum.EN}>
             <div class="text-sm text-gray-500 dark:text-gray-400">
-              <b>Enter data for {language}:</b>
-              <div class="mb-6">
-                <Label for={`description-${language}`}>Description</Label>
-                <div class:error={formData[language].descriptionError}>
+              <b style="color:var(--titleColor)">Enter data for {language}:</b>
+              <div class="my-4">
+                <Label
+                  class="mb-2"
+                  style="color:var(--titleColor)"
+                  for={`location-${language}`}>Location</Label
+                >
+                <div class:error={formData[language].locationError}>
                   <Input
-                    id={`description-${language}`}
-                    bind:value={formData[language].description}
-                    placeholder="Enter description"
+                    id={`location-${language}`}
+                    bind:value={formData[language].location}
+                    placeholder="Enter location"
                     on:input={() => {
-                      formData[language].descriptionError = "";
+                      formData[language].locationError = "";
                     }}
                   />
                 </div>
-                {#if formData[language].descriptionError}
+                {#if formData[language].locationError}
                   <p class="text-red-500">
-                    {formData[language].descriptionError}
+                    {formData[language].locationError}
+                  </p>
+                {/if}
+              </div>
+
+              <div class="mb-6">
+                <Label
+                  class="mb-2"
+                  style="color:var(--titleColor)"
+                  for={`email-${language}`}>Email</Label
+                >
+                <div class:error={formData[language].emailError}>
+                  <Input
+                    id={`email-${language}`}
+                    bind:value={formData[language].email}
+                    placeholder="Enter email"
+                    on:input={() => {
+                      formData[language].emailError = "";
+                    }}
+                  />
+                </div>
+                {#if formData[language].emailError}
+                  <p class="text-red-500">
+                    {formData[language].emailError}
+                  </p>
+                {/if}
+              </div>
+
+              <div class="mb-6">
+                <Label
+                  class="mb-2"
+                  style="color:var(--titleColor)"
+                  for={`phoneNumber1-${language}`}>Phone Number 1</Label
+                >
+                <div class:error={formData[language].phoneNumber1Error}>
+                  <Input
+                    id={`phoneNumber1-${language}`}
+                    bind:value={formData[language].phoneNumber1}
+                    placeholder="Enter phone number 1"
+                    on:input={() => {
+                      formData[language].phoneNumber1Error = "";
+                    }}
+                  />
+                </div>
+                {#if formData[language].phoneNumber1Error}
+                  <p class="text-red-500">
+                    {formData[language].phoneNumber1Error}
+                  </p>
+                {/if}
+              </div>
+
+              <div class="mb-6">
+                <Label
+                  class="mb-2"
+                  style="color:var(--titleColor)"
+                  for={`phoneNumber2-${language}`}>Phone Number 2</Label
+                >
+                <div class:error={formData[language].phoneNumber2Error}>
+                  <Input
+                    id={`phoneNumber2-${language}`}
+                    bind:value={formData[language].phoneNumber2}
+                    placeholder="Enter phone number 2"
+                    on:input={() => {
+                      formData[language].phoneNumber2Error = "";
+                    }}
+                  />
+                </div>
+                {#if formData[language].phoneNumber2Error}
+                  <p class="text-red-500">
+                    {formData[language].phoneNumber2Error}
                   </p>
                 {/if}
               </div>
@@ -128,5 +227,5 @@
 {/if}
 
 {#if showToast}
-  <Toast message="This about has been Updated successfully" type="success" />
+  <Toast message="This about has been updated successfully" type="success" />
 {/if}

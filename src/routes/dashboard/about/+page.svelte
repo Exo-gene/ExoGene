@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import { Tabs, TabItem, Label, Button } from "flowbite-svelte";
   import { supabase } from "$lib/supabaseClient";
   import Toast from "$lib/components/Toast.svelte";
@@ -11,7 +11,6 @@
   import { aboutStore } from "../../../stores/aboutStore";
   import { LanguageEnum } from "../../../models/languageEnum";
   import QuillEditor from "$lib/components/editor/QuillEditor.svelte";
-  import { get } from "svelte/store";
 
   const id = 1;
   let showToast = false;
@@ -20,9 +19,10 @@
   let activeLanguage: LanguageEnum = LanguageEnum.EN;
 
   onMount(() => {
+    isLoading = true;
     async function fetchData() {
       let query = await supabase.rpc("get_about_by_id", { input_about_id: id });
-
+      isLoading = false;
       if (query && query.data) {
         languages.forEach((language) => {
           const translation = query.data[0].about_translations.find(

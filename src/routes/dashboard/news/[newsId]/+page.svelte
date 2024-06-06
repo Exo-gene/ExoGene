@@ -396,13 +396,15 @@
       />
       <TagDropdown {selectedTagIds} on:tagChange={handleTagChange} />
     </div>
-    <div class="border rounded w-full">
+    <div class="w-full">
       <LanguageNewsTabs {languages} {formData} {handleFileChange} />
       <!-- ////////// -->
-      <div class="p-4 flex space-x-3 border-t-2 rounded w-full">
+      <div class="p-4 flex space-x-3 w-full my-2">
         <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <Label for="start_date" class="mb-2">Start Date</Label>
+            <Label style="color:var(--titleColor)" for="start_date" class="mb-2"
+              >Start Date</Label
+            >
             <Input
               type="date"
               id="start_date"
@@ -411,13 +413,18 @@
             />
           </div>
           <div>
-            <Label for="end_date" class="mb-2">End Date</Label>
+            <Label style="color:var(--titleColor)" for="end_date" class="mb-2"
+              >End Date</Label
+            >
             <Input type="date" id="end_date" bind:value={end_date} required />
           </div>
         </div>
         <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <Label for="repeat_view_count" class="mb-2">Repeat View Count</Label
+            <Label
+              style="color:var(--titleColor)"
+              for="repeat_view_count"
+              class="mb-2">Repeat View Count</Label
             >
             <Input
               type="number"
@@ -427,8 +434,10 @@
             />
           </div>
           <div>
-            <Label for="view_count_interval" class="mb-2"
-              >View Count Interval (HH:MM)</Label
+            <Label
+              style="color:var(--titleColor)"
+              for="view_count_interval"
+              class="mb-2">View Count Interval (HH:MM)</Label
             >
             <Input
               type="text"

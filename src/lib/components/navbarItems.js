@@ -64,7 +64,7 @@ export const items = [
   {
     label: "Setting",
     url: "/dashboard/setting",
-    icon: "<i class='fa fa-users'></i>",
+    icon: "<i class='fa fa-cog'></i>",
     policies: [Policies.READ_ROLE, Policies.READ_USER],
   },
   {

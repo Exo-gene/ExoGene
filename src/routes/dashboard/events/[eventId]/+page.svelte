@@ -38,6 +38,32 @@
     {}
   );
 
+  // Fetch data from db
+  onMount(async () => {
+    isLoading = true;
+    let query = await supabase.rpc("get_event_by_id", {
+      input_event_id: id,
+    });
+
+    if (query && query.data) {
+      const eventData = query.data[0];
+      start_date = toLocaleDateFormat(eventData.start_date);
+      end_date = toLocaleDateFormat(eventData.end_date);
+      repeat_annually = eventData.repeat_annually; // Use the string value directly
+
+      languages.forEach((language) => {
+        const translation = eventData.event_translations.find(
+          (t: EventLanguageModel) => t.language === language
+        );
+        if (translation) {
+          formData[language].title = translation.title;
+          formData[language].description = translation.description;
+        }
+      });
+    }
+    isLoading = false;
+  });
+
   async function formSubmit() {
     let isValid = true;
     isLoading = true;
@@ -114,30 +140,6 @@
       isLoading = false;
     }
   }
-
-  // Fetch data from db
-  onMount(async () => {
-    let query = await supabase.rpc("get_event_by_id", {
-      input_event_id: id,
-    });
-
-    if (query && query.data) {
-      const eventData = query.data[0];
-      start_date = toLocaleDateFormat(eventData.start_date);
-      end_date = toLocaleDateFormat(eventData.end_date);
-      repeat_annually = eventData.repeat_annually; // Use the string value directly
-
-      languages.forEach((language) => {
-        const translation = eventData.event_translations.find(
-          (t: EventLanguageModel) => t.language === language
-        );
-        if (translation) {
-          formData[language].title = translation.title;
-          formData[language].description = translation.description;
-        }
-      });
-    }
-  });
 </script>
 
 {#if isLoading}

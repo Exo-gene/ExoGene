@@ -9,6 +9,7 @@
     Label,
     MultiSelect,
     Spinner,
+    Select,
   } from "flowbite-svelte";
   import {
     ExclamationCircleOutline,
@@ -21,8 +22,12 @@
   import { policyStore } from "../../../stores/Policy.Store";
   import { roleStore } from "../../../stores/Role.Store";
   import { roleActionStore } from "../../../stores/Role_Action.Store";
-  export let isLoading: boolean = true;
+  // @ts-ignore
+  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
+  // @ts-ignore
+  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
 
+  export let isLoading: boolean = true;
   export let roleModal: boolean = false;
   let selectedRolePolicies: {
     id: string;
@@ -196,13 +201,13 @@
   bind:open={roleModal}
   backdropClass="h-80 dark:bg-white"
   class="h-[530px] w-96 "
-  classDialog=" backdrop-blur-lg "
-  bodyClass="dark:bg-white rounded-lg rounded-lg"
+  classDialog="backdrop-blur-lg "
+  bodyClass="bg-white rounded-lg rounded-lg"
 >
   <div class="w-full h-auto flex flex-wrap gap-3">
-    <div class="w-full z-50 flex flex-row h-auto">
-      <select
-        class="w-full rounded-tl-lg rounded-bl-lg h-10 dark:border-white"
+    <div class="w-full z-50 flex flex-row h-auto mx-4">
+      <Select
+        class="w-full border-gray-400 h-10"
         bind:value={selectedRolePolicies}
         on:change={async () => {
           await getPoliciesForRole(selectedRolePolicies.id);
@@ -222,14 +227,14 @@
             >
           {/each}
         {/if}
-      </select>
-      <button
-        class="bg-[#2A3551] hover:bg-[#1e263a] dark:hover:bg-[#2d2d2d] hover:text-blue-500 w-20 h-10 rounded-tr-lg rounded-br-lg text-xl font-bold text-white transition-all text-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#191919] via-[#2d2d2d] to-[#05070c]"
-        on:click={() => (drawerCondition = false)}>+</button
+      </Select>
+      <Button
+        class="w-20 h-10 mx-2 text-xl font-bold text-white transition-all text-center  "
+        on:click={() => (drawerCondition = false)}>+</Button
       >
     </div>
 
-    <form class="w-full">
+    <form class="mx-5 w-full">
       <Input
         id="search"
         placeholder="Search"
@@ -244,7 +249,7 @@
           slot="right"
           size="sm"
           type="submit"
-          class="bg-ekhlas-primary hover:bg-[#ec945d] ease-in-out duration-300"
+          class="bg-[#D0D0D0] hover:bg-[#d0d0d0cb] text-[#686868] ease-in-out duration-300"
           on:click={filterPolicies}>{"search"}</Button
         >
       </Input>
@@ -252,7 +257,7 @@
 
     {#if selectedRolePolicies.policies}
       <div
-        class="w-full h-60 flex flex-col gap-5 justify-start items-start bg-[#f1f1f1] dark:bg-ekhlas-background-dark rounded-lg p-4 text-black overflow-y-auto"
+        class="w-full h-60 flex flex-col gap-5 justify-start items-start border m-4 rounded-lg p-4 text-black overflow-y-auto"
       >
         {#each Object.keys(groupedPolicies) as policyCategory}
           <div
@@ -261,11 +266,11 @@
             <div
               class=" text-center w-full h-auto flex justify-between items-center"
             >
-              <p class=" w-full font-medium px-2 text-sm uppercase text-white">
+              <p class=" w-full font-medium px-2 text-sm uppercase text-black">
                 Policies of {policyCategory}
               </p>
               <div
-                class="w-full h-auto flex justify-end gap-2 items-center text-white"
+                class="w-full h-auto flex justify-end gap-2 items-center text-black"
               >
                 <p class="text-sm">Select All</p>
                 <input
@@ -320,9 +325,7 @@
 
   {#if isLoading}
     <div class="w-full h-auto flex justify-center items-center gap-3">
-      <Button
-        disabled
-        class="bg-ekhlas-ekhlas-main-dark hover:bg-ekhlas-main-dark ease-in-out duration-300 gap-3"
+      <Button disabled class="ease-in-out duration-300 gap-3"
         >{"Update"}
         <Spinner color="red" />
       </Button>
@@ -333,8 +336,7 @@
     <div class="w-full h-auto flex justify-center items-center gap-3">
       <Button
         on:click={() => updateRole(roleOptions)}
-        class="bg-blue-600 hover:bg-[#ed9243] ease-in-out duration-300"
-        >{"Update"}</Button
+        class="ease-in-out duration-300">{"Update"}</Button
       >
       <!-- <Button color="alternative">Decline</Button> -->
     </div>
@@ -355,7 +357,7 @@
   <form action="#" class="mb-6">
     <div class="w-full flex justify-center items-center gap-2">
       <div class="mb-6 w-full">
-        <Label for="title" class="block mb-2">{"title"}</Label>
+        <Label for="title" class="block mb-2">{"Title"}</Label>
         <Input
           id="title"
           name="title"
@@ -409,7 +411,7 @@
   {:else}
     <Button
       on:click={() => createOrUpdate(roleOptions)}
-      class="bg-ekhlas-primary hover:bg-[#ed9e5a] ease-in-out duration-300 w-full"
+      class="ease-in-out duration-300 w-full"
     >
       {"submit"}</Button
     >
@@ -417,9 +419,7 @@
   <div
     class="w-full h-[40rem] bg-[#f1f1f1] dark:bg-ekhlas-main-dark mt-4 rounded-lg flex justify-start items-center flex-col px-2"
   >
-    <p class="text-center dark:text-white w-full h-auto mt-4 mb-8">
-      Roles List
-    </p>
+    <p class="text-center text-black w-full h-auto mt-4 mb-8">Roles List</p>
     <div
       class="w-full h-[40rem] bg-[#f1f1f1] dark:bg-ekhlas-main-dark overflow-y-auto"
     >
@@ -429,12 +429,12 @@
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
-            class="w-full h-12 bg-white dark:bg-white rounded-lg flex justify-between items-center px-4 mt-2 overflow-y-auto"
+            class="w-full h-12 text-black rounded-lg flex justify-between items-center px-4 mt-2 overflow-y-auto"
           >
-            <p class="dark:text-white">{role.name}</p>
+            <p class="">{role.name}</p>
 
             <div
-              class=" w-auto h-8 rounded-lg flex justify-center items-center gap-5"
+              class=" w-auto h-8 rounded-lg flex justify-center items-center gap-2"
             >
               <div
                 on:click={async () => {
@@ -450,26 +450,18 @@
                     }
                   });
                 }}
-                class="bg-green-500 w-8 h-8 rounded-lg flex justify-center items-center cursor-pointer"
+                class="rounded-lg flex justify-center items-center cursor-pointer"
               >
-                <img
-                  src="/images/edit.png"
-                  alt=""
-                  class="w-5 h-5 object-contain"
-                />
+                <IconEdit stroke={2} class="text-green-600" />
               </div>
               <div
                 on:click={() => {
                   deleteModal = true;
                   roleData = role;
                 }}
-                class="bg-red-500 w-8 h-8 rounded-lg flex justify-center items-center cursor-pointer"
+                class="rounded-lg flex justify-center items-center cursor-pointer"
               >
-                <img
-                  src="/images/bin.png"
-                  alt=""
-                  class="w-6 h-6 object-contain"
-                />
+                <IconTrash stroke={2} class="text-red-600" />
               </div>
             </div>
           </div>
@@ -479,41 +471,28 @@
   </div>
 </Drawer>
 
-<Modal size="lg" bind:open={deleteModal} bodyClass="dark:bg-white rounded-lg">
-  <div class="text-center">
-    <ExclamationCircleOutline
-      class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
-    />
-    <div class="mb-5 text-lg font-normal dark:text-white">
-      {"areYouSureYouWantToDelete"}{"role"}{"questionMark"}
-      {#if isLoading}
-        <div class="w-full flex flex-wrap items-center gap-2">
-          <Button class="w-full" disabled>
-            <Spinner class="me-3" size="4" color="white" />
-            Loading ...
-          </Button>
-        </div>
-      {:else}
-        <div class="w-full flex justify-center items-center gap-3">
-          <Button
-            class="me-2 bg-ekhlas-primary p-2 w-full h-12"
-            on:click={() => {
-              deleteRole(roleData.id);
-            }}>{"yesImSure"}</Button
-          >
-          <Button
-            class="w-full h-12"
-            color="red"
-            on:click={() => {
-              deleteModal = false;
-              roleData = new RoleDto();
-            }}>{"noCancel"}</Button
-          >
-        </div>
-      {/if}
-    </div>
-  </div></Modal
+<Modal
+  title="Confirm Deletion"
+  bind:open={deleteModal}
+  class="bg-white max-w-sm mx-auto"
 >
+  <p>{"are you sure you want to delete this role ?"}</p>
+  <svelte:fragment slot="footer">
+    <Button
+      on:click={() => {
+        deleteRole(roleData.id);
+      }}
+      class="border bg-red-700 hover:bg-red-600">Delete</Button
+    >
+    <Button
+      on:click={() => {
+        deleteModal = false;
+        roleData = new RoleDto();
+      }}
+      class="border text-black bg-gray-100 hover:bg-white">Cancel</Button
+    >
+  </svelte:fragment>
+</Modal>
 
 <style>
   input[type="checkbox"] {

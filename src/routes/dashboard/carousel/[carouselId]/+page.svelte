@@ -14,6 +14,7 @@
   import { page } from "$app/stores";
   import type { FormDataSet } from "../../../../models/carouselModel";
   import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
+  import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
 
   const id = +$page.params.carouselId;
   let selectedNewsId: number = 0;
@@ -72,6 +73,7 @@
   }
 
   onMount(async () => {
+     isLoading = true;
     let { data: carouselData, error } = await supabase.rpc(
       "get_carousel_by_id",
       {
@@ -102,6 +104,7 @@
         formData[translation.language].image = translation.image;
       }
     });
+        isLoading = false;
   });
 
   // Reactively fetch news details when selectedNewsId changes
@@ -256,6 +259,11 @@
   };
 </script>
 
+
+
+{#if isLoading}
+  <FullPageLoadingIndicator />
+{:else}
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
   <NewsDropdown bind:selectedNewsId on:newsChange={onNewsSelected} />
   <div class="my-2">
@@ -378,6 +386,7 @@
     </div>
   </div>
 </div>
+{/if}
 
 {#if showToast}
   <Toast message="Carousel has been updated successfully" type="success" />

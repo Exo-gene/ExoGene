@@ -10,6 +10,8 @@
   import { supabase } from "$lib/supabaseClient";
   // @ts-ignore
   import { debounce } from "lodash-es";
+  // @ts-ignore
+  import IconChevronRight from "@tabler/icons-svelte/IconChevronRight.svelte";
 
   export let selectedCategoryIds: number[] = [];
   export let selectedSubCategoryIds: number[] = [];
@@ -128,26 +130,7 @@
           <span class="ml-2">{category.category_title}</span>
         </div>
         {#if category.subcategories && category.subcategories.length}
-          <svg
-            class="bg-slate-200 icon rounded"
-            width="20px"
-            height="20px"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="#000000"
-            ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
-              id="SVGRepo_tracerCarrier"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></g><g id="SVGRepo_iconCarrier"
-              ><path
-                d="M256 120.768L306.432 64 768 512l-461.568 448L256 903.232 659.072 512z"
-                fill="#000000"
-              ></path></g
-            ></svg
-          >
-
+          <IconChevronRight stroke={2} />
           <Dropdown class="ml-4" placement="right-start">
             {#each category.subcategories as subcategory}
               <DropdownItem>

@@ -9,7 +9,9 @@
   } from "flowbite-svelte";
   import { LanguageEnum } from "../../models/languageEnum";
   import { formatDateTime } from "$lib/utils/formatDateTime";
+    // @ts-ignore
   import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
+    // @ts-ignore
   import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";

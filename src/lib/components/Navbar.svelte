@@ -1,11 +1,5 @@
 <script lang="ts">
-  import IconMenu2 from "@tabler/icons-svelte/IconMenu2.svelte";
   import {
-    Navbar,
-    NavBrand,
-    NavLi,
-    NavUl,
-    NavHamburger,
     Avatar,
     Dropdown,
     DropdownItem,
@@ -14,6 +8,12 @@
   } from "flowbite-svelte";
   import profile from "../images/profile.jpg";
   import { onMount } from "svelte";
+  // @ts-ignore
+  import IconSun from "@tabler/icons-svelte/IconSun.svelte";
+  // @ts-ignore
+  import IconMoon from "@tabler/icons-svelte/IconMoon.svelte";
+  // @ts-ignore
+  import IconMenu2 from "@tabler/icons-svelte/IconMenu2.svelte";
 
   export let sidebarOpen: boolean;
   function toggleSidebar() {
@@ -22,7 +22,7 @@
 
   //////////toggle mode////////
   let theme = "light";
-  onMount(() => {
+  onMount(async () => {
     theme = localStorage.getItem("theme") || "light";
     updateTheme();
   });
@@ -49,7 +49,11 @@
     </div>
     <div class="flex items-center md:order-2 cursor-pointer">
       <button on:click={toggleTheme} class="mr-4">
-        {theme === "light" ? "Dark" : "Light"}
+        {#if theme === "light"}
+          <IconMoon stroke={2} />
+        {:else}
+          <IconSun stroke={2} />
+        {/if}
       </button>
       <Avatar id="avatar-menu" src={profile} />
     </div>
@@ -62,7 +66,6 @@
   </DropdownHeader>
   <DropdownItem>Dashboard</DropdownItem>
   <DropdownItem>Settings</DropdownItem>
-  <DropdownItem>Earnings</DropdownItem>
   <DropdownDivider />
   <DropdownItem>Sign out</DropdownItem>
 </Dropdown>
