@@ -85,7 +85,7 @@
       editData={editEvent}
       {handleDelete}
       {tableHeaders}
-      pageName="events"
+      pageName="event"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
     <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteEvent} />
