@@ -1,7 +1,4 @@
 <script lang="ts">
-  import logo_dark from "../images/logo.png";
-  import logo_light from "../images/logo_light.png";
-  import logo_sidebar from "../images/tiwar.png";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { items } from "./navbarItems";
@@ -11,8 +8,7 @@
 
   export let sidebarOpen: boolean;
   let navItems = items;
-  let activeUrl: string;
-  let currentLogo = logo_dark;
+  let activeUrl: string; 
  
   // Function to detect current theme based on document attribute
   function getCurrentTheme() {
@@ -21,8 +17,7 @@
 
   // Reactive statement to update the logo based on current theme
   $: theme = getCurrentTheme();
-  $: currentLogo = theme === "light" ? logo_light : logo_dark;
-
+ 
   // Function to detect active URL
   $: activeUrl = $page.url.pathname;
   function updateActiveUrl(url: string) {
@@ -50,13 +45,7 @@
     : 'w-20'} transition-all ease-in-out duration-300 min-h-full"
   style="background-color: var(--background-color-nav); color: var(--text-color-nav)"
 >
-  <div class="mb-2 p-4">
-    <img
-      src={sidebarOpen ? currentLogo : logo_sidebar}
-      alt="Logo"
-      class="h-8 w-auto"
-    />
-  </div>
+
   <nav
     class="flex flex-col gap-1 min-w-[240px] p-2 font-sans text-base font-normal text-gray-700"
   >
