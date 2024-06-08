@@ -8,6 +8,9 @@
   import { tagStore } from "../../../stores/tagsStore";
   import CustomTable from "$lib/components/CustomTable.svelte";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
+  import { authStore } from "../../../stores/Auth.Store";
+  import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
+  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -79,7 +82,9 @@
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
+    {#if checkUserPolicies([Policies.CREATE_TAG], $authStore)}
     <InsertButton insertData={createTag} />
+    {/if}
     <CustomTable
       items={tags}
       editData={editTag}
