@@ -24,7 +24,7 @@
   export let pageName = "";
 
   // Function to get the translation based on priority
-  function getTranslation(item) {
+  function getTranslation(item:any) {
     let translation = item.translation.find(t => t.language === LanguageEnum.EN && t.title !== null);
     if (!translation) {
       translation = item.translation.find(t => t.language === LanguageEnum.CKB && t.title !== null);
