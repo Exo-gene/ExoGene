@@ -71,7 +71,7 @@
 
 
 <div
-  class="border border-gray-800 p-10 rounded container mx-auto px-12 mt-12 w-3/5 float-right lg:float-none flex flex-col gap-4"
+  class="border border-gray-800 p-10 rounded max-w-xl mx-auto"
 >
 
 <div class="w-full h-auto flex justify-center items-center p-2">
@@ -80,7 +80,7 @@
  
   <p class="text-center ">{"Add Your Image"}</p>
   <UploadImage bind:image={userOptions.image} />
-  <div class="w-full flex flex-col h-auto gap-2">
+  <div class="w-full flex flex-col h-auto gap-2 py-2">
     <p class=" w-full h-4 rounded-lg ">{"Name"}</p>
     <input
       type="text"
@@ -89,7 +89,7 @@
       required
     />
   </div>
-  <div class="w-full flex flex-col h-auto gap-2">
+  <div class="w-full flex flex-col h-auto gap-2 py-2">
     <p class=" w-full h-4 rounded-lg ">{"Email"}</p>
     <input
       type="text"
@@ -98,7 +98,7 @@
       required
     />
   </div>
-  <div class="w-full flex flex-col h-auto gap-2">
+  <div class="w-full flex flex-col h-auto gap-2 py-2">
     <p class=" w-full h-4 rounded-lg ">{"Password"}</p>
     <input
       type="password"
@@ -107,7 +107,7 @@
       required
     />
   </div>
-  <div class="w-full flex flex-col h-auto gap-2">
+  <div class="w-full flex flex-col h-auto gap-2 py-2">
     <p class=" w-full h-4 rounded-lg ">{"Roles"}</p>
     <MultiSelect
       items={$roleStore.data.map((role) => {
@@ -131,7 +131,7 @@
     </button>
   {:else}
     <Button
-      class="w-full h-12  duration-300 ease-in-out rounded-lg text-white"
+      class="mt-5 w-full h-12  duration-300 ease-in-out rounded-lg text-white"
       on:click={() => {
         update(userOptions, userRoleOptions, password);
       }}>{"Update"}</Button
