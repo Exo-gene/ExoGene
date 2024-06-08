@@ -8,6 +8,9 @@
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
+  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils.js";
+  import { Policies } from "$lib/Models/Enums/Policies.Enum.Model.js";
+  import { authStore } from "../../../stores/Auth.Store.js";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -79,7 +82,9 @@
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-    <InsertButton insertData={createEvent} />
+      {#if checkUserPolicies([Policies.CREATE_EVENT], $authStore)}
+      <InsertButton insertData={createEvent} />
+    {/if}
     <CustomTable
       items={events}
       editData={editEvent}
