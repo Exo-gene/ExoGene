@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { checkUserPolicies } from '$lib/utils/checkUserPolicies.Utils';
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
@@ -8,6 +9,8 @@
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
+  import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
+  import { authStore } from "../../../stores/Auth.Store";
 
   let openModal = false;
   let itemIdToDelete: number | null = null;
@@ -83,7 +86,9 @@
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-    <InsertButton insertData={createAdvertisement} />
+      {#if checkUserPolicies([Policies.CREATE_ADVERTISEMENT], $authStore)}
+      <InsertButton insertData={createAdvertisement} />
+    {/if}
     <CustomTable
       items={advertisements}
       editData={editAdvertisement}
