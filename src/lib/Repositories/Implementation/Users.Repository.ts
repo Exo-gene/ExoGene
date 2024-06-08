@@ -40,33 +40,34 @@ export class UsersRepository implements IUsersRepository {
       if (!data.success) {
         throw new Error(data.message);
       }
-      // console.log("User", data);
       return data.user;
     } catch (error) {
       throw error;
     }
   }
+
   async getUsers(): Promise<SupabaseResponse<User>> {
     try {
       const response = (await Supabase.client
         .from("users")
-        .select("*")) as SupabaseResponse<User>;
+        .select("*")
+        .is("deleted_at", null)) as SupabaseResponse<User>;
       if (response.error) {
         throw response.error;
       }
-      // console.log("Users", response);
-
       return response;
     } catch (error) {
       throw error;
     }
   }
+
   async getUser(id: string): Promise<User> {
     try {
       const response = (await Supabase.client
         .from("users")
         .select("*")
-        .eq("id", id)) as SupabaseResponse<User>;
+        .eq("id", id)
+        .is("deleted_at", null)) as SupabaseResponse<User>;
       if (response.error) {
         throw response.error;
       }
@@ -75,12 +76,14 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+
   async getUserById(id: string): Promise<User> {
     try {
       const response = (await Supabase.client
         .from("users")
         .select("*")
-        .eq("user_id::UUID", id)) as SupabaseResponse<User>;
+        .eq("user_id::UUID", id)
+        .is("deleted_at", null)) as SupabaseResponse<User>;
       if (response.error) {
         throw response.error;
       }
@@ -89,6 +92,7 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+
   async getUserByUserIdWithFunction(user_id: string) {
     try {
       const response = (await Supabase.client.rpc(
@@ -103,12 +107,14 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+
   async getUserByEmail(email: string): Promise<User> {
     try {
       const response = (await Supabase.client
         .from("users")
         .select("*")
-        .eq("email", email)) as SupabaseResponse<User>;
+        .eq("email", email)
+        .is("deleted_at", null)) as SupabaseResponse<User>;
       if (response.error) {
         throw response.error;
       }
@@ -117,6 +123,7 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+
   async updateUser(user: CreateUserRequest, password?: string): Promise<User> {
     try {
       const userRequest: UserRequest = {
@@ -151,11 +158,12 @@ export class UsersRepository implements IUsersRepository {
       throw error;
     }
   }
+
   async deleteUser(id: string): Promise<void> {
     try {
       const response = (await Supabase.client
         .from("users")
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq("id", id)) as PostgrestSingleResponse<User>;
       if (response.error) {
         throw response.error;
