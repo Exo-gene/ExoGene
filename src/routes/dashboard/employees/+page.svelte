@@ -1,94 +1,153 @@
 <script lang="ts">
+  import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import { goto } from "$app/navigation";
   import InsertButton from "$lib/components/InsertButton.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { userStore } from "./../../../stores/User.Store";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
-  import {
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-    Tooltip,
-  } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { authStore } from "../../../stores/Auth.Store";
+  import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
+   // @ts-ignore
+  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
+  // @ts-ignore
+  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
+
+  
+  let itemIdToDelete: any | null = null;
+  let isLoading = true;
+  let userData :any= [];
+  let openModal = false;
+  let pageName: any = "user";
+  $: userData = $userStore?.data || [];
+
+ 
+
 
   onMount(async () => {
-    // console.log("Hello from the employees page");
     await userStore.getAll();
-    // console.log($userStore);
+    isLoading = false;
+    userData = $userStore?.data || [];
   });
+
+  function editEmployee(userId: number) {
+    goto(`/dashboard/employees/edit/${userId}`);
+  }
+
+
+  
+
+  async function deleteEmployee() {
+    if (itemIdToDelete === null) {
+      console.error("No item ID specified for deletion");
+      return;
+    }
+    try {
+     userStore.delete(itemIdToDelete);
+       itemIdToDelete = null;
+      await userStore.getAll(); // Refresh data after deletion
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    } finally {
+      openModal = false;
+    }
+  }
+
+
 </script>
 
-<InsertButton insertData={() => goto("/dashboard/employees/add")} />
-<Table shadow>
-  <TableHead>
-    <TableHeadCell>Image</TableHeadCell>
-    <TableHeadCell>Name</TableHeadCell>
-    <TableHeadCell>Email</TableHeadCell>
-    {#if checkUserPolicies([Policies.DELETE_USER,Policies.UPDATE_USER], $authStore)}
-    <TableHeadCell>More Info</TableHeadCell>
+<div class="max-w-screen-2xl mx-auto py-10">
+  {#if isLoading}
+    <div class="flex justify-center items-center">
+      <LoadingIndicator />
+    </div>
+  {:else}
+    <!-- insert new data -->
+    {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}
+     <InsertButton insertData={() => goto("/dashboard/employees/add")} />
     {/if}
-  </TableHead>
-  <TableBody tableBodyClass="divide-y">
-    {#each $userStore.data as user}
-      <TableBodyRow>
-        <!-- svelte-ignore a11y-img-redundant-alt -->
-        <TableBodyCell
-          ><img
-            src={user.image ?? "/images/defualt.png"}
-            alt="User Image"
-            class="object-cover rounded-lg w-12 h-12"
-          /></TableBodyCell
-        >
-        <TableBodyCell>{user.name}</TableBodyCell>
-        <TableBodyCell>{user.email}</TableBodyCell>
-        <TableBodyCell>
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div class="w-auto h-auto flex justify-center gap-2 items-center">
-            {#if checkUserPolicies([Policies.UPDATE_USER], $authStore)}
-              <Tooltip triggeredBy="#hover3">{"Update"}</Tooltip>
-              <div
-                id="hover3"
-                class="w-8 h-8 flex justify-center items-center bg-blue-500 rounded-md cursor-pointer hover:bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] hover:from-[#232C46] hover:via-[#1B2237] hover:to-[#151B2B] dark:hover:bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] dark:hover:from-[#232C46] dark:hover:via-[#1B2237] dark:hover:to-[#151B2B"
-              >
-                <a href="/dashboard/employees/edit/{user.id}">
-                  <img
-                    src="/images/exclamation.png"
-                    class="w-4 h-4 object-contain"
-                    alt=""
-                  />
-                </a>
-              </div>
-            {/if}
-            {#if checkUserPolicies([Policies.DELETE_USER], $authStore)}
-              <Tooltip triggeredBy="#hover2">Delete</Tooltip>
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <!-- svelte-ignore a11y-no-static-element-interactions -->
-              <button
-                disabled={!checkUserPolicies(
-                  [Policies.DELETE_USER],
-                  $authStore
-                )}
-                id="hover2"
-                on:click={() => {
-                  userStore.delete(user.id);
-                }}
-                class="w-8 h-8 flex justify-center items-center bg-red-500 rounded-md cursor-pointer hover:bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] hover:from-red-500 hover:via-red-700 hover:to-red-900 dark:hover:bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] dark:hover:from-red-500 dark:hover:via-red-700 dark:hover:to-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <img
-                  src="/images/bin.png"
-                  alt=""
-                  class="w-4 h-4 object-contain"
-                />
-              </button>
-            {/if}
-          </div>
-        </TableBodyCell>
-      </TableBodyRow>
-    {/each}
-  </TableBody>
-</Table>
+
+    <!-- table data -->
+    <div class="max-w-screen-2xl mx-auto px-4 lg:px-0">
+      <div class="overflow-x-auto">
+        <div class="min-w-full table-responsive">
+          <table class="min-w-full -collapse bg-[#d0d0d0]">
+            <thead>
+              <tr>
+               
+                <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm  w-10"
+                >
+                  <div class="flex justify-center items-center gap-2">
+                    <span>Name</span>
+                  </div>
+                </th>
+                <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm "
+                >
+                  <div class="flex items-start gap-2">
+                    <span>Email</span>
+                  </div>
+                </th>
+                <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm "
+                >
+                  <div class="flex items-center gap-2">
+                    <span>Actions</span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody
+             >
+              {#each $userStore.data as item, index (item.id)}
+                <tr >
+                 
+                  <td
+                    class="p-3 bg-gray-10 border-b-2 "
+                  >
+                    <span
+                      class="flex justify-center text-[#111827] dark:text-gray-200 font-semibold"
+                      >{item.name}</span
+                    >
+                  </td>
+                    <td
+                    class="p-3 bg-gray-10 border-b-2 "
+                  >
+                    <span
+                      class="flex justify-center text-[#111827] dark:text-gray-200 font-semibold"
+                      >{item.email}</span
+                    >
+                  </td>
+                  <td
+                    class="p-3 font- bg-gray-10 border-b-2 text-gray-600 dark:text-gray-300  w-32"
+                  >
+                    {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
+                      <button
+                        class="font-medium text-green-600 hover:underline dark:text-green-600"
+                        on:click={() => editEmployee(item.id)}
+                      >
+                        <IconEdit stroke={2} class="text-green-700" />
+                      </button>
+                    {/if}
+                    {#if checkUserPolicies([Policies[`DELETE_${pageName.toUpperCase()}`]], $authStore)}
+                      <button
+                        on:click={() => {
+                          itemIdToDelete = item.id;
+                          openModal = true;
+                        }}><IconTrash stroke={2} class="text-red-700" /></button
+                      >
+                    {/if}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {/if}
+</div>
+
+<ConfirmDeleteModal bind:open={openModal} on:confirm={deleteEmployee} />
