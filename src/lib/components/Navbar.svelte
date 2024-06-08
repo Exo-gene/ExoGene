@@ -3,24 +3,24 @@
     Avatar,
     Dropdown,
     DropdownItem,
-    DropdownHeader,
-    DropdownDivider,
-  } from "flowbite-svelte";
-  import profile from "../images/profile.jpg";
+    DropdownHeader, 
+  } from "flowbite-svelte"; 
   import { onMount } from "svelte";
-  // @ts-ignore
   import IconSun from "@tabler/icons-svelte/IconSun.svelte";
-  // @ts-ignore
   import IconMoon from "@tabler/icons-svelte/IconMoon.svelte";
-  // @ts-ignore
   import IconMenu2 from "@tabler/icons-svelte/IconMenu2.svelte";
-
+  import { authStore } from "../../stores/Auth.Store";
+  import { goto } from "$app/navigation";
+ 
+ 
+ 
   export let sidebarOpen: boolean;
+
   function toggleSidebar() {
     sidebarOpen = !sidebarOpen;
   }
 
-  //////////toggle mode////////
+  // Toggle theme
   let theme = "light";
   onMount(async () => {
     theme = localStorage.getItem("theme") || "light";
@@ -36,10 +36,20 @@
   function updateTheme() {
     document.documentElement.setAttribute("data-theme", theme);
   }
+
+  // Logout function
+  async function handleLogout() {
+    await authStore.logout();
+    goto('/')
+  }
+    // view user profile
+  async function userProfile(uId : string) {
+    goto(`/dashboard/employees/edit/${uId}`)
+  }
 </script>
 
 <div
-  style="background-color: var(--background-color-nav);color:var(--text-color-nav)"
+  style="background-color: var(--background-color-nav); color: var(--text-color-nav);"
 >
   <div class="flex items-center justify-between px-4 py-2">
     <div class="flex items-center justify-start">
@@ -55,17 +65,17 @@
           <IconSun stroke={2} />
         {/if}
       </button>
-      <Avatar id="avatar-menu" src={profile} />
+      <Avatar id="avatar-menu" src={$authStore?.image} />
     </div>
   </div>
 </div>
 <Dropdown placement="bottom" triggeredBy="#avatar-menu">
   <DropdownHeader>
-    <span class="block text-sm">Bonnie Green</span>
-    <span class="block truncate text-sm font-medium">name@flowbite.com</span>
+    <span class="block text-sm">{$authStore?.name}</span>
+    <span class="block truncate text-sm font-medium">{$authStore?.email}</span>
   </DropdownHeader>
-  <DropdownItem>Dashboard</DropdownItem>
-  <DropdownItem>Settings</DropdownItem>
-  <DropdownDivider />
-  <DropdownItem>Sign out</DropdownItem>
+  <DropdownItem on:click={userProfile($authStore.id)}>Profile</DropdownItem>
+  <!-- <DropdownItem>Settings</DropdownItem> -->
+  <!-- <DropdownDivider /> -->
+  <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>  
 </Dropdown>
