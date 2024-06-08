@@ -118,7 +118,9 @@
     </div>
   {:else}
     <!-- insert new data -->
-    <InsertButton insertData={createCategory} />
+      {#if checkUserPolicies([Policies.CREATE_CATEGORY], $authStore)}
+      <InsertButton insertData={createCategory} />
+    {/if}
 
     <!-- table data -->
     <div class="max-w-screen-2xl mx-auto px-4 lg:px-0">
