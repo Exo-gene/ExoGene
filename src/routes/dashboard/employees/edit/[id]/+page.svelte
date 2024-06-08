@@ -1,9 +1,7 @@
 <script lang="ts">
   import { CreateUser_RoleRequest } from "$lib/Models/Requests/User_Role.Request.Model";
   import { onMount } from "svelte";
-
-  import { Spinner, MultiSelect } from "flowbite-svelte";
-
+  import { Spinner, MultiSelect, Button } from "flowbite-svelte";
   import { goto } from "$app/navigation";
   import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
   import UploadImage from "$lib/components/UploadImage.Component.svelte";
@@ -70,55 +68,47 @@
   }
 </script>
 
-<div class="w-full h-auto flex justify-center items-center mt-12">
-  <p class="text-2xl font-bold dark:text-white">{"Add Employee"}</p>
 
-  <!-- svelte-ignore a11y-missing-content -->
-</div>
-<div
-  class="container mx-auto w-3/5 h-auto flex justify-start items-center mt-12"
->
-  <a
-    href="/dashboard/employees/1"
-    class="rounded-lg w-24 text-center bg-[#f1f1f1] dark:bg-ekhlas-main-dark dark:text-white py-3 border-2 dark:border-black ml-5 mt-12"
-    >{"back"}</a
-  >
-</div>
 
 <div
-  class="container mx-auto px-12 mt-12 w-3/5 float-right lg:float-none flex flex-col gap-4"
+  class="border border-gray-800 p-10 rounded container mx-auto px-12 mt-12 w-3/5 float-right lg:float-none flex flex-col gap-4"
 >
-  <p class="text-center dark:text-white">{"Add Your Image"}</p>
+
+<div class="w-full h-auto flex justify-center items-center p-2">
+  <p class="text-2xl font-bold ">{"Update Employee Information"}</p>
+</div>
+ 
+  <p class="text-center ">{"Add Your Image"}</p>
   <UploadImage bind:image={userOptions.image} />
   <div class="w-full flex flex-col h-auto gap-2">
-    <p class=" w-full h-4 rounded-lg dark:text-white">{"Name"}</p>
+    <p class=" w-full h-4 rounded-lg ">{"Name"}</p>
     <input
       type="text"
-      class="rounded-lg dark:bg-ekhlas-main-dark dark:text-white"
+      class="rounded-lg text-black "
       bind:value={userOptions.name}
       required
     />
   </div>
   <div class="w-full flex flex-col h-auto gap-2">
-    <p class=" w-full h-4 rounded-lg dark:text-white">{"Email"}</p>
+    <p class=" w-full h-4 rounded-lg ">{"Email"}</p>
     <input
       type="text"
-      class="rounded-lg dark:bg-ekhlas-main-dark dark:text-white"
+      class="rounded-lg text-black "
       bind:value={userOptions.email}
       required
     />
   </div>
   <div class="w-full flex flex-col h-auto gap-2">
-    <p class=" w-full h-4 rounded-lg dark:text-white">{"Password"}</p>
+    <p class=" w-full h-4 rounded-lg ">{"Password"}</p>
     <input
       type="password"
-      class="rounded-lg dark:bg-ekhlas-main-dark dark:text-white"
+      class="rounded-lg text-black "
       bind:value={password}
       required
     />
   </div>
   <div class="w-full flex flex-col h-auto gap-2">
-    <p class=" w-full h-4 rounded-lg dark:text-white">{"Roles"}</p>
+    <p class=" w-full h-4 rounded-lg ">{"Roles"}</p>
     <MultiSelect
       items={$roleStore.data.map((role) => {
         return {
@@ -140,11 +130,11 @@
       Loading ...
     </button>
   {:else}
-    <button
-      class="w-full h-12 bg-ekhlas-primary dark:hover:bg-[#FF9300] duration-300 ease-in-out rounded-lg text-white"
+    <Button
+      class="w-full h-12  duration-300 ease-in-out rounded-lg text-white"
       on:click={() => {
         update(userOptions, userRoleOptions, password);
-      }}>{"Update"}</button
+      }}>{"Update"}</Button
     >
   {/if}
 </div>
