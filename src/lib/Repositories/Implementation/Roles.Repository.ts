@@ -20,7 +20,6 @@ export class RolesRepository implements IRolesRepository {
         .insert(roleRequest)
         .select()) as SupabaseResponse<Role>;
 
-      // console.log("Repository Data", response);
       if (response.error) {
         throw response.error;
       }
@@ -29,26 +28,29 @@ export class RolesRepository implements IRolesRepository {
       throw error;
     }
   }
+
   async getRoles(): Promise<SupabaseResponse<Role>> {
     try {
       const response = (await Supabase.client
         .from("roles")
-        .select(`*`)) as SupabaseResponse<Role>;
+        .select(`*`)
+        .is("deleted_at", null)) as SupabaseResponse<Role>;
       if (response.error) {
         throw response.error;
       }
-      // console.log("Repository Data", response);
       return response;
     } catch (error) {
       throw error;
     }
   }
+
   async getRole(id: string): Promise<Role> {
     try {
       const response = (await Supabase.client
         .from("roles")
         .select("*")
-        .eq("id", id)) as SupabaseResponse<Role>;
+        .eq("id", id)
+        .is("deleted_at", null)) as SupabaseResponse<Role>;
       if (response.error) {
         throw response.error;
       }
@@ -57,6 +59,7 @@ export class RolesRepository implements IRolesRepository {
       throw error;
     }
   }
+
   async updateRole(role: CreateRoleRequest): Promise<Role> {
     try {
       const roleRequest: RoleRequest = {
@@ -75,11 +78,12 @@ export class RolesRepository implements IRolesRepository {
       throw error;
     }
   }
+
   async deleteRole(id: string): Promise<void> {
     try {
       const response = (await Supabase.client
         .from("roles")
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq("id", id)) as PostgrestSingleResponse<Role>;
       if (response.error) {
         throw response.error;
