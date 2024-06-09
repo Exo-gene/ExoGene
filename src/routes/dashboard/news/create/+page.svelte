@@ -215,12 +215,18 @@
         };
       });
 
-      const newsObject = {
-        start_date: toUtc(start_date),
-        end_date: toUtc(end_date),
+      const newsObject: any = {
         repeat_view_count: repeat_view_count,
         view_count_interval: view_count_interval,
       };
+
+      if (start_date) {
+        newsObject.start_date = toUtc(start_date);
+      }
+
+      if (end_date) {
+        newsObject.end_date = toUtc(end_date);
+      }
 
       const categoryData = selectedCategoryIds.map((id) => ({
         category_id: id,

@@ -65,11 +65,12 @@
 
       if (data) {
         // Populate main news data
-        start_date = toLocaleDateFormat(data.start_date);
-        end_date = toLocaleDateFormat(data.end_date);
+        start_date = data.start_date
+          ? toLocaleDateFormat(data.start_date)
+          : null;
+        end_date = data.end_date ? toLocaleDateFormat(data.end_date) : null;
         repeat_view_count = data.repeat_view_count;
         view_count_interval = data.view_count_interval;
-
         // Populate categories, subcategories, and tags
         selectedCategoryIds =
           data.categories?.map((c: { category_id: number }) => c.category_id) ||
@@ -149,6 +150,7 @@
       isLoading = false;
     }
   });
+
   function handleFileChange(
     event: Event,
     language: string,
@@ -325,12 +327,18 @@
         };
       });
 
-      const newsObject = {
-        start_date: start_date ? toUtc(start_date) : null,
-        end_date: end_date ? toUtc(end_date) : null,
+      const newsObject: any = {
         repeat_view_count: repeat_view_count || null,
         view_count_interval: view_count_interval || null,
       };
+
+      if (start_date) {
+        newsObject.start_date = toUtc(start_date);
+      }
+
+      if (end_date) {
+        newsObject.end_date = toUtc(end_date);
+      }
 
       const categoryData = selectedCategoryIds.map((id) => ({
         category_id: id,
@@ -406,17 +414,22 @@
               >Start Date</Label
             >
             <Input
-              type="date"
-              id="start_date"
+              class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+              type="datetime-local"
+              id="start-date"
               bind:value={start_date}
-              required
             />
           </div>
           <div>
             <Label style="color:var(--titleColor)" for="end_date" class="mb-2"
               >End Date</Label
             >
-            <Input type="date" id="end_date" bind:value={end_date} required />
+            <Input
+              class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+              type="datetime-local"
+              id="end-date"
+              bind:value={end_date}
+            />
           </div>
         </div>
         <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
