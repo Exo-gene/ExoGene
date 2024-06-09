@@ -10,7 +10,7 @@
   // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
-  import { toLocaleDate, toUtc } from "$lib/utils/dateTimeFormat.js";
+  import { toLocaleDateFormat, toUtc } from "$lib/utils/dateTimeFormat.js";
   import { PositionEnum } from "../../../../models/positionEnum.js";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { advertisementStore } from "../../../../stores/advertisementStore";
@@ -60,8 +60,8 @@
       const advertisement = advertisementData[0];
 
       // Convert UTC dates to local dates
-      start_date = toLocaleDate(advertisement.start_date);
-      end_date = toLocaleDate(advertisement.end_date);
+      start_date = toLocaleDateFormat(advertisement.start_date);
+      end_date = toLocaleDateFormat(advertisement.end_date);
 
       selectedPosition = advertisement.position;
       selectedCategoryId = advertisement.category_id;
@@ -237,7 +237,7 @@
         <Label for="start-date">Start Date</Label>
         <Input
           class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
-          type="date"
+          type="datetime-local"
           id="start-date"
           bind:value={start_date}
         />
@@ -246,7 +246,7 @@
         <Label for="end-date">End Date</Label>
         <Input
           class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
-          type="date"
+          type="datetime-local"
           id="end-date"
           bind:value={end_date}
         />

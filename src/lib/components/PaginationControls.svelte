@@ -28,7 +28,9 @@
     </svg>
   </button>
 
-  <span> <span>{currentPage}</span> of {totalPages} Pages</span>
+  <span style="color:var(--titleColor)">
+    <span>{currentPage}</span> of {totalPages} Pages</span
+  >
 
   <button
     on:click={nextPage}

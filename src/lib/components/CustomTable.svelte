@@ -56,11 +56,13 @@
           <TableBodyCell class="font-semibold text-gray-700">
             {formatDateTime(item.created_at.toString())}
           </TableBodyCell>
-          <TableBodyCell>
-            <span>
-              {getTranslation(item).title ? getTranslation(item).title.slice(0, 40) : ''}{getTranslation(item).title && getTranslation(item).title.length > 40 ? "..." : ""}
-            </span>
-          </TableBodyCell>
+          {#if getTranslation(item).title}
+            <TableBodyCell>
+              <span>
+                {getTranslation(item).title.slice(0, 40)}{getTranslation(item).title.length > 40 ? "..." : ""}
+              </span>
+            </TableBodyCell>
+          {/if}
           <TableBodyCell>
             <span>{getTranslation(item).language}</span>
           </TableBodyCell>

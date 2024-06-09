@@ -164,9 +164,9 @@
     <div class="w-full mb-5 flex space-x-4">
       <div class="mb-4">
         <Label for="start-date">Start Date</Label>
-        <Input 
+        <Input
           class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
-          type="date"
+          type="datetime-local"
           id="start-date"
           bind:value={start_date}
         />
@@ -176,7 +176,7 @@
         <Label for="end-date">End Date</Label>
         <Input
           class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
-          type="date"
+          type="datetime-local"
           id="end-date"
           bind:value={end_date}
         />
