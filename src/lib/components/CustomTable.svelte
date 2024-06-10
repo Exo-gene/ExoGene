@@ -66,6 +66,11 @@
           <TableBodyCell>
             <span>{getTranslation(item).language}</span>
           </TableBodyCell>
+          {#if getTranslation(item).number}
+            <TableBodyCell>
+              <span>{getTranslation(item).number}</span>
+            </TableBodyCell>
+          {/if}
           <TableBodyCell class="flex space-x-3">
             {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
               <button
