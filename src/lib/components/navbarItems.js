@@ -56,6 +56,12 @@ export const items = [
     policies: [Policies.READ_EVENT],
   },
   {
+    label: "Magazine",
+    url: "/dashboard/magazine",
+    icon: "<i class='fa fa-newspaper'></i>",
+    policies: [Policies.READ_MAGAZINE],
+  },
+  {
     label: "News",
     url: "/dashboard/news",
     icon: "<i class='fa fa-newspaper'></i>",
