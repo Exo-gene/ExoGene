@@ -1,20 +1,22 @@
 <script lang="ts">
   import FullPageLoadingIndicator from "./../../../../lib/components/FullPageLoadingIndicator.svelte";
-  import { magazineStore } from "../../../../stores/magazineStore";
+  import { newspaperStore } from "../../../../stores/newspaperStore";
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
-  // @ts-ignore
   import { v4 as uuidv4 } from "uuid";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
-  // @ts-ignore
   import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
-  import type { FormData } from "../../../../models/magazineModel";
-  // @ts-ignore
+  import type {
+    FormData,
+    NewspaperLanguageModelToUpdate,
+  } from "../../../../models/newspaperModel";
   import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
-  import { toUtc } from "$lib/utils/dateTimeFormat";
+  import { onMount } from "svelte";
+  import { page } from "$app/stores";
+  import { toLocaleDate, toUtc } from "$lib/utils/dateTimeFormat";
 
   let showAlert = false;
   let alertMessage = "";
@@ -23,18 +25,66 @@
   const languages: LanguageEnum[] = Object.values(LanguageEnum);
   let selectedLanguage: LanguageEnum = languages[0]; // Assuming the first language is the default
 
-  let formData: Record<LanguageEnum, FormData> = languages.reduce((acc, language) => {
-    acc[language] = {
-      pdfFile: null,
-      pdfFileName: "",
-      pdfFileError: "",
-      numberError: "",
-      number: 0,
-      date: "",
-      dateError: "", 
-    };
-    return acc;
-  }, {} as Record<LanguageEnum, FormData>);
+  let formData: Record<LanguageEnum, FormData> = languages.reduce(
+    (acc, language) => {
+      acc[language] = {
+        pdfFile: null,
+        pdfFileName: "",
+        pdfFileError: "",
+        numberError: "",
+        number: 0,
+        date: "",
+        dateError: "",
+      };
+      return acc;
+    },
+    {} as Record<LanguageEnum, FormData>
+  );
+
+  const id = +$page.params.newspaperId;
+  onMount(async () => {
+    isLoading = true;
+    let { data: newspaperData, error } = await supabase.rpc(
+      "get_newspaper_by_id",
+      {
+        input_newspaper_id: id,
+      }
+    );
+
+    if (error) {
+      console.error("Error fetching data:", error);
+      showToast = true;
+      isLoading = false;
+      return;
+    }
+
+    if (!newspaperData || newspaperData.length === 0) {
+      console.log("No newspaper data found.");
+      isLoading = false;
+      return;
+    }
+
+    const firstnewspaperData = newspaperData[0];
+    firstnewspaperData.newspaper_translations.forEach(
+      (translation: {
+        language: LanguageEnum;
+        number: number;
+        date: string;
+        pdfFile: string;
+      }) => {
+        if (formData[translation.language]) {
+          formData[translation.language].number = translation.number;
+          formData[translation.language].date = toLocaleDate(translation.date);
+          formData[translation.language].pdfFile = translation.pdfFile;
+          formData[translation.language].pdfFileName = translation.pdfFile
+            .split("/")
+            .pop();
+        }
+      }
+    );
+
+    isLoading = false;
+  });
 
   function handleFileChange(event: Event, language: LanguageEnum) {
     const input = event.target as HTMLInputElement;
@@ -76,16 +126,20 @@
   async function formSubmit() {
     isLoading = true;
     let atLeastOneValid = false;
-    const magazineLanguageData = [];
+    const newspaperLanguageData: NewspaperLanguageModelToUpdate[] = [];
 
     for (const language of languages) {
       let isValid = true;
 
-      if (!formData[language].pdfFile) {
+      // Ensure required fields are present and valid
+      if (!formData[language].pdfFile && !formData[language].pdfFileName) {
         formData[language].pdfFileError = "File is required";
         isValid = false;
       }
-      if (!formData[language].number) {
+      if (
+        formData[language].number === undefined ||
+        formData[language].number === null
+      ) {
         formData[language].numberError = "Number is required";
         isValid = false;
       }
@@ -96,28 +150,27 @@
 
       if (isValid) {
         try {
-          const file = formData[language].pdfFile;
-          let imagePath = "";
-          if (file instanceof File) {
-            imagePath = await uploadFile(file, language);
-          } else {
-            console.error(`Expected a File, but received ${typeof file}`);
-            isValid = false;
+          let imagePath = formData[language].pdfFile as string;
+          if (formData[language].pdfFile instanceof File) {
+            imagePath = await uploadFile(
+              formData[language].pdfFile as File,
+              language
+            );
           }
 
-          if (isValid) {
-            magazineLanguageData.push({
-              pdfFile: imagePath,
-              number: formData[language].number,
-              date: toUtc(formData[language].date),
-              language: language,
-            });
-            atLeastOneValid = true;
-          }
+          newspaperLanguageData.push({
+            pdfFile: imagePath,
+            number: formData[language].number!,
+            date: toUtc(formData[language].date!),
+            language: language,
+          });
+
+          atLeastOneValid = true;
         } catch (error) {
-          console.error("Error during magazine insertion:", error);
+          console.error("Error during newspaper update:", error);
           showAlert = true;
-          alertMessage = "There was an error inserting the magazine. Please try again.";
+          alertMessage =
+            "There was an error updating the newspaper. Please try again.";
           isLoading = false;
           return;
         }
@@ -131,22 +184,27 @@
       return;
     }
 
-    const magazineObject = {
-      // Add any other fields required for the magazine object here
+    const newspaperObject = {
+      id: id,
     };
 
     try {
-      await magazineStore.insertMagazineData(magazineObject, magazineLanguageData, supabase);
+      await newspaperStore.updateNewspaperData(
+        newspaperObject,
+        newspaperLanguageData,
+        supabase
+      );
 
       showToast = true;
       setTimeout(() => {
         showToast = false;
-        goto("/dashboard/magazine");
+        goto("/dashboard/newspaper");
       }, 3000);
     } catch (error) {
-      console.error("Error during magazine insertion:", error);
+      console.error("Error during newspaper update:", error);
       showAlert = true;
-      alertMessage = "There was an error inserting the magazine. Please try again.";
+      alertMessage =
+        "There was an error updating the newspaper. Please try again.";
     } finally {
       isLoading = false;
     }
@@ -155,22 +213,41 @@
   function handleTabChange(language: LanguageEnum) {
     selectedLanguage = language;
   }
+
+  const getObjectUrl = (file: File | string | null): string => {
+    if (file instanceof File) {
+      return URL.createObjectURL(file);
+    } else if (typeof file === "string") {
+      return `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${file}`;
+    }
+    return "";
+  };
 </script>
 
 {#if isLoading}
   <FullPageLoadingIndicator />
 {:else}
-  <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
+  <div
+    class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto"
+  >
     <div class="w-full">
-      <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex" on:change={(event) => handleTabChange(event.detail)}>
+      <Tabs
+        tabStyle="underline"
+        defaultClass="bg-[#D0D0D0] flex"
+        on:change={(event) => handleTabChange(event.detail)}
+      >
         {#each languages as language}
           <TabItem title={language} open={language === selectedLanguage}>
             <div class="text-sm">
-              <b style="color: var(--titleColor);">Enter data for {language}:</b>
+              <b style="color: var(--titleColor);">Enter data for {language}:</b
+              >
               <div class="mb-6 flex justify-between items-start">
                 <div class="my-4">
                   <div class="mb-4">
-                    <Label style="color: var(--titleColor);" for={`number-${language}`}>Number</Label>
+                    <Label
+                      style="color: var(--titleColor);"
+                      for={`number-${language}`}>Number</Label
+                    >
                     <div class:error={formData[language].numberError}>
                       <Input
                         id={`number-${language}`}
@@ -182,11 +259,16 @@
                       />
                     </div>
                     {#if formData[language].numberError}
-                      <p class="text-red-500">{formData[language].numberError}</p>
+                      <p class="text-red-500">
+                        {formData[language].numberError}
+                      </p>
                     {/if}
                   </div>
                   <div class="mb-4">
-                    <Label style="color: var(--titleColor);" for={`date-${language}`}>Date</Label>
+                    <Label
+                      style="color: var(--titleColor);"
+                      for={`date-${language}`}>Date</Label
+                    >
                     <div class:error={formData[language].dateError}>
                       <Input
                         type="date"
@@ -203,8 +285,12 @@
                     {/if}
                   </div>
                   <div class="mb-4">
-                    <label class="text-titleColor" for={`image-${language}`}>Pdf File</label>
-                    <div class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded">
+                    <label class="text-titleColor" for={`image-${language}`}
+                      >Pdf File</label
+                    >
+                    <div
+                      class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                    >
                       <Input
                         type="file"
                         accept="application/pdf"
@@ -212,17 +298,36 @@
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         on:change={(event) => handleFileChange(event, language)}
                       />
-                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300">
-                        <IconUpload stroke={2} class="mx-auto mb-4 w-12 h-12" style="color: var(--titleColor);" />
-                        <p style="color: var(--titleColor);">Drop your pdf file here, or <span class="text-titleColor underline">browse</span></p>
+                      <div
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                      >
+                        <IconUpload
+                          stroke={2}
+                          class="mx-auto mb-4 w-12 h-12"
+                          style="color: var(--titleColor);"
+                        />
+                        <p style="color: var(--titleColor);">
+                          Drop your pdf file here, or <span
+                            class="text-titleColor underline">browse</span
+                          >
+                        </p>
                         <p class="text-gray-500 text-sm mt-2">Supports: PDF</p>
                       </div>
                     </div>
                     {#if formData[language].pdfFile}
-                      <span class="block mt-2 text-sm text-gray-700">Selected File: {formData[language]?.pdfFile?.name}</span>
+                      <span class="block mt-2 text-sm text-gray-700">
+                        Selected File: <a
+                          href={getObjectUrl(formData[language].pdfFile)}
+                          target="_blank"
+                          class="text-orange-500 underline"
+                          >{formData[language].pdfFileName}</a
+                        >
+                      </span>
                     {/if}
                     {#if formData[language].pdfFileError}
-                      <p class="text-red-500 mt-2">{formData[language].pdfFileError}</p>
+                      <p class="text-red-500 mt-2">
+                        {formData[language].pdfFileError}
+                      </p>
                     {/if}
                   </div>
                 </div>
@@ -239,7 +344,7 @@
 {/if}
 
 {#if showToast}
-  <Toast message="New carousel has been inserted successfully" type="success" />
+  <Toast message="Newspaper has been updated successfully" type="success" />
 {/if}
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">

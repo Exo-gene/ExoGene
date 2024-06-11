@@ -1,30 +1,30 @@
 import type { LanguageEnum } from "./languageEnum";
 
-export interface MagazineModel {
+export interface NewspaperModel {
   id: number;
   count: number;
-  items: MagazineDataModel[];
+  items: NewspaperDataModel[];
   page: number;
   page_limit: number;
   remainingitems: number;
 }
 
-export interface MagazineLanguageModel {
+export interface NewspaperLanguageModel {
   id: number;
   number: number;
   date: Date;
-  magazine_id: number;
+  newspaper_id: number;
   pdfFile: string;
   language: LanguageEnum;
 }
 
-export interface MagazineLanguageModelToUpdate {
+export interface NewspaperLanguageModelToUpdate {
   pdfFile: string;
   language: LanguageEnum;
   number: number;
   date: Date;
 }
-export interface MagazineDataModel {
+export interface NewspaperDataModel {
   id: number;
 }
 

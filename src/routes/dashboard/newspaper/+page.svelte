@@ -6,7 +6,7 @@
   import { supabase } from "$lib/supabaseClient";
   import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
-  import { magazineStore } from "../../../stores/magazineStore";
+  import { newspaperStore } from "../../../stores/newspaperStore";
   import CustomTable from "$lib/components/CustomTable.svelte";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
   import { authStore } from "../../../stores/Auth.Store";
@@ -28,7 +28,7 @@
   // Function to fetch categories for a specific page
   function fetchCategories(page: number) {
     currentPage = page;
-    magazineStore.getMagazineData(supabase, pageSize, currentPage);
+    newspaperStore.getNewspaperData(supabase, pageSize, currentPage);
   }
 
   function nextPage() {
@@ -43,8 +43,8 @@
     }
   }
 
-  function createMagazine() {
-    goto("/dashboard/magazine/create");
+  function createNewspaper() {
+    goto("/dashboard/newspaper/create");
   }
 
   // Function to delete a category
@@ -53,47 +53,47 @@
     openModal = true;
   }
   // Function to delete a category
-  async function deleteMagazine() {
+  async function deleteNewspaper() {
     if (itemIdToDelete === null) {
       console.error("No item ID specified for deletion");
       return;
     }
     try {
-      await magazineStore.deleteMagazineData(itemIdToDelete, supabase);
+      await newspaperStore.deleteNewspaperData(itemIdToDelete, supabase);
       itemIdToDelete = null;
       fetchCategories(currentPage);
     } catch (error) {
-      console.error("Error deleting category:", error);
+      console.error("Error deleting newspaper:", error);
     } finally {
       openModal = false;
     }
   }
 
-  function editMagazine(magazineId: number) {
-    goto(`/dashboard/magazine/${magazineId}`);
+  function editNewspaper(newspaperId: number) {
+    goto(`/dashboard/newspaper/${newspaperId}`);
   }
 
   const tableHeaders = ["ID", "Created At", "Language", "Number", "Action"];
-  $: totalPages = Math.ceil($magazineStore[0]?.count / pageSize);
-  let magazine = $magazineStore[0]?.items;
-  $: magazine = $magazineStore[0]?.items;
+  $: totalPages = Math.ceil($newspaperStore[0]?.count / pageSize);
+  let newspaper = $newspaperStore[0]?.items;
+  $: newspaper = $newspaperStore[0]?.items;
 </script>
 
 {#if isLoading}
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-    {#if checkUserPolicies([Policies.CREATE_MAGAZINE], $authStore)}
-      <InsertButton insertData={createMagazine} />
+    {#if checkUserPolicies([Policies.CREATE_NEWSPAPER], $authStore)}
+      <InsertButton insertData={createNewspaper} />
     {/if}
     <CustomTable
-      items={magazine}
-      editData={editMagazine}
+      items={newspaper}
+      editData={editNewspaper}
       {handleDelete}
       {tableHeaders}
-      pageName="magazine"
+      pageName="newspaper"
     />
     <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
-    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteMagazine} />
+    <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteNewspaper} />
   </div>
 {/if}
