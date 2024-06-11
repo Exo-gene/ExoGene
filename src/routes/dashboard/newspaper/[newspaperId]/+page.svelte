@@ -31,6 +31,9 @@
         pdfFile: null,
         pdfFileName: "",
         pdfFileError: "",
+        thumbnailFile: null,
+        thumbnailFileName: "",
+        thumbnailFileError: "",
         numberError: "",
         number: 0,
         date: "",
@@ -71,12 +74,17 @@
         number: number;
         date: string;
         pdfFile: string;
+        thumbnail: string;
       }) => {
         if (formData[translation.language]) {
           formData[translation.language].number = translation.number;
           formData[translation.language].date = toLocaleDate(translation.date);
           formData[translation.language].pdfFile = translation.pdfFile;
           formData[translation.language].pdfFileName = translation.pdfFile
+            .split("/")
+            .pop();
+          formData[translation.language].thumbnailFile = translation.thumbnail;
+          formData[translation.language].thumbnailFileName = translation.thumbnail
             .split("/")
             .pop();
         }
@@ -86,15 +94,27 @@
     isLoading = false;
   });
 
-  function handleFileChange(event: Event, language: LanguageEnum) {
+  function handleFileChange(event: Event, language: LanguageEnum, fileType: 'pdf' | 'thumbnail') {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      formData[language].pdfFile = input.files[0];
-      formData[language].pdfFileName = input.files[0].name;
-      formData[language].pdfFileError = "";
+      const file = input.files[0];
+      if (fileType === 'pdf') {
+        formData[language].pdfFile = file;
+        formData[language].pdfFileName = file.name;
+        formData[language].pdfFileError = "";
+      } else if (fileType === 'thumbnail') {
+        formData[language].thumbnailFile = file;
+        formData[language].thumbnailFileName = file.name;
+        formData[language].thumbnailFileError = "";
+      }
     } else {
-      formData[language].pdfFile = null;
-      formData[language].pdfFileName = "";
+      if (fileType === 'pdf') {
+        formData[language].pdfFile = null;
+        formData[language].pdfFileName = "";
+      } else if (fileType === 'thumbnail') {
+        formData[language].thumbnailFile = null;
+        formData[language].thumbnailFileName = "";
+      }
     }
   }
 
@@ -102,13 +122,13 @@
     return uuidv4().split("-")[0];
   }
 
-  async function uploadFile(file: File, language: LanguageEnum) {
+  async function uploadFile(file: File, language: LanguageEnum, folder: string) {
     const fileExtension = file.name.split(".").pop();
     const randomPart = getRandomString();
     const fileName = `${language}_${randomPart}.${fileExtension}`;
 
     const { data, error } = await supabase.storage
-      .from("magazine-pdf-file")
+      .from(folder)
       .upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
@@ -120,7 +140,7 @@
     }
 
     // Return the full path where the file was uploaded
-    return `magazine-pdf-file/${fileName}`;
+    return `${folder}/${fileName}`;
   }
 
   async function formSubmit() {
@@ -133,7 +153,11 @@
 
       // Ensure required fields are present and valid
       if (!formData[language].pdfFile && !formData[language].pdfFileName) {
-        formData[language].pdfFileError = "File is required";
+        formData[language].pdfFileError = "PDF file is required";
+        isValid = false;
+      }
+      if (!formData[language].thumbnailFile && !formData[language].thumbnailFileName) {
+        formData[language].thumbnailFileError = "Thumbnail image is required";
         isValid = false;
       }
       if (
@@ -150,16 +174,28 @@
 
       if (isValid) {
         try {
-          let imagePath = formData[language].pdfFile as string;
+          let pdfPath = formData[language].pdfFile as string;
+          let thumbnailPath = formData[language].thumbnailFile as string;
+
           if (formData[language].pdfFile instanceof File) {
-            imagePath = await uploadFile(
+            pdfPath = await uploadFile(
               formData[language].pdfFile as File,
-              language
+              language,
+              'magazine-pdf-file'
+            );
+          }
+
+          if (formData[language].thumbnailFile instanceof File) {
+            thumbnailPath = await uploadFile(
+              formData[language].thumbnailFile as File,
+              language,
+              'magazine-thumbnails'
             );
           }
 
           newspaperLanguageData.push({
-            pdfFile: imagePath,
+            pdfFile: pdfPath,
+            thumbnail: thumbnailPath,
             number: formData[language].number!,
             date: toUtc(formData[language].date!),
             language: language,
@@ -227,9 +263,7 @@
 {#if isLoading}
   <FullPageLoadingIndicator />
 {:else}
-  <div
-    class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto"
-  >
+  <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">
     <div class="w-full">
       <Tabs
         tabStyle="underline"
@@ -239,15 +273,11 @@
         {#each languages as language}
           <TabItem title={language} open={language === selectedLanguage}>
             <div class="text-sm">
-              <b style="color: var(--titleColor);">Enter data for {language}:</b
-              >
+              <b style="color: var(--titleColor);">Enter data for {language}:</b>
               <div class="mb-6 flex justify-between items-start">
                 <div class="my-4">
                   <div class="mb-4">
-                    <Label
-                      style="color: var(--titleColor);"
-                      for={`number-${language}`}>Number</Label
-                    >
+                    <Label style="color: var(--titleColor);" for={`number-${language}`}>Number</Label>
                     <div class:error={formData[language].numberError}>
                       <Input
                         id={`number-${language}`}
@@ -259,16 +289,11 @@
                       />
                     </div>
                     {#if formData[language].numberError}
-                      <p class="text-red-500">
-                        {formData[language].numberError}
-                      </p>
+                      <p class="text-red-500">{formData[language].numberError}</p>
                     {/if}
                   </div>
                   <div class="mb-4">
-                    <Label
-                      style="color: var(--titleColor);"
-                      for={`date-${language}`}>Date</Label
-                    >
+                    <Label style="color: var(--titleColor);" for={`date-${language}`}>Date</Label>
                     <div class:error={formData[language].dateError}>
                       <Input
                         type="date"
@@ -285,32 +310,18 @@
                     {/if}
                   </div>
                   <div class="mb-4">
-                    <label class="text-titleColor" for={`image-${language}`}
-                      >Pdf File</label
-                    >
-                    <div
-                      class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
-                    >
+                    <label class="text-titleColor" for={`pdfFile-${language}`}>PDF File</label>
+                    <div class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded">
                       <Input
                         type="file"
                         accept="application/pdf"
-                        id={`image-${language}`}
+                        id={`pdfFile-${language}`}
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        on:change={(event) => handleFileChange(event, language)}
+                        on:change={(event) => handleFileChange(event, language, 'pdf')}
                       />
-                      <div
-                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
-                      >
-                        <IconUpload
-                          stroke={2}
-                          class="mx-auto mb-4 w-12 h-12"
-                          style="color: var(--titleColor);"
-                        />
-                        <p style="color: var(--titleColor);">
-                          Drop your pdf file here, or <span
-                            class="text-titleColor underline">browse</span
-                          >
-                        </p>
+                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300">
+                        <IconUpload stroke={2} class="mx-auto mb-4 w-12 h-12" style="color: var(--titleColor);" />
+                        <p style="color: var(--titleColor);">Drop your PDF file here, or <span class="text-titleColor underline">browse</span></p>
                         <p class="text-gray-500 text-sm mt-2">Supports: PDF</p>
                       </div>
                     </div>
@@ -325,9 +336,37 @@
                       </span>
                     {/if}
                     {#if formData[language].pdfFileError}
-                      <p class="text-red-500 mt-2">
-                        {formData[language].pdfFileError}
-                      </p>
+                      <p class="text-red-500 mt-2">{formData[language].pdfFileError}</p>
+                    {/if}
+                  </div>
+                  <div class="mb-4">
+                    <label class="text-titleColor" for={`thumbnailFile-${language}`}>Thumbnail Image</label>
+                    <div class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        id={`thumbnailFile-${language}`}
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        on:change={(event) => handleFileChange(event, language, 'thumbnail')}
+                      />
+                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300">
+                        <IconUpload stroke={2} class="mx-auto mb-4 w-12 h-12" style="color: var(--titleColor);" />
+                        <p style="color: var(--titleColor);">Drop your thumbnail file here, or <span class="text-titleColor underline">browse</span></p>
+                        <p class="text-gray-500 text-sm mt-2">Supports: JPEG, PNG</p>
+                      </div>
+                    </div>
+                    {#if formData[language].thumbnailFile}
+                      <span class="block mt-2 text-sm text-gray-700">
+                        Selected File: <a
+                          href={getObjectUrl(formData[language].thumbnailFile)}
+                          target="_blank"
+                          class="text-orange-500 underline"
+                          >{formData[language].thumbnailFileName}</a
+                        >
+                      </span>
+                    {/if}
+                    {#if formData[language].thumbnailFileError}
+                      <p class="text-red-500 mt-2">{formData[language].thumbnailFileError}</p>
                     {/if}
                   </div>
                 </div>

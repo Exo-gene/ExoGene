@@ -29,6 +29,9 @@
         pdfFile: null,
         pdfFileName: "",
         pdfFileError: "",
+        thumbnailFile: null,
+        thumbnailFileName: "",
+        thumbnailFileError: "",
         numberError: "",
         number: 0,
         date: "",
@@ -39,15 +42,31 @@
     {} as Record<LanguageEnum, FormData>
   );
 
-  function handleFileChange(event: Event, language: LanguageEnum) {
+  function handleFileChange(
+    event: Event,
+    language: LanguageEnum,
+    fileType: "pdf" | "thumbnail"
+  ) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      formData[language].pdfFile = input.files[0];
-      formData[language].pdfFileName = input.files[0].name;
-      formData[language].pdfFileError = "";
+      const file = input.files[0];
+      if (fileType === "pdf") {
+        formData[language].pdfFile = file;
+        formData[language].pdfFileName = file.name;
+        formData[language].pdfFileError = "";
+      } else if (fileType === "thumbnail") {
+        formData[language].thumbnailFile = file;
+        formData[language].thumbnailFileName = file.name;
+        formData[language].thumbnailFileError = "";
+      }
     } else {
-      formData[language].pdfFile = null;
-      formData[language].pdfFileName = "";
+      if (fileType === "pdf") {
+        formData[language].pdfFile = null;
+        formData[language].pdfFileName = "";
+      } else if (fileType === "thumbnail") {
+        formData[language].thumbnailFile = null;
+        formData[language].thumbnailFileName = "";
+      }
     }
   }
 
@@ -55,13 +74,17 @@
     return uuidv4().split("-")[0];
   }
 
-  async function uploadFile(file: File, language: LanguageEnum) {
+  async function uploadFile(
+    file: File,
+    language: LanguageEnum,
+    folder: string
+  ) {
     const fileExtension = file.name.split(".").pop();
     const randomPart = getRandomString();
     const fileName = `${language}_${randomPart}.${fileExtension}`;
 
     const { data, error } = await supabase.storage
-      .from("magazine-pdf-file")
+      .from(folder)
       .upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
@@ -73,7 +96,7 @@
     }
 
     // Return the full path where the file was uploaded
-    return `magazine-pdf-file/${fileName}`;
+    return `${folder}/${fileName}`;
   }
 
   async function formSubmit() {
@@ -85,7 +108,11 @@
       let isValid = true;
 
       if (!formData[language].pdfFile) {
-        formData[language].pdfFileError = "File is required";
+        formData[language].pdfFileError = "PDF file is required";
+        isValid = false;
+      }
+      if (!formData[language].thumbnailFile) {
+        formData[language].thumbnailFileError = "Thumbnail image is required";
         isValid = false;
       }
       if (!formData[language].number) {
@@ -99,18 +126,33 @@
 
       if (isValid) {
         try {
-          const file = formData[language].pdfFile;
-          let imagePath = "";
-          if (file instanceof File) {
-            imagePath = await uploadFile(file, language);
+          const pdfFile = formData[language].pdfFile;
+          const thumbnailFile = formData[language].thumbnailFile;
+          let pdfPath = "";
+          let thumbnailPath = "";
+          if (pdfFile instanceof File) {
+            pdfPath = await uploadFile(pdfFile, language, "magazine-pdf-file");
           } else {
-            console.error(`Expected a File, but received ${typeof file}`);
+            console.error(`Expected a File, but received ${typeof pdfFile}`);
+            isValid = false;
+          }
+          if (thumbnailFile instanceof File) {
+            thumbnailPath = await uploadFile(
+              thumbnailFile,
+              language,
+              "magazine-thumbnails"
+            );
+          } else {
+            console.error(
+              `Expected a File, but received ${typeof thumbnailFile}`
+            );
             isValid = false;
           }
 
           if (isValid) {
             newspaperLanguageData.push({
-              pdfFile: imagePath,
+              pdfFile: pdfPath,
+              thumbnail: thumbnailPath,
               number: formData[language].number,
               date: toUtc(formData[language].date),
               language: language,
@@ -227,8 +269,8 @@
                     {/if}
                   </div>
                   <div class="mb-4">
-                    <label class="text-titleColor" for={`image-${language}`}
-                      >Pdf File</label
+                    <label class="text-titleColor" for={`pdfFile-${language}`}
+                      >PDF File</label
                     >
                     <div
                       class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
@@ -236,9 +278,10 @@
                       <Input
                         type="file"
                         accept="application/pdf"
-                        id={`image-${language}`}
+                        id={`pdfFile-${language}`}
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        on:change={(event) => handleFileChange(event, language)}
+                        on:change={(event) =>
+                          handleFileChange(event, language, "pdf")}
                       />
                       <div
                         class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
@@ -249,7 +292,7 @@
                           style="color: var(--titleColor);"
                         />
                         <p style="color: var(--titleColor);">
-                          Drop your pdf file here, or <span
+                          Drop your PDF file here, or <span
                             class="text-titleColor underline">browse</span
                           >
                         </p>
@@ -268,6 +311,52 @@
                       </p>
                     {/if}
                   </div>
+                  <div class="mb-4">
+                    <label
+                      class="text-titleColor"
+                      for={`thumbnailFile-${language}`}>Thumbnail Image</label
+                    >
+                    <div
+                      class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                    >
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        id={`thumbnailFile-${language}`}
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        on:change={(event) =>
+                          handleFileChange(event, language, "thumbnail")}
+                      />
+                      <div
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                      >
+                        <IconUpload
+                          stroke={2}
+                          class="mx-auto mb-4 w-12 h-12"
+                          style="color: var(--titleColor);"
+                        />
+                        <p style="color: var(--titleColor);">
+                          Drop your image file here, or <span
+                            class="text-titleColor underline">browse</span
+                          >
+                        </p>
+                        <p class="text-gray-500 text-sm mt-2">
+                          Supports: JPEG, PNG
+                        </p>
+                      </div>
+                    </div>
+                    {#if formData[language].thumbnailFile}
+                      <span class="block mt-2 text-sm text-gray-700"
+                        >Selected File: {formData[language]?.thumbnailFile
+                          ?.name}</span
+                      >
+                    {/if}
+                    {#if formData[language].thumbnailFileError}
+                      <p class="text-red-500 mt-2">
+                        {formData[language].thumbnailFileError}
+                      </p>
+                    {/if}
+                  </div>
                 </div>
               </div>
             </div>
@@ -282,7 +371,10 @@
 {/if}
 
 {#if showToast}
-  <Toast message="New newspaper has been inserted successfully" type="success" />
+  <Toast
+    message="New newspaper has been inserted successfully"
+    type="success"
+  />
 {/if}
 
 <div class="pt-5 lg:pt-10 flex flex-col justify-center max-w-screen-lg mx-auto">

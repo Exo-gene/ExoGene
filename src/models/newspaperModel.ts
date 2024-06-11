@@ -15,11 +15,13 @@ export interface NewspaperLanguageModel {
   date: Date;
   newspaper_id: number;
   pdfFile: string;
+  thumbnailFile: string;
   language: LanguageEnum;
 }
 
 export interface NewspaperLanguageModelToUpdate {
   pdfFile: string;
+  thumbnailFile: string;
   language: LanguageEnum;
   number: number;
   date: Date;
@@ -32,6 +34,9 @@ export interface FormData {
   pdfFile: File | string | null;
   pdfFileName?: string;
   pdfFileError: string;
+  thumbnailFile: File | string | null;
+  thumbnailFileName?: string;
+  thumbnailFileError: string;
   numberError: string;
   number?: number;
   date?: string;
