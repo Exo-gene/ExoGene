@@ -21,7 +21,7 @@
   export let editData: any;
   export let handleDelete: (itemId: number) => void;
   export let tableHeaders;
-  export let pageName: string = "";
+  export let pageName = "";
 
   // Function to get the translation based on priority
   function getTranslation(item: any) {
@@ -40,6 +40,7 @@
     }
     return translation;
   }
+  console.log("Items:", items);
 </script>
 
 <Table>

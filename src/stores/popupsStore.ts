@@ -1,19 +1,19 @@
 import { writable } from "svelte/store";
 import type { SupabaseClient } from "@supabase/supabase-js";
-// import type {
-//   AdvertisementDataModel,
-//   AdvertisementDataModelToUpdate,
-//   AdvertisementLanguageModel,
-//   AdvertisementLanguageModelToUpdate,
-//   AdvertisementModel,
-// } from "../models/advertisementModel";
+import type {
+  PopupsDataModel,
+  PopupsDataModelToUpdate,
+  PopupsLanguageModel,
+  PopupsLanguageModelToUpdate,
+  PopupsModel,
+} from "../models/popupsModel";
 
 const createPopupsStore = () => {
-  const { subscribe, set, update } = writable<any[]>([]);
+  const { subscribe, set, update } = writable<PopupsModel[]>([]);
 
   return {
     subscribe,
-    set: (popups: any[]) => {
+    set: (popups: PopupsModel[]) => {
       set(popups);
     },
     getPopupsData: async (
@@ -21,7 +21,7 @@ const createPopupsStore = () => {
       pageSize: number,
       pageNum: number
     ) => {
-      let query = await supabase.rpc("get_paged_popups", {
+      let query = await supabase.rpc("get_paginated_popups", {
         page_size: pageSize,
         page_num: pageNum,
       });
@@ -36,14 +36,14 @@ const createPopupsStore = () => {
     deletePopupsData: async (PopupsId: number, supabase: SupabaseClient) => {
       try {
         const { error } = await supabase.rpc(
-          "delete_popups_and_popups_translations",
+          "delete_popup_and_popup_translations",
           {
             data: { id: PopupsId },
           }
         );
 
         if (error) {
-          console.error("Error deleting Popups:", error);
+          console.error("Error deleting Popup:", error);
           throw error;
         }
 
@@ -51,7 +51,7 @@ const createPopupsStore = () => {
           currentPopupsId.filter((popups) => popups.id !== PopupsId)
         );
       } catch (error) {
-        console.error("Failed to delete popups:", error);
+        console.error("Failed to delete popup:", error);
         throw error;
       }
     },
@@ -62,15 +62,15 @@ const createPopupsStore = () => {
     ) => {
       try {
         const { data, error } = await supabase.rpc(
-          "insert_popups_and_popups_translations",
+          "insert_popup_and_popup_translations",
           {
-            popups_data: popupsObject,
-            popups_lang_data: popupsLanguageData,
+            popup_data: popupsObject,
+            popup_lang_data: popupsLanguageData,
           }
         );
 
         if (error) {
-          console.error("Error inserting Popups:", error);
+          console.error("Error inserting Popup:", error);
           throw error;
         }
 
@@ -80,13 +80,13 @@ const createPopupsStore = () => {
 
         return data;
       } catch (error) {
-        console.error("Failed to insert Popups:", error);
+        console.error("Failed to insert Popup:", error);
         throw error;
       }
     },
     updatePopupsData: async (
-      popupsObject: any,
-      popupsLanguageData: any[],
+      popupsObject: PopupsDataModelToUpdate,
+      popupsLanguageData: PopupsLanguageModelToUpdate[],
       supabase: SupabaseClient
     ) => {
       try {
