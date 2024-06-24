@@ -64,8 +64,20 @@ export const items = [
   {
     label: "News",
     url: "/dashboard/news",
-    icon: "<i class='fa fa-newspaper'></i>",
+    icon: "<i class='fa-solid fa-rectangle-ad'></i>",
     policies: [Policies.READ_NEWS],
+  },
+  {
+    label: "CustomTheme",
+    url: "/dashboard/customTheme",
+    icon: "<i class='fa-solid fa-palette'></i>",
+    policies: [Policies.READ_CUSTOMTHEME],
+  },
+  {
+    label: "popups",
+    url: "/dashboard/popups",
+    icon: "<i class='fa-solid fa-palette'></i>",
+    policies: [Policies.READ_POPUPS],
   },
   {
     label: "Setting",

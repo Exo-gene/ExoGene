@@ -17,7 +17,7 @@
   let isLoading = true;
   let userData: any = [];
   let openModal = false;
-  let pageName: any = "user";
+  let pageName: string = "user";
   $: userData = $userStore?.data || [];
 
   onMount(async () => {

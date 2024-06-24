@@ -76,7 +76,7 @@
   const tableHeaders = ["ID", "Created At", "Language", "Number", "Action"];
   $: totalPages = Math.ceil($newspaperStore[0]?.count / pageSize);
   let newspaper = $newspaperStore[0]?.items;
-  $: newspaper = $newspaperStore[0]?.items;
+  $: newspaper = $newspaperStore[0]?.items || [];
 </script>
 
 {#if isLoading}

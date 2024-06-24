@@ -11,6 +11,9 @@
   import { aboutStore } from "../../../stores/aboutStore";
   import { LanguageEnum } from "../../../models/languageEnum";
   import QuillEditor from "$lib/components/editor/QuillEditor.svelte";
+  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
+  import { authStore } from "../../../stores/Auth.Store";
+  import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
 
   const id = 1;
   let showToast = false;
@@ -134,8 +137,11 @@
           </TabItem>
         {/each}
       </Tabs>
+
       <div class="flex justify-end p-4">
-        <Button on:click={formSubmit}>Submit</Button>
+        {#if checkUserPolicies([Policies.UPDATE_ABOUT], $authStore)}
+          <Button on:click={formSubmit}>Update</Button>
+        {/if}
       </div>
     </div>
   </div>

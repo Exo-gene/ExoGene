@@ -21,16 +21,22 @@
   export let editData: any;
   export let handleDelete: (itemId: number) => void;
   export let tableHeaders;
-  export let pageName = "";
+  export let pageName: string = "";
 
   // Function to get the translation based on priority
-  function getTranslation(item:any) {
-    let translation = item.translation.find(t => t.language === LanguageEnum.EN && t.title !== null);
+  function getTranslation(item: any) {
+    let translation = item.translation.find(
+      (t) => t.language === LanguageEnum.EN && t.title !== null
+    );
     if (!translation) {
-      translation = item.translation.find(t => t.language === LanguageEnum.CKB && t.title !== null);
+      translation = item.translation.find(
+        (t) => t.language === LanguageEnum.CKB && t.title !== null
+      );
     }
     if (!translation) {
-      translation = item.translation.find(t => t.language === LanguageEnum.AR && t.title !== null);
+      translation = item.translation.find(
+        (t) => t.language === LanguageEnum.AR && t.title !== null
+      );
     }
     return translation;
   }
@@ -59,7 +65,10 @@
           {#if getTranslation(item).title}
             <TableBodyCell>
               <span>
-                {getTranslation(item).title.slice(0, 40)}{getTranslation(item).title.length > 40 ? "..." : ""}
+                {getTranslation(item).title.slice(0, 40)}{getTranslation(item)
+                  .title.length > 40
+                  ? "..."
+                  : ""}
               </span>
             </TableBodyCell>
           {/if}

@@ -86,7 +86,7 @@
     flag = false; // Set flag to false after data is fetched
   }
 
- let pageName: any = "category";
+ let pageName: string = "category";
 
   function editCategory(categoryId: number) {
     goto(`/dashboard/categories/${categoryId}`);

@@ -10,6 +10,9 @@
   } from "../../../models/contactModel";
   import { contactStore } from "../../../stores/contactStore";
   import { LanguageEnum } from "../../../models/languageEnum";
+  import { authStore } from "../../../stores/Auth.Store";
+  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
+  import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
 
   const id = 1;
   let showToast = false;
@@ -220,7 +223,9 @@
         {/each}
       </Tabs>
       <div class="flex justify-end p-4">
-        <Button on:click={formSubmit}>Submit</Button>
+        {#if checkUserPolicies([Policies.UPDATE_CONTACT], $authStore)}
+          <Button on:click={formSubmit}>Update</Button>
+        {/if}
       </div>
     </div>
   </div>

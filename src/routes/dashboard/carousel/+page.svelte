@@ -76,7 +76,7 @@
   const tableHeaders = ["ID", "Created At", "Language", "Title", "Action"];
   $: totalPages = Math.ceil($carouselStore[0]?.count / pageSize);
   let carousel = $carouselStore[0]?.items;
-  $: carousel = $carouselStore[0]?.items;
+  $: carousel = $carouselStore[0]?.items || [];
 </script>
 
 {#if isLoading}
@@ -86,6 +86,7 @@
     {#if checkUserPolicies([Policies.CREATE_CAROUSEL], $authStore)}
       <InsertButton insertData={createCarousel} />
     {/if}
+
     <CustomTable
       items={carousel}
       editData={editCarousel}
