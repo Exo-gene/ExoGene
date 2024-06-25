@@ -69,25 +69,52 @@
           >
             {#if selectedTheme && selectedTheme.id === theme.id}
               <div class="p-4">
-                <div class="flex items-center border-gray-500 border-b-2 py-4">
-                  <div
-                    class="mx-4 flex flex-col items-center justify-center w-1/2"
-                  >
+                <div
+                  class="flex items-center justify-between border-b-2 border-gray-500 py-4"
+                >
+                  <div class="mx-4 flex flex-col items-center w-1/3">
                     <Label
                       style="color:var(--titleColor)"
-                      for="mainBackgroundColor"
-                      >Main Background
-                    </Label>
+                      for="mainBackgroundColor">Main Background</Label
+                    >
                     <input
                       type="color"
                       id="mainBackgroundColor"
                       bind:value={selectedTheme.mainBackgroundColor}
                       class="w-full h-12"
                     />
+                    <span class="text-center mt-2"
+                      >{selectedTheme.mainBackgroundColor}</span
+                    >
                   </div>
-                  <span class="ml-2 w-1/2 text-center"
-                    >{selectedTheme.mainBackgroundColor}</span
-                  >
+                  <div class="mx-4 flex flex-col items-center w-1/3">
+                    <Label style="color:var(--titleColor)" for="backgroundCard"
+                      >Background Card</Label
+                    >
+                    <input
+                      type="color"
+                      id="backgroundCard"
+                      bind:value={selectedTheme.backgroundCard}
+                      class="w-full h-12"
+                    />
+                    <span class="text-center mt-2"
+                      >{selectedTheme.backgroundCard}</span
+                    >
+                  </div>
+                  <div class="mx-4 flex flex-col items-center w-1/3">
+                    <Label style="color:var(--titleColor)" for="textColor"
+                      >Text Color</Label
+                    >
+                    <input
+                      type="color"
+                      id="textColor"
+                      bind:value={selectedTheme.textColor}
+                      class="w-full h-12"
+                    />
+                    <span class="text-center mt-2"
+                      >{selectedTheme.textColor}</span
+                    >
+                  </div>
                 </div>
 
                 {#each Array(7)
@@ -99,9 +126,8 @@
                     >
                       <Label
                         style="color:var(--titleColor)"
-                        for={"section" + section}
-                        >Section {section}
-                      </Label>
+                        for={"section" + section}>Section {section}</Label
+                      >
                       <input
                         type="color"
                         id={"section" + section}

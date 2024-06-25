@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { checkUserPolicies } from '$lib/utils/checkUserPolicies.Utils';
+  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import InsertButton from "../../../lib/components/InsertButton.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
@@ -86,7 +86,7 @@
   <LoadingIndicator />
 {:else}
   <div class="mx-2">
-      {#if checkUserPolicies([Policies.CREATE_ADVERTISEMENT], $authStore)}
+    {#if checkUserPolicies([Policies.CREATE_ADVERTISEMENT], $authStore)}
       <InsertButton insertData={createAdvertisement} />
     {/if}
     <CustomTable

@@ -9,13 +9,12 @@
   } from "flowbite-svelte";
   import { LanguageEnum } from "../../models/languageEnum";
   import { formatDateTime } from "$lib/utils/formatDateTime";
-  // @ts-ignore
   import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
-  // @ts-ignore
   import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { authStore } from "../../stores/Auth.Store";
+  import { onMount } from "svelte";
 
   export let items: any = [];
   export let editData: any;
@@ -24,23 +23,30 @@
   export let pageName = "";
 
   // Function to get the translation based on priority
-  function getTranslation(item: any) {
+  function getTranslation(item) {
+    console.log("Getting translation for item", item);
     let translation = item.translation.find(
-      (t) => t.language === LanguageEnum.EN && t.title !== null
+      (t) => t.language === LanguageEnum.EN && t.title
     );
     if (!translation) {
+      console.log("EN translation not found, checking CKB");
       translation = item.translation.find(
-        (t) => t.language === LanguageEnum.CKB && t.title !== null
+        (t) => t.language === LanguageEnum.CKB && t.title
       );
     }
     if (!translation) {
+      console.log("CKB translation not found, checking AR");
       translation = item.translation.find(
-        (t) => t.language === LanguageEnum.AR && t.title !== null
+        (t) => t.language === LanguageEnum.AR && t.title
       );
     }
+    console.log("Translation found:", translation);
     return translation;
   }
-  console.log("Items:", items);
+
+  onMount(() => {
+    console.log(items);
+  });
 </script>
 
 <Table>
@@ -55,48 +61,44 @@
   <TableBody tableBodyClass="divide-y">
     {#each items as item}
       {#if getTranslation(item)}
-        <TableBodyRow
-          style="background-color: var(--tableBackgroundColor); color:var(--tableColor)"
-        >
-          <TableBodyCell class="!p-4"></TableBodyCell>
-          <TableBodyCell>{item.id}</TableBodyCell>
-          <TableBodyCell class="font-semibold text-gray-700">
-            {formatDateTime(item.created_at.toString())}
-          </TableBodyCell>
-          {#if getTranslation(item).title}
-            <TableBodyCell>
-              <span>
-                {getTranslation(item).title.slice(0, 40)}{getTranslation(item)
-                  .title.length > 40
-                  ? "..."
-                  : ""}
-              </span>
+        {#await Promise.resolve(getTranslation(item)) then translation}
+          <TableBodyRow
+            style="background-color: var(--tableBackgroundColor); color:var(--tableColor)"
+          >
+            <TableBodyCell class="!p-4"></TableBodyCell>
+            <TableBodyCell>{item.id}</TableBodyCell>
+            <TableBodyCell class="font-semibold text-gray-700">
+              {formatDateTime(item.created_at.toString())}
             </TableBodyCell>
-          {/if}
-          <TableBodyCell>
-            <span>{getTranslation(item).language}</span>
-          </TableBodyCell>
-          {#if getTranslation(item).number}
+            {#if translation.title}
+              <TableBodyCell>
+                <span>
+                  {translation.title.slice(0, 40)}{translation.title.length > 40
+                    ? "..."
+                    : ""}
+                </span>
+              </TableBodyCell>
+            {/if}
             <TableBodyCell>
-              <span>{getTranslation(item).number}</span>
+              <span>{translation.language}</span>
             </TableBodyCell>
-          {/if}
-          <TableBodyCell class="flex space-x-3">
-            {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
-              <button
-                class="font-medium text-green-600 hover:underline dark:text-green-600"
-                on:click={() => editData(item.id)}
-              >
-                <IconEdit stroke={2} class="text-green-700" />
-              </button>
-            {/if}
-            {#if checkUserPolicies([Policies[`DELETE_${pageName.toUpperCase()}`]], $authStore)}
-              <button on:click={() => handleDelete(item.id)}
-                ><IconTrash stroke={2} class="text-red-700" /></button
-              >
-            {/if}
-          </TableBodyCell>
-        </TableBodyRow>
+            <TableBodyCell class="flex space-x-3">
+              {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
+                <button
+                  class="font-medium text-green-600 hover:underline dark:text-green-600"
+                  on:click={() => editData(item.id)}
+                >
+                  <IconEdit stroke={2} class="text-green-700" />
+                </button>
+              {/if}
+              {#if checkUserPolicies([Policies[`DELETE_${pageName.toUpperCase()}`]], $authStore)}
+                <button on:click={() => handleDelete(item.id)}
+                  ><IconTrash stroke={2} class="text-red-700" /></button
+                >
+              {/if}
+            </TableBodyCell>
+          </TableBodyRow>
+        {/await}
       {/if}
     {/each}
   </TableBody>

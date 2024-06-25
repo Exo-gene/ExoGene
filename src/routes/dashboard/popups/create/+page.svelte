@@ -10,28 +10,71 @@
   import { popupsStore } from "../../../../stores/popupsStore";
   import type { FormDataSet } from "../../../../models/popupsModel";
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
+  import { IconUpload } from "@tabler/icons-svelte";
+  import { v4 as uuidv4 } from "uuid"; // Import uuid
 
   let isLoading = false;
 
   let languages = Object.values(LanguageEnum);
   let start_date = "";
   let end_date = "";
-  let selectedNewsId: number = 0;
+  let link = "";
+  let selectedNewsId: number = null;
   let showToast = false;
 
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
+        image: null,
+        imageName: "",
         title: "",
         description: "",
         titleError: "",
         descriptionError: "",
+        imageError: "",
         news_id: null,
       };
       return acc;
     },
     {}
   );
+
+  function handleFileChange(event: Event, language: LanguageEnum) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      formData[language].image = input.files[0];
+      formData[language].imageName = input.files[0].name;
+      formData[language].imageError = "";
+    } else {
+      formData[language].image = null;
+      formData[language].imageName = "";
+    }
+  }
+
+  function getRandomString() {
+    return uuidv4().split("-")[0];
+  }
+
+  async function uploadFile(file: File, language: LanguageEnum) {
+    const fileExtension = file.name.split(".").pop();
+    const randomPart = getRandomString();
+    const fileName = `${language}_${randomPart}.${fileExtension}`;
+
+    const { data, error } = await supabase.storage
+      .from("images")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+
+    // Return the full path where the file was uploaded
+    return `images/${fileName}`;
+  }
 
   async function formSubmit() {
     let isValid = true;
@@ -43,7 +86,7 @@
       formData[language].descriptionError = "";
     });
 
-    // Validation logic
+    // Check if at least one language has both title and description
     languages.forEach((language) => {
       if (formData[language].title && formData[language].description) {
         atLeastOneLanguageValid = true;
@@ -65,6 +108,12 @@
       alert("End date is required");
     }
 
+    // Validation for link and news_id
+    if (link && selectedNewsId) {
+      isValid = false;
+      alert("You can only choose either a Link or a News item, not both.");
+    }
+
     if (!isValid) {
       isLoading = false;
       return;
@@ -76,14 +125,24 @@
       const popupsObject = {
         start_date: toUtc(start_date),
         end_date: toUtc(end_date),
+        link: link,
         news_id: selectedNewsId,
       };
 
-      const popupLanguageData = languages.map((language) => ({
-        title: formData[language].title,
-        description: formData[language].description,
-        language: language,
-      }));
+      const popupLanguageData = await Promise.all(
+        languages.map(async (language) => {
+          let imageUrl = null;
+          if (formData[language].image) {
+            imageUrl = await uploadFile(formData[language].image, language);
+          }
+          return {
+            title: formData[language].title,
+            description: formData[language].description,
+            language: language,
+            image: imageUrl,
+          };
+        })
+      );
 
       await popupsStore.insertPopupsData(
         popupsObject,
@@ -132,6 +191,15 @@
           type="datetime-local"
           id="end-date"
           bind:value={end_date}
+        />
+      </div>
+      <div class="mb-4">
+        <Label for="start-date">Link</Label>
+        <Input
+          class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+          type="text"
+          id="link"
+          bind:value={link}
         />
       </div>
       <div class="mt-3">
@@ -185,6 +253,46 @@
                   </p>
                 {/if}
               </div>
+
+              <div class="mb-4">
+                <label class="text-titleColor" for={`image-${language}`}
+                  >Image (Optional)</label
+                >
+                <div
+                  class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id={`image-${language}`}
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    on:change={(event) => handleFileChange(event, language)}
+                  />
+                  <div
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                  >
+                    <IconUpload
+                      stroke={2}
+                      class="mx-auto mb-4 w-12 h-12"
+                      style="color: var(--titleColor);"
+                    />
+                    <p style="color: var(--titleColor);">
+                      Drop your image here, or <span
+                        class="text-titleColor underline">browse</span
+                      >
+                    </p>
+                    <p class="text-gray-500 text-sm mt-2">
+                      Supports: JPG, JPEG2000, PNG
+                    </p>
+                  </div>
+                </div>
+
+                {#if formData[language].imageName}
+                  <span class="block mt-2 text-sm text-gray-700"
+                    >Selected File: {formData[language].imageName}</span
+                  >
+                {/if}
+              </div>
             </div>
           </TabItem>
         {/each}
@@ -197,10 +305,7 @@
 {/if}
 
 {#if showToast}
-  <Toast
-    message="New advertisement has been inserted successfully"
-    type="success"
-  />
+  <Toast message="New popup has been inserted successfully" type="success" />
 {/if}
 
 <style>

@@ -16,7 +16,7 @@
   let itemIdToDelete: number | null = null;
   let currentPage = 1;
   let totalPages = 1;
-  const pageSize = 3;
+  const pageSize = 10;
   let isLoading = true;
 
   // Fetch initial data
@@ -74,7 +74,7 @@
     goto(`/dashboard/popups/${popupId}`);
   }
 
-  const tableHeaders = ["ID", "Created At", "Language", "Action"];
+  const tableHeaders = ["ID", "Created At", "Title", "Language", "Action"];
   $: totalPages = Math.ceil($popupsStore[0]?.count / pageSize);
   let popups = $popupsStore[0]?.items;
   $: popups = $popupsStore[0]?.items || [];

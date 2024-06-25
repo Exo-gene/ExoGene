@@ -76,7 +76,7 @@ export const items = [
   {
     label: "popups",
     url: "/dashboard/popups",
-    icon: "<i class='fa-solid fa-palette'></i>",
+    icon: "<i class='fa-solid fa-bell'></i>",
     policies: [Policies.READ_POPUPS],
   },
   {

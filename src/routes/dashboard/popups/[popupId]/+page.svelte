@@ -8,8 +8,9 @@
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
   import { toLocaleDateFormat, toUtc } from "$lib/utils/dateTimeFormat.js";
   import { LanguageEnum } from "../../../../models/languageEnum";
-  import { popupsStore } from "../../../../stores/popupsStore";
   import { page } from "$app/stores";
+  import { v4 as uuidv4 } from "uuid"; // Import uuid
+  import { IconUpload } from "@tabler/icons-svelte";
   import type { FormDataSet } from "../../../../models/popupsModel";
 
   const id = +$page.params.popupId;
@@ -17,23 +18,27 @@
   let showToast = false;
   let start_date = "";
   let end_date = "";
+  let link = "";
   let languages = Object.values(LanguageEnum);
-  let selectedNewsId: number = 0;
+  let selectedNewsId: number = null;
 
   let formData: FormDataSet = languages.reduce(
     (acc: FormDataSet, language: LanguageEnum) => {
       acc[language] = {
+        image: null,
+        imageName: "",
         title: "",
         description: "",
         titleError: "",
         descriptionError: "",
+        imageError: "",
         news_id: null,
+        existingImageUrl: null,
       };
       return acc;
     },
-    {}
+    {} as FormDataSet
   );
-
   onMount(async () => {
     isLoading = true;
 
@@ -53,9 +58,8 @@
       // Convert UTC dates to local dates
       start_date = toLocaleDateFormat(popup.start_date);
       end_date = toLocaleDateFormat(popup.end_date);
-
       selectedNewsId = popup.news_id;
-
+      link = popup.link;
       // Populate formData with existing data
       popup.translations.forEach((translation: any) => {
         const language = translation.language;
@@ -65,12 +69,50 @@
           titleError: "",
           descriptionError: "",
           news_id: popup.news_id,
+          existingImageUrl: translation.image,
         };
       });
     }
 
     isLoading = false;
   });
+
+  function handleFileChange(event: Event, language: LanguageEnum) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      formData[language].image = input.files[0];
+      formData[language].imageName = input.files[0].name;
+      formData[language].imageError = "";
+    } else {
+      formData[language].image = null;
+      formData[language].imageName = "";
+    }
+  }
+
+  function getRandomString() {
+    return uuidv4().split("-")[0];
+  }
+
+  async function uploadFile(file: File, language: LanguageEnum) {
+    const fileExtension = file.name.split(".").pop();
+    const randomPart = getRandomString();
+    const fileName = `${language}_${randomPart}.${fileExtension}`;
+
+    const { data, error } = await supabase.storage
+      .from("images")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+
+    // Return the full path where the file was uploaded
+    return `images/${fileName}`;
+  }
 
   function onNewsSelected(event: CustomEvent) {
     selectedNewsId = event.detail;
@@ -115,6 +157,12 @@
       alert("End date is required");
     }
 
+    // Validation for link and news_id
+    if (link && selectedNewsId) {
+      isValid = false;
+      alert("You can only choose either a Link or a News item, not both.");
+    }
+
     if (!isValid) {
       isLoading = false;
       return;
@@ -127,14 +175,24 @@
         id, // Include the ID for updating
         start_date: toUtc(start_date),
         end_date: toUtc(end_date),
+        link: link,
         news_id: selectedNewsId,
       };
 
-      const popupLanguageData = languages.map((language) => ({
-        title: formData[language].title,
-        description: formData[language].description,
-        language: language,
-      }));
+      const popupLanguageData = await Promise.all(
+        languages.map(async (language) => {
+          let imageUrl = formData[language].existingImageUrl;
+          if (formData[language].image) {
+            imageUrl = await uploadFile(formData[language].image, language);
+          }
+          return {
+            title: formData[language].title,
+            description: formData[language].description,
+            language: language,
+            image: imageUrl, // Save the image URL
+          };
+        })
+      );
 
       await supabase.rpc("update_popups", {
         popup_data: popupsObject,
@@ -152,6 +210,15 @@
       isLoading = false;
     }
   }
+
+  const getObjectUrl = (file: File | string | null): string => {
+    if (file instanceof File) {
+      return URL.createObjectURL(file);
+    } else if (typeof file === "string" && file) {
+      return `${import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL}/${file}`;
+    }
+    return "";
+  };
 </script>
 
 {#if isLoading}
@@ -177,6 +244,15 @@
           type="datetime-local"
           id="end-date"
           bind:value={end_date}
+        />
+      </div>
+      <div class="mb-4">
+        <Label for="start-date">Link</Label>
+        <Input
+          class="form-input px-4 py-2 rounded-md border-2 border-gray-300"
+          type="text"
+          id="link"
+          bind:value={link}
         />
       </div>
       <div class="mt-3">
@@ -230,6 +306,54 @@
                   </p>
                 {/if}
               </div>
+              <div class="mb-4">
+                <label class="text-titleColor" for={`image-${language}`}
+                  >Image (Optional)</label
+                >
+                <div
+                  class="relative w-full hover:bg-[#D0D0D0] hover:bg-opacity-35 hover:rounded"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id={`image-${language}`}
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    on:change={(event) => handleFileChange(event, language)}
+                  />
+                  <div
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-titleColor transition duration-300"
+                  >
+                    <IconUpload
+                      stroke={2}
+                      class="mx-auto mb-4 w-12 h-12"
+                      style="color: var(--titleColor);"
+                    />
+                    <p style="color: var(--titleColor);">
+                      Drop your image here, or <span
+                        class="text-titleColor underline">browse</span
+                      >
+                    </p>
+                    <p class="text-gray-500 text-sm mt-2">
+                      Supports: JPG, JPEG2000, PNG
+                    </p>
+                  </div>
+                </div>
+                {#if formData[language].imageName}
+                  <span class="block mt-2 text-sm text-gray-700"
+                    >Selected File: {formData[language].imageName}</span
+                  >
+                {/if}
+                {#if formData[language].image || formData[language].existingImageUrl}
+                  <img
+                    src={getObjectUrl(
+                      formData[language].image ||
+                        formData[language].existingImageUrl
+                    )}
+                    alt={`Image for ${language}`}
+                    class="w-44 h-44 mt-2 rounded"
+                  />
+                {/if}
+              </div>
             </div>
           </TabItem>
         {/each}
@@ -238,9 +362,6 @@
         <Button on:click={formSubmit}>Submit</Button>
       </div>
     </div>
-    {#if isLoading}
-      <FullPageLoadingIndicator />
-    {/if}
   </div>
 {/if}
 

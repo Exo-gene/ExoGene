@@ -73,7 +73,7 @@
     goto(`/dashboard/carousel/${carouselId}`);
   }
 
-  const tableHeaders = ["ID", "Created At", "Language", "Title", "Action"];
+  const tableHeaders = ["ID", "Created At", "Title", "Language", "Action"];
   $: totalPages = Math.ceil($carouselStore[0]?.count / pageSize);
   let carousel = $carouselStore[0]?.items;
   $: carousel = $carouselStore[0]?.items || [];
