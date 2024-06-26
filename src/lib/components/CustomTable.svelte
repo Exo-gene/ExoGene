@@ -40,11 +40,11 @@
       return translation;
     } else {
       let translation = item.translation.find(
-        (t) => t.language === LanguageEnum.CKB && t.title !== ""
+        (t) => t.language === LanguageEnum.EN && t.title !== ""
       );
       if (!translation) {
         translation = item.translation.find(
-          (t) => t.language === LanguageEnum.EN && t.title !== ""
+          (t) => t.language === LanguageEnum.CKB && t.title !== ""
         );
       }
       if (!translation) {
