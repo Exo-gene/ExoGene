@@ -2,7 +2,7 @@
   import { Tabs, TabItem, Input } from "flowbite-svelte";
   import { LanguageEnum } from "../../models/languageEnum";
   import { onDestroy } from "svelte";
-  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
+  import { IconUpload } from "@tabler/icons-svelte";
 
   export let languages: LanguageEnum[];
   export let formData: any;

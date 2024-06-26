@@ -9,10 +9,9 @@
   import { v4 as uuidv4 } from "uuid";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
-  import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import NewsDropdown from "$lib/components/NewsDropdown.svelte";
   import type { FormDataSet } from "../../../../models/carouselModel";
-  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
+  import { IconAlertTriangle, IconUpload } from "@tabler/icons-svelte";
 
   let selectedNewsId: number = 0;
   let showAlert = false;

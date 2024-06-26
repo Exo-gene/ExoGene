@@ -8,10 +8,7 @@
   import { onMount } from "svelte";
   import { authStore } from "../../../stores/Auth.Store";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
-  // @ts-ignore
-  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
-  // @ts-ignore
-  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
+  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
 
   let itemIdToDelete: any | null = null;
   let isLoading = true;

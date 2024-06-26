@@ -10,8 +10,8 @@
   import { supabase } from "$lib/supabaseClient";
   // @ts-ignore
   import { debounce } from "lodash-es";
+  import { IconChevronRight } from "@tabler/icons-svelte";
   // @ts-ignore
-  import IconChevronRight from "@tabler/icons-svelte/IconChevronRight.svelte";
 
   export let selectedCategoryIds: number[] = [];
   export let selectedSubCategoryIds: number[] = [];

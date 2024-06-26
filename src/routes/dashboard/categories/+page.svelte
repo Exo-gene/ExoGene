@@ -7,19 +7,12 @@
   import InsertButton from "$lib/components/InsertButton.svelte";
   import { categoriesStore } from "../../../stores/categoriesStore.js";
   import { LanguageEnum } from "../../../models/languageEnum";
-  // @ts-ignore
-  import IconArrowUp from "@tabler/icons-svelte/IconArrowUp.svelte";
-  // @ts-ignore
-  import IconArrowDown from "@tabler/icons-svelte/IconArrowDown.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { authStore } from "../../../stores/Auth.Store";
-  // @ts-ignore
-  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
-  // @ts-ignore
-  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
+  import { IconArrowDown, IconArrowUp, IconEdit, IconTrash } from "@tabler/icons-svelte";
 
   let items: any[] = [];
   let flag = false;

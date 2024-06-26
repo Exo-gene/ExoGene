@@ -18,8 +18,7 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
-  import IconPlus from "@tabler/icons-svelte/IconPlus.svelte";
+  import { IconPlus } from "@tabler/icons-svelte";
 
   export let languages: LanguageEnum[];
   export let formData: FormDataSet;

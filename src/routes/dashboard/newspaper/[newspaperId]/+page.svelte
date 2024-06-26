@@ -8,15 +8,14 @@
   import { v4 as uuidv4 } from "uuid";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
-  import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import type {
     FormData,
     NewspaperLanguageModelToUpdate,
   } from "../../../../models/newspaperModel";
-  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import { toLocaleDate, toUtc } from "$lib/utils/dateTimeFormat";
+  import { IconAlertTriangle } from "@tabler/icons-svelte";
 
   let showAlert = false;
   let alertMessage = "";

@@ -10,6 +10,10 @@ const config = {
 
   kit: {
     adapter: adapter(),
+    env: {
+      dir:"./",
+      publicPrefix: "VITE_",
+    },
     // additional configuration if needed
   },
 };

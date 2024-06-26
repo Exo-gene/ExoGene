@@ -6,15 +6,13 @@
     DropdownHeader, 
   } from "flowbite-svelte"; 
   import { onMount } from "svelte";
-  import IconSun from "@tabler/icons-svelte/IconSun.svelte";
-  import IconMoon from "@tabler/icons-svelte/IconMoon.svelte";
-  import IconMenu2 from "@tabler/icons-svelte/IconMenu2.svelte";
   import { authStore } from "../../stores/Auth.Store";
   import { goto } from "$app/navigation";
   import logo_dark from "../images/logo.png";
   import logo_light from "../images/logo_light.png";
   import logo_sidebar from "../images/tiwar.png";
   import { page } from "$app/stores";
+  import { IconMenu2, IconMoon, IconSun } from "@tabler/icons-svelte";
  
    let currentLogo = logo_dark;
   export let sidebarOpen: boolean;

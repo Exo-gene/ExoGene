@@ -9,12 +9,9 @@
   import { v4 as uuidv4 } from "uuid";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
-  // @ts-ignore
-  import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
   import type { FormData } from "../../../../models/newspaperModel";
-  // @ts-ignore
-  import IconUpload from "@tabler/icons-svelte/IconUpload.svelte";
   import { toUtc } from "$lib/utils/dateTimeFormat";
+  import { IconUpload } from "@tabler/icons-svelte";
 
   let showAlert = false;
   let alertMessage = "";

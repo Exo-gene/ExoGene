@@ -9,17 +9,14 @@ import type { UserRequest } from "$lib/Models/Requests/User.Request.Model";
 import type { User } from "$lib/Models/Entities/User.Entity.Model";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
 import type { SupabaseResponse } from "$lib/Models/Responses/Supabase.Response.Model";
+import { VITE_SERVICE_ROLE_KEY, VITE_SUPABASE_URL } from "$env/static/public";
 
-const supabase = createClient(
-  Enviroments.supabase_url,
-  Enviroments.supabase_service_role_key,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
+const supabase = createClient(VITE_SUPABASE_URL, VITE_SERVICE_ROLE_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
 
 const admin = supabase.auth.admin;
 

@@ -22,10 +22,7 @@
   import { policyStore } from "../../../stores/Policy.Store";
   import { roleStore } from "../../../stores/Role.Store";
   import { roleActionStore } from "../../../stores/Role_Action.Store";
-  // @ts-ignore
-  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
-  // @ts-ignore
-  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
+  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
 
   export let isLoading: boolean = true;
   export let roleModal: boolean = false;

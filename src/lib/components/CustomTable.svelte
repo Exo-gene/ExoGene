@@ -9,12 +9,11 @@
   } from "flowbite-svelte";
   import { LanguageEnum } from "../../models/languageEnum";
   import { formatDateTime } from "$lib/utils/formatDateTime";
-  import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
-  import IconEdit from "@tabler/icons-svelte/IconEdit.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { authStore } from "../../stores/Auth.Store";
   import { onMount } from "svelte";
+  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
 
   export let items: any = [];
   export let editData: any;
@@ -22,31 +21,25 @@
   export let tableHeaders;
   export let pageName = "";
 
+ 
   // Function to get the translation based on priority
-  function getTranslation(item) {
-    console.log("Getting translation for item", item);
+  function getTranslation(item: any) {
+    console.log(item);
     let translation = item.translation.find(
-      (t) => t.language === LanguageEnum.EN && t.title
+      (t) => t.language === LanguageEnum.EN && t.title !== null
     );
     if (!translation) {
-      console.log("EN translation not found, checking CKB");
       translation = item.translation.find(
-        (t) => t.language === LanguageEnum.CKB && t.title
+        (t) => t.language === LanguageEnum.CKB && t.title !== null
       );
     }
     if (!translation) {
-      console.log("CKB translation not found, checking AR");
       translation = item.translation.find(
-        (t) => t.language === LanguageEnum.AR && t.title
+        (t) => t.language === LanguageEnum.AR && t.title !== null
       );
     }
-    console.log("Translation found:", translation);
     return translation;
   }
-
-  onMount(() => {
-    console.log(items);
-  });
 </script>
 
 <Table>
@@ -82,6 +75,11 @@
             <TableBodyCell>
               <span>{translation.language}</span>
             </TableBodyCell>
+            {#if translation.number}
+              <TableBodyCell>
+                <span>{translation.number}</span>
+              </TableBodyCell>
+            {/if}
             <TableBodyCell class="flex space-x-3">
               {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
                 <button
