@@ -9,11 +9,11 @@
   } from "flowbite-svelte";
   import { LanguageEnum } from "../../models/languageEnum";
   import { formatDateTime } from "$lib/utils/formatDateTime";
+  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { authStore } from "../../stores/Auth.Store";
   import { onMount } from "svelte";
-  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
 
   export let items: any = [];
   export let editData: any;
@@ -21,24 +21,39 @@
   export let tableHeaders;
   export let pageName = "";
 
- 
   // Function to get the translation based on priority
   function getTranslation(item: any) {
-    console.log(item);
-    let translation = item.translation.find(
-      (t) => t.language === LanguageEnum.EN && t.title !== null
-    );
-    if (!translation) {
-      translation = item.translation.find(
-        (t) => t.language === LanguageEnum.CKB && t.title !== null
+    if (pageName === "news") {
+      let translation = item.translation.find(
+        (t) => t.language === LanguageEnum.EN && t.title !== null
       );
-    }
-    if (!translation) {
-      translation = item.translation.find(
-        (t) => t.language === LanguageEnum.AR && t.title !== null
+      if (!translation) {
+        translation = item.translation.find(
+          (t) => t.language === LanguageEnum.CKB && t.title !== null
+        );
+      }
+      if (!translation) {
+        translation = item.translation.find(
+          (t) => t.language === LanguageEnum.AR && t.title !== null
+        );
+      }
+      return translation;
+    } else {
+      let translation = item.translation.find(
+        (t) => t.language === LanguageEnum.CKB && t.title !== ""
       );
+      if (!translation) {
+        translation = item.translation.find(
+          (t) => t.language === LanguageEnum.EN && t.title !== ""
+        );
+      }
+      if (!translation) {
+        translation = item.translation.find(
+          (t) => t.language === LanguageEnum.AR && t.title !== ""
+        );
+      }
+      return translation;
     }
-    return translation;
   }
 </script>
 

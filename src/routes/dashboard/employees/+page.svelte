@@ -91,21 +91,21 @@
                 <tr>
                   <td class="p-3 bg-gray-10 border-b-2">
                     <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200 font-semibold"
+                      class="flex justify-start text-[#111827] dark:text-gray-200"
                     >
                       {item.name}
                     </span>
                   </td>
                   <td class="p-3 bg-gray-10 border-b-2">
                     <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200 font-semibold"
+                      class="flex justify-start text-[#111827] dark:text-gray-200"
                     >
                       {item.email}
                     </span>
                   </td>
                   <td class="p-5 bg-gray-10 border-b-2">
                     <span
-                      class="flex justify-end text-[#111827] dark:text-gray-200 font-semibold"
+                      class="flex justify-end text-[#111827] dark:text-gray-200"
                     >
                       {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
                         <button
