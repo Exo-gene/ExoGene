@@ -1,5 +1,4 @@
 import { VITE_SUPABASE_ANON_KEY, VITE_SUPABASE_URL } from "$env/static/public";
-import { Enviroments } from "$lib/Env/Enviroments";
 import { createClient } from "@supabase/supabase-js";
 
 export namespace Supabase {

@@ -4,7 +4,6 @@ import {
   type PostgrestSingleResponse,
   type UserResponse,
 } from "@supabase/supabase-js";
-import { Enviroments } from "$lib/Env/Enviroments";
 import type { UserRequest } from "$lib/Models/Requests/User.Request.Model";
 import type { User } from "$lib/Models/Entities/User.Entity.Model";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
