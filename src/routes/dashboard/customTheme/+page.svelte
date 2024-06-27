@@ -68,21 +68,19 @@
   <div class="pt-5 lg:pt-10 flex justify-center w-full">
     <div class="max-w-screen-md w-full">
       <Tabs
-        open={lightTheme}
         tabStyle="underline"
         defaultClass="bg-[#D0D0D0] flex"
         activeClass="active"
-        defaultActiveTab={0}
       >
         {#if lightTheme}
-          <TabItem title="Light Theme">
+          <TabItem title="Light Theme" open={true}>
             <div class="p-4">
               <ThemeEditor theme={lightTheme} />
             </div>
           </TabItem>
         {/if}
         {#if darkTheme}
-          <TabItem title="Dark Theme">
+          <TabItem title="Dark Theme" open={!lightTheme}>
             <div class="p-4">
               <ThemeEditor theme={darkTheme} />
             </div>
