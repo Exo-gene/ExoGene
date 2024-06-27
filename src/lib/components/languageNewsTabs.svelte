@@ -8,17 +8,9 @@
     Button,
   } from "flowbite-svelte";
   import { LanguageEnum } from "../../models/languageEnum";
-  import type { FormDataSet, AdditionalFile } from "../../models/newsModel";
+  import type { FormDataSet } from "../../models/newsModel";
   import { onDestroy, onMount } from "svelte";
-  import {
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
-  import { IconPlus } from "@tabler/icons-svelte";
+  import { IconPlus, IconUpload } from "@tabler/icons-svelte";
 
   export let languages: LanguageEnum[];
   export let formData: FormDataSet;
