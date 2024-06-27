@@ -8,12 +8,14 @@
   import { authStore } from "../../../stores/Auth.Store";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import type { CustomThemeModel } from "../../../models/customThemeModel";
+  import ThemeEditor from "$lib/components/ThemeEditor.svelte";
 
   let isLoading = false;
   let showToast = false;
   let toastMessage = "";
   let themes: CustomThemeModel[] = [];
-  let selectedTheme: CustomThemeModel | null = null;
+  let lightTheme: CustomThemeModel | null = null;
+  let darkTheme: CustomThemeModel | null = null;
 
   // fetch data from db
   onMount(async () => {
@@ -22,35 +24,40 @@
     isLoading = false;
     if (data) {
       themes = data;
-      selectedTheme = data[0];
+      lightTheme = data.find((theme) => theme.theme === "light") || null;
+      darkTheme = data.find((theme) => theme.theme === "dark") || null;
     } else if (error) {
       console.error(error);
     }
   });
 
-  function handleThemeSelect(theme: CustomThemeModel) {
-    selectedTheme = theme;
-  }
-
-  async function updateTheme() {
-    if (!selectedTheme) return;
+  async function updateThemes() {
     isLoading = true;
-    let { data, error } = await supabase
-      .from("customColor")
-      .update(selectedTheme)
-      .eq("id", selectedTheme.id);
+    let updates = [];
+    if (lightTheme) {
+      updates.push(
+        supabase.from("customColor").update(lightTheme).eq("id", lightTheme.id)
+      );
+    }
+    if (darkTheme) {
+      updates.push(
+        supabase.from("customColor").update(darkTheme).eq("id", darkTheme.id)
+      );
+    }
 
-    isLoading = false;
-    if (data) {
-      toastMessage = "CustomThemeModel updated successfully";
+    try {
+      await Promise.all(updates);
+      toastMessage = "Themes updated successfully";
       showToast = true;
       setTimeout(() => {
         showToast = false;
       }, 2000);
-    } else if (error) {
-      toastMessage = "Error updating theme";
+    } catch (error) {
+      toastMessage = "Error updating themes";
       showToast = true;
       console.error(error);
+    } finally {
+      isLoading = false;
     }
   }
 </script>
@@ -60,98 +67,34 @@
 {:else}
   <div class="pt-5 lg:pt-10 flex justify-center w-full">
     <div class="max-w-screen-md w-full">
-      <Tabs tabStyle="underline" defaultClass="bg-[#D0D0D0] flex">
-        {#each themes as theme}
-          <TabItem
-            title={theme.theme.charAt(0).toUpperCase() + theme.theme.slice(1)}
-            on:click={() => handleThemeSelect(theme)}
-            open={selectedTheme && selectedTheme.id === theme.id}
-          >
-            {#if selectedTheme && selectedTheme.id === theme.id}
-              <div class="p-4">
-                <div
-                  class="flex items-center justify-between border-b-2 border-gray-500 py-4"
-                >
-                  <div class="mx-4 flex flex-col items-center w-1/3">
-                    <Label
-                      style="color:var(--titleColor)"
-                      for="mainBackgroundColor">Main Background</Label
-                    >
-                    <input
-                      type="color"
-                      id="mainBackgroundColor"
-                      bind:value={selectedTheme.mainBackgroundColor}
-                      class="w-full h-12"
-                    />
-                    <span class="text-center mt-2"
-                      >{selectedTheme.mainBackgroundColor}</span
-                    >
-                  </div>
-                  <div class="mx-4 flex flex-col items-center w-1/3">
-                    <Label style="color:var(--titleColor)" for="backgroundCard"
-                      >Background Card</Label
-                    >
-                    <input
-                      type="color"
-                      id="backgroundCard"
-                      bind:value={selectedTheme.backgroundCard}
-                      class="w-full h-12"
-                    />
-                    <span class="text-center mt-2"
-                      >{selectedTheme.backgroundCard}</span
-                    >
-                  </div>
-                  <div class="mx-4 flex flex-col items-center w-1/3">
-                    <Label style="color:var(--titleColor)" for="textColor"
-                      >Text Color</Label
-                    >
-                    <input
-                      type="color"
-                      id="textColor"
-                      bind:value={selectedTheme.textColor}
-                      class="w-full h-12"
-                    />
-                    <span class="text-center mt-2"
-                      >{selectedTheme.textColor}</span
-                    >
-                  </div>
-                </div>
-
-                {#each Array(7)
-                  .fill(0)
-                  .map((_, i) => i + 1) as section}
-                  <div class="flex items-center mt-10 mb-5">
-                    <div
-                      class="mx-4 flex flex-col items-center justify-center w-1/2"
-                    >
-                      <Label
-                        style="color:var(--titleColor)"
-                        for={"section" + section}>Section {section}</Label
-                      >
-                      <input
-                        type="color"
-                        id={"section" + section}
-                        bind:value={selectedTheme[`section${section}`]}
-                        class="w-full h-12"
-                      />
-                    </div>
-                    <span class="ml-2 w-1/2 text-center"
-                      >{selectedTheme[`section${section}`]}</span
-                    >
-                  </div>
-                {/each}
-
-                <div class="flex justify-end">
-                  {#if checkUserPolicies([Policies.UPDATE_CUSTOMTHEME], $authStore)}
-                    <Button on:click={updateTheme}>Update Theme</Button>
-                  {/if}
-                </div>
-              </div>
-            {/if}
+      <Tabs
+        open={lightTheme}
+        tabStyle="underline"
+        defaultClass="bg-[#D0D0D0] flex"
+        activeClass="active"
+        defaultActiveTab={0}
+      >
+        {#if lightTheme}
+          <TabItem title="Light Theme">
+            <div class="p-4">
+              <ThemeEditor theme={lightTheme} />
+            </div>
           </TabItem>
-        {/each}
+        {/if}
+        {#if darkTheme}
+          <TabItem title="Dark Theme">
+            <div class="p-4">
+              <ThemeEditor theme={darkTheme} />
+            </div>
+          </TabItem>
+        {/if}
       </Tabs>
     </div>
+  </div>
+  <div class="mt-6 flex justify-center">
+    {#if checkUserPolicies([Policies.UPDATE_CUSTOMTHEME], $authStore)}
+      <Button on:click={updateThemes}>Update Themes</Button>
+    {/if}
   </div>
 {/if}
 
