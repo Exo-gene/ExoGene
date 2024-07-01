@@ -28,17 +28,14 @@ const createRoleStore = () => {
           if (store.data) {
             store.data = [...store.data, dto];
             store.count = store.data.length;
-            // console.log("Role DTO", store);
-
-            return store;
+             return store;
           } else {
             store.data = [dto];
             store.count = 1;
             return store;
           }
         });
-        // console.log("Role DTO", dto);
-
+        
         return dto;
       } catch (error) {
         update((store) => {

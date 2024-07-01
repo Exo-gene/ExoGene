@@ -55,7 +55,6 @@
       await policyStore.getAll();
       await roleStore.getAll();
       await roleActionStore.getAll();
-      //   console.log("RoleActions",$roleActionStore.data);
     } finally {
       isLoading = false;
     }
@@ -77,7 +76,6 @@
       // Push the policy to the category array
       groupedPolicies[categoryName].push(policy);
     });
-    // console.log("GroupedPolicies", groupedPolicies);
     return groupedPolicies;
   }
 

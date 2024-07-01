@@ -30,7 +30,7 @@
         thumbnailFileName: "",
         thumbnailFileError: "",
         numberError: "",
-        number: 0,
+        number: undefined,
         date: "",
         dateError: "",
       };
@@ -223,7 +223,7 @@
               <b style="color: var(--titleColor);">Enter data for {language}:</b
               >
               <div class="mb-6 flex justify-between items-start">
-                <div class="my-4">
+                <div class="my-4 w-full">
                   <div class="mb-4">
                     <Label
                       style="color: var(--titleColor);"

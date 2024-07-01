@@ -22,7 +22,6 @@
       await roleStore.getAll();
       const id = $page.params.id;
       const data = await userStore.get(id);
-      // console.log(data);
       if (data && data.id) {
         userOptions = {
           id: data.id,

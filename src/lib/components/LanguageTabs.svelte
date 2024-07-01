@@ -57,7 +57,7 @@
       </p>
       <div class="text-sm text-gray-500 dark:text-gray-400 p-2">
         <div class="mb-6 flex justify-between items-start">
-          <div class="mb-6">
+          <div class="mb-6 w-full">
             <div>
               <b style="color: var(--titleColor);"
                 >Enter image file for {language}:</b

@@ -22,11 +22,11 @@
     if ($authStore) {
       return goto("/dashboard/home");
     }
-    // console.log("Not Authenticated");
+    
   }
 
   async function login(loginRequest: LoginRequest) {
-    // console.log(loginRequest);
+    
     const response = await authStore.login(loginRequest.email, loginRequest.password);
     if(response){
       await CheckAuth();
