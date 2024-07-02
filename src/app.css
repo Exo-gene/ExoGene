@@ -16,7 +16,7 @@
 }
 :root {
 /* Light theme colors */
-    --primary-background:#A5371B;
+    --primary-background:#1E90FF;
     --primary-textColor:#D0D0D0;
     --background-color: white;
     --text-color: black;
@@ -35,7 +35,7 @@
 
 [data-theme='dark'] {
     /* Dark theme colors */
-    --primary-background:#A5371B;
+    --primary-background:#1E90FF;
     --primary-textColor:#D0D0D0;
     --background-color: #0c1a35;
     --text-color: #D0D0D0;
