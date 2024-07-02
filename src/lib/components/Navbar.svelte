@@ -3,23 +3,13 @@
     Avatar,
     Dropdown,
     DropdownItem,
-    DropdownHeader, 
-  } from "flowbite-svelte"; 
+    DropdownHeader,
+  } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { authStore } from "../../stores/Auth.Store";
   import { goto } from "$app/navigation";
-  import logo_dark from "../images/logo.png";
-  import logo_light from "../images/logo_light.png";
-  import logo_sidebar from "../images/tiwar.png";
   import { page } from "$app/stores";
-  import { IconMenu2, IconMoon, IconSun } from "@tabler/icons-svelte";
- 
-   let currentLogo = logo_dark;
-  export let sidebarOpen: boolean;
-
-  function toggleSidebar() {
-    sidebarOpen = !sidebarOpen;
-  }
+  import { IconMoon, IconSun } from "@tabler/icons-svelte";
 
   // Toggle theme
   let theme = "light";
@@ -41,16 +31,13 @@
   // Logout function
   async function handleLogout() {
     await authStore.logout();
-    goto('/')
-  }
-    // view user profile
-  async function userProfile(uId : string) {
-    goto(`/dashboard/employees/edit/${uId}`)
+    goto("/");
   }
 
-
-   // Reactive statement to update the logo based on current theme
-  $: currentLogo = theme === "light" ? logo_light : logo_dark;
+  // View user profile
+  async function userProfile(uId: string) {
+    goto(`/dashboard/employees/edit/${uId}`);
+  }
 
   // Function to detect active URL
   $: activeUrl = $page.url.pathname;
@@ -58,7 +45,7 @@
     activeUrl = url;
   }
 
-    // Function to detect current theme based on document attribute
+  // Function to detect current theme based on document attribute
   function getCurrentTheme() {
     return document.documentElement.getAttribute("data-theme") || "light";
   }
@@ -78,20 +65,11 @@
   });
 </script>
 
-<div style="background-color: var(--background-color-nav); color: var(--text-color-nav);">
+<div
+  class="flex justify-end"
+  style="background-color: var(--background-color-nav); color: var(--text-color-nav);"
+>
   <div class="flex items-center justify-between px-4 py-2">
-    <div class="flex items-center justify-start">
-      <div class="mb-2 mr-16 py-2">
-    <img
-      src={sidebarOpen ? currentLogo : logo_sidebar}
-      alt="Logo"
-      class="h-8 w-auto"
-    />
-  </div>
-      <button class="p-2" on:click={toggleSidebar}>
-        <IconMenu2 stroke="2" class="text-gray-700" />
-      </button>
-    </div>
     <div class="flex items-center cursor-pointer">
       <button on:click={toggleTheme} class="mr-4">
         {#if theme === "light"}
@@ -104,17 +82,17 @@
     </div>
   </div>
 </div>
+
 <Dropdown placement="bottom" triggeredBy="#avatar-menu">
   <DropdownHeader>
     <span class="block text-sm">{$authStore?.name}</span>
     <span class="block truncate text-sm font-medium">{$authStore?.email}</span>
   </DropdownHeader>
-  <DropdownItem on:click={()=>userProfile($authStore?.id ?? '')}>Profile</DropdownItem>
-  <!-- <DropdownItem>Settings</DropdownItem> -->
-  <!-- <DropdownDivider /> -->
-  <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>  
+  <DropdownItem on:click={() => userProfile($authStore?.id ?? "")}
+    >Profile</DropdownItem
+  >
+  <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>
 </Dropdown>
-
 
 <style>
   .flex {
@@ -126,9 +104,6 @@
   .justify-between {
     justify-content: space-between;
   }
-  .justify-start {
-    justify-content: flex-start;
-  }
   .cursor-pointer {
     cursor: pointer;
   }
@@ -137,9 +112,6 @@
   }
   .mr-4 {
     margin-right: 1rem;
-  }
-  .text-gray-700 {
-    color: #4a5568;
   }
   .px-4 {
     padding-left: 1rem;

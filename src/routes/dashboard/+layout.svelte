@@ -7,7 +7,6 @@
   import { goto } from "$app/navigation";
   import { authStore } from "../../stores/Auth.Store";
 
-  let sidebarOpen: boolean = true;
   let isLoading: boolean = true;
 
   onMount(async () => {
@@ -27,7 +26,7 @@
 {#if isLoading}
   <LoadingIndicator />
 {:else}
-  <Layout {sidebarOpen}>
-     <slot />
+  <Layout>
+    <slot />
   </Layout>
 {/if}
