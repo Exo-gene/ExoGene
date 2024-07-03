@@ -4,7 +4,7 @@
   import { flip } from "svelte/animate";
   import { dndzone } from "svelte-dnd-action";
   import { supabase } from "$lib/supabaseClient";
-  import InsertButton from "$lib/components/InsertButton.svelte";
+  import InsertButton from "$lib/components/ButtonComponent.svelte";
   import { categoriesStore } from "../../../stores/categoriesStore.js";
   import { LanguageEnum } from "../../../models/languageEnum";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";

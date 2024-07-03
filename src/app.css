@@ -19,8 +19,6 @@
     --primary-background:#1E90FF;
     --primary-textColor:#fff;
     --toggleButtonColor: #B0B0B0; 
-     --background-color-nav: #012853;
-    --text-color-nav: #686868;
     --activeText-color-nav: #D0D0D0;
     --insertButtonColor: #D0D0D0;
     --insertButtonBackgroundColor: #012853;
@@ -28,7 +26,8 @@
     --tableHeaderBackgroundColor: #B0B0B0;   
     --tableColor: #181818;
     --tableBackgroundColor: #D0D0D0;  
-    --titleColor: #686868; 
+    --titleColor: #686868;
+    --backButtonBackgroundColor: #D0D0D0;
     --mainBackgroundColor: #E0E0E0; /* Default value */
     --textColor: #181818;
     --backgroundButtonColor: #1E90FF;
@@ -39,8 +38,6 @@
     --primary-background:#1E90FF;
     --primary-textColor:#fff;
     --toggleButtonColor: #0c1a35;  
-    --background-color-nav: #D0D0D0;
-    --text-color-nav: #686868;
     --activeText-color-nav: #012853;
     --insertButtonColor: #012853;
     --insertButtonBackgroundColor: #D0D0D0;
@@ -48,7 +45,8 @@
     --tableHeaderBackgroundColor: #B0B0B0;  
     --tableColor: #181818;
     --tableBackgroundColor: #D0D0D0; 
-     --titleColor: #D0D0D0;  
+     --titleColor: #D0D0D0; 
+    --backButtonBackgroundColor: #686868;  
     --mainBackgroundColor: #E0E0E0; /* Default value */
     --textColor: #181818;
     --backgroundButtonColor: #1E90FF;

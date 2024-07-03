@@ -8,7 +8,7 @@
 <div class="flex flex-col space-y-4">
   <div class="flex items-center space-x-4 py-4">
     <div class="flex flex-col items-center w-full">
-      <Label style="color:var(--textColor)" for="mainBackgroundColor"
+      <Label style="color:var(--titleColor)" for="mainBackgroundColor"
         >Main Background</Label
       >
       <input
@@ -20,7 +20,7 @@
       <span class="mt-2">{theme.mainBackgroundColor}</span>
     </div>
     <div class="flex flex-col items-center w-full">
-      <Label style="color:var(--textColor)" for="backgroundButtonColor"
+      <Label style="color:var(--titleColor)" for="backgroundButtonColor"
         >backgroundButtonColor</Label
       >
       <input
@@ -32,7 +32,7 @@
       <span class="mt-2">{theme.backgroundButtonColor}</span>
     </div>
     <div class="flex flex-col items-center w-full">
-      <Label style="color:var(--textColor)" for="textColor">Text Color</Label>
+      <Label style="color:var(--titleColor)" for="textColor">Text Color</Label>
       <input
         type="color"
         id="textColor"

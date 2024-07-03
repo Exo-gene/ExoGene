@@ -16,7 +16,7 @@ export class Auth {
     email_change_sent_at: null | Date = null;
     last_sign_in_at: null | Date = null;
     raw_app_meta_data: {
-      provider: string | null;,
+      provider: string | null;
       providers: Array<string>
     } = {
         provider: null,

@@ -1,7 +1,7 @@
 <script lang="ts">
   import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import { goto } from "$app/navigation";
-  import InsertButton from "$lib/components/InsertButton.svelte";
+  import ButtonComponent from "$lib/components/ButtonComponent.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { userStore } from "./../../../stores/User.Store";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
@@ -9,6 +9,7 @@
   import { authStore } from "../../../stores/Auth.Store";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import { IconEdit, IconTrash } from "@tabler/icons-svelte";
+  import { supabase } from "$lib/supabaseClient"; // Assuming you have this client set up
 
   let itemIdToDelete: any | null = null;
   let isLoading = true;
@@ -24,7 +25,7 @@
   });
 
   function editEmployee(userId: number) {
-    goto(`/dashboard/employees/edit/${userId}`);
+    goto(`/dashboard/users/edit/${userId}`);
   }
 
   async function deleteEmployee() {
@@ -35,12 +36,25 @@
     try {
       userStore.delete(itemIdToDelete);
       itemIdToDelete = null;
-      await userStore.getAll(); // Refresh data after deletion
+      await userStore.getAll();
     } catch (error) {
       console.error("Error deleting category:", error);
     } finally {
       openModal = false;
     }
+  }
+
+  async function getLabTitle(labId: number): Promise<string> {
+    const { data, error } = await supabase
+      .from("lab")
+      .select("labName")
+      .eq("id", labId)
+      .single();
+    if (error) {
+      console.error("Error fetching lab:", error);
+      return "Unknown Lab";
+    }
+    return data.labName;
   }
 </script>
 
@@ -50,10 +64,23 @@
       <LoadingIndicator />
     </div>
   {:else}
-    <!-- insert new data -->
-    {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}
-      <InsertButton insertData={() => goto("/dashboard/employees/add")} />
-    {/if}
+    <!-- Header Section -->
+    <div class="w-full flex items-center justify-between py-4">
+      <ButtonComponent title="Back" dispatch={() => history.back()} />
+      <h1
+        class="font-bold text-center flex-grow"
+        style="color: var(--titleColor);"
+      >
+        Users List
+      </h1>
+      <!-- insert new data -->
+      {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}
+        <ButtonComponent
+          title="Add"
+          dispatch={() => goto("/dashboard/users/add")}
+        />
+      {/if}
+    </div>
 
     <!-- table data -->
     <div class="max-w-screen-2xl mx-auto px-4 lg:px-0">
@@ -66,7 +93,7 @@
                   class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
                 >
                   <div class="flex justify-start items-start gap-2">
-                    <span>Name</span>
+                    <span>User Name</span>
                   </div>
                 </th>
                 <th
@@ -74,6 +101,27 @@
                 >
                   <div class="flex justify-start items-start gap-2">
                     <span>Email</span>
+                  </div>
+                </th>
+                <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                >
+                  <div class="flex justify-start items-start gap-2">
+                    <span>Phone Number</span>
+                  </div>
+                </th>
+                <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                >
+                  <div class="flex justify-start items-start gap-2">
+                    <span>Lab</span>
+                  </div>
+                </th>
+                <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                >
+                  <div class="flex justify-start items-start gap-2">
+                    <span>Address</span>
                   </div>
                 </th>
                 <th
@@ -93,7 +141,7 @@
                     <span
                       class="flex justify-start text-[#111827] dark:text-gray-200"
                     >
-                      {item.name}
+                      {item.userName}
                     </span>
                   </td>
                   <td class="p-3 bg-gray-10 border-b-2">
@@ -101,6 +149,32 @@
                       class="flex justify-start text-[#111827] dark:text-gray-200"
                     >
                       {item.email}
+                    </span>
+                  </td>
+                  <td class="p-3 bg-gray-10 border-b-2">
+                    <span
+                      class="flex justify-start text-[#111827] dark:text-gray-200"
+                    >
+                      {item.phoneNumber}
+                    </span>
+                  </td>
+
+                  <td class="p-3 bg-gray-10 border-b-2">
+                    <span
+                      class="flex justify-start text-[#111827] dark:text-gray-200"
+                    >
+                      {#await getLabTitle(item.lab) then labTitle}
+                        {labTitle}
+                      {:catch}
+                        Unknown Lab
+                      {/await}
+                    </span>
+                  </td>
+                  <td class="p-3 bg-gray-10 border-b-2">
+                    <span
+                      class="flex justify-start text-[#111827] dark:text-gray-200"
+                    >
+                      {item.address}
                     </span>
                   </td>
                   <td class="p-5 bg-gray-10 border-b-2">

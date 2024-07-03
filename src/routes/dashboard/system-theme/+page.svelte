@@ -11,6 +11,7 @@
   import ThemeEditor from "$lib/components/ThemeEditor.svelte";
   import CustomButton from "$lib/components/CustomButton.svelte";
   import { IconRefresh } from "@tabler/icons-svelte";
+  import ButtonComponent from "$lib/components/ButtonComponent.svelte";
 
   let isLoading = false;
   let showToast = false;
@@ -64,48 +65,63 @@
   }
 </script>
 
-{#if isLoading}
-  <FullPageLoadingIndicator />
-{:else}
-  <div class="pt-5 lg:pt-10 flex justify-center w-full">
-    <div class="max-w-screen-md w-full">
-      <Tabs
-        tabStyle="underline"
-        defaultClass="bg-[#D0D0D0] flex"
-        activeClass="active"
-      >
-        {#if lightTheme}
-          <TabItem title="Light Theme" open={true}>
-            <div class="p-4">
-              <ThemeEditor theme={lightTheme} />
-            </div>
-          </TabItem>
-        {/if}
-        {#if darkTheme}
-          <TabItem title="Dark Theme" open={!lightTheme}>
-            <div class="p-4">
-              <ThemeEditor theme={darkTheme} />
-            </div>
-          </TabItem>
-        {/if}
-      </Tabs>
-    </div>
+<div class="max-w-screen-xl mx-auto flex flex-col items-center h-1/3">
+  <!-- Header Section -->
+  <div class="w-full flex items-center justify-between py-4">
+    <ButtonComponent title="Back" dispatch={() => history.back()} />
+    <h1
+      class="font-bold text-center flex-grow"
+      style="color: var(--titleColor);"
+    >
+      Update Theme
+    </h1>
   </div>
 
-  {#if checkUserPolicies([Policies.UPDATE_CUSTOMTHEME], $authStore)}
-    <div class="flex justify-center w-44">
-      <!-- <Button on:click={updateThemes}>Update Themes</Button> -->
-      <CustomButton
-        width="100%"
-        height="3rem"
-        icon={IconRefresh}
-        label="Update Themes"
-        on:click={updateThemes}
-      />
-    </div>
-  {/if}
-{/if}
+  <!-- Main Content -->
+  <div class="w-full flex items-center justify-center flex-grow">
+    {#if isLoading}
+      <FullPageLoadingIndicator />
+    {:else}
+      <div class="w-full flex justify-center">
+        <div class="max-w-screen-md w-full">
+          <Tabs
+            tabStyle="underline"
+            defaultClass="bg-[#D0D0D0] flex"
+            activeClass="active"
+          >
+            {#if lightTheme}
+              <TabItem title="Light Theme" open={true}>
+                <div class="p-4">
+                  <ThemeEditor theme={lightTheme} />
+                </div>
+              </TabItem>
+            {/if}
+            {#if darkTheme}
+              <TabItem title="Dark Theme" open={!lightTheme}>
+                <div class="p-4">
+                  <ThemeEditor theme={darkTheme} />
+                </div>
+              </TabItem>
+            {/if}
+          </Tabs>
 
-{#if showToast}
-  <Toast message={toastMessage} type="success" />
-{/if}
+          {#if checkUserPolicies([Policies.UPDATE_CUSTOMTHEME], $authStore)}
+            <div class="flex justify-end mt-4">
+              <CustomButton
+                width="20%"
+                height="3rem"
+                icon={IconRefresh}
+                label="Update"
+                on:click={updateThemes}
+              />
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/if}
+  </div>
+
+  {#if showToast}
+    <Toast message={toastMessage} type="success" />
+  {/if}
+</div>

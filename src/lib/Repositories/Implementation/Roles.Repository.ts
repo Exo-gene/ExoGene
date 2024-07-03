@@ -23,6 +23,7 @@ export class RolesRepository implements IRolesRepository {
       if (response.error) {
         throw response.error;
       }
+      console.log(response);
       return response.data[0];
     } catch (error) {
       throw error;

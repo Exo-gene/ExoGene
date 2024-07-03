@@ -49,6 +49,7 @@
     updateTheme();
   }
 
+  // custom theme
   function updateTheme() {
     const currentTheme = themeData[theme];
     document.documentElement.setAttribute("data-theme", theme);
@@ -89,15 +90,7 @@
         on:click={() => redirectToPage("test")}
       />
     </div>
-    <div class="flex justify-center">
-      <CustomButton
-        width="100%"
-        height="4rem"
-        icon={IconUsersPlus}
-        label="Users"
-        on:click={() => redirectToPage("user")}
-      />
-    </div>
+
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -179,6 +172,17 @@
         on:click={() => redirectToPage("role")}
       />
     </div>
+    {#if checkUserPolicies([Policies.READ_USER], $authStore)}
+      <div class="flex justify-center">
+        <CustomButton
+          width="100%"
+          height="4rem"
+          icon={IconUsersPlus}
+          label="Users"
+          on:click={() => redirectToPage("users")}
+        />
+      </div>
+    {/if}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
