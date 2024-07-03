@@ -426,6 +426,6 @@
 
 <style>
   .tabs-background {
-    background-color: var(--background-color);
+    background-color: var(--mainBackgroundColor);
   }
 </style>

@@ -7,7 +7,7 @@
     <Navbar />
   </div>
 
-  <div class="main" style="background-color: var(--background-color);">
+  <div class="main" style="background-color: var(--mainBackgroundColor);">
     <slot />
   </div>
 </div>

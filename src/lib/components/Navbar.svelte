@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import {
     Avatar,
     Dropdown,
@@ -8,8 +8,9 @@
   import { onMount } from "svelte";
   import { authStore } from "../../stores/Auth.Store";
   import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
   import { IconMoon, IconSun } from "@tabler/icons-svelte";
+  import { themeStore } from "../../stores/customThemeStore";
+  import { get } from "svelte/store";
 
   // Toggle theme
   let theme = "light";
@@ -37,12 +38,6 @@
   // View user profile
   async function userProfile(uId: string) {
     goto(`/dashboard/employees/edit/${uId}`);
-  }
-
-  // Function to detect active URL
-  $: activeUrl = $page.url.pathname;
-  function updateActiveUrl(url: string) {
-    activeUrl = url;
   }
 
   // Function to detect current theme based on document attribute
@@ -121,4 +116,4 @@
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
-</style>
+</style> -->
