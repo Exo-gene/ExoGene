@@ -4,8 +4,7 @@ import type { Store } from "$lib/Models/Responses/Store.Response.Model";
 import { UsersRepository } from "$lib/Repositories/Implementation/Users.Repository";
 import { get, writable } from "svelte/store";
 import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
-import { ImageToUrl } from "$lib/utils/getFileUrl.Utils";
-
+ 
 const usersRepository = new UsersRepository();
 
 const createUserStore = () => {
@@ -24,10 +23,7 @@ const createUserStore = () => {
           throw new Error("Email is required");
         if (!password || password === "")
           throw new Error("Password is required");
-        if (user.image.url instanceof File) {
-          user.image.url = await ImageToUrl(user.image.url);
-        }
-        if (user.email) {
+         if (user.email) {
           const check = await usersRepository.getUserByEmail(user.email);
           if (check) {
             throw new Error("User already exists");
@@ -105,11 +101,7 @@ const createUserStore = () => {
         if (!user.email || user.email === "") {
           user.email = document.email;
         }
-        if (user.image.url instanceof File) {
-          user.image.url = await ImageToUrl(user.image.url);
-        } else {
-          user.image.url = document.image;
-        }
+        
         const data = await usersRepository.updateUser(user, password);
         const dto = Dto.ToUserDto(data);
         update((store) => {
