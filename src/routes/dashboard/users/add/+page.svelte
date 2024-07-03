@@ -14,7 +14,7 @@
   let userRoleOptions: CreateUser_RoleRequest = new CreateUser_RoleRequest();
   let password: string = "";
   let selected: string[] = [];
-  let selectedLabId: string = "";
+  let selectedLabId: number ;
   let labs = [];
 
   let isLoading = true;
@@ -39,6 +39,8 @@
   ) {
     isLoading = true;
     try {
+      // Set the selected lab ID to user options before creating the user
+      userOptions.lab = selectedLabId;
       const user = await userStore.create(userOptions, password);
       if (user && user.id) {
         selected.forEach(async (role_id) => {
@@ -46,8 +48,6 @@
           userRoleOptions.user_id = user.id;
           await userRoleStore.create(userRoleOptions);
         });
-        // Set the selected lab ID to user options
-        userOptions.id = selectedLabId;
       }
     } finally {
       isLoading = false;
