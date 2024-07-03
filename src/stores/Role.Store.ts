@@ -3,7 +3,7 @@ import type { RoleDto } from "$lib/Models/DTOS/Role.DTO.Model";
 import type { CreateRoleRequest } from "$lib/Models/Requests/Role.Request.Model";
 import type { Store } from "$lib/Models/Responses/Store.Response.Model";
 import { RolesRepository } from "$lib/Repositories/Implementation/Roles.Repository";
-import { get, writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 const rolesRepository = new RolesRepository();
 
@@ -28,14 +28,14 @@ const createRoleStore = () => {
           if (store.data) {
             store.data = [...store.data, dto];
             store.count = store.data.length;
-             return store;
+            return store;
           } else {
             store.data = [dto];
             store.count = 1;
             return store;
           }
         });
-        
+
         return dto;
       } catch (error) {
         update((store) => {

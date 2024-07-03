@@ -14,10 +14,12 @@ export class Dto {
     try {
       return {
         id: entity.id,
-        name: entity.name,
+        userName: entity.userName,
         email: entity.email,
-        image: entity.image,
+        phoneNumber: entity.phoneNumber,
         user_id: entity.user_id,
+        lab: entity.lab,
+        address: entity.address, 
       };
     } catch (error) {
       throw error;
@@ -27,10 +29,12 @@ export class Dto {
     try {
       return {
         id: entity.id,
-        name: entity.name,
+        userName: entity.userName,
         email: entity.email,
-        image: entity.image,
+        phoneNumber: entity.phoneNumber,
         user_id: entity.user_id,
+        lab: entity.lab,
+        address: entity.address, 
         roles: entity.roles.map((x) => Dto.ToRoleWithPoliciesDto(x)),
       };
     } catch (error) {

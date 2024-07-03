@@ -3,7 +3,7 @@ import type { IAuthRepository } from "../Interface/I.Auth.Repository";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
 export class AuthRepository implements IAuthRepository {
   async getAuth(): Promise<User | null> {
-    try {
+     try {
       const {
         data: { user },
         error,

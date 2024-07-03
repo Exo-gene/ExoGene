@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Policies } from "./../../../lib/Models/Enums/Policies.Enum.Model";
-  import InsertButton from "../../../lib/components/InsertButton.svelte";
+  import InsertButton from "../../../lib/components/ButtonComponent.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";

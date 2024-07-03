@@ -87,9 +87,10 @@ div[role=tabpanel]{
 
 
 [data-theme='dark'] div[role=tabpanel]{
-	background-color: #0c1a35 !important;
+	background-color: var(--mainBackgroundColor) !important;
 	color: white !important;
 	border :1px solid #686868 !important;
-	 margin-top: 0 !important;
+	margin-top: 0 !important;
 }
+ 
  

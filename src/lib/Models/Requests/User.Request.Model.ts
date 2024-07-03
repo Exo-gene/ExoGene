@@ -2,15 +2,19 @@ import { ImageType } from "../Common/Image.Common.Model";
 
 export class CreateUserRequest {
   id?: string;
-  name: string | null = null;
+  userName: string | null = null;
   email: string = null!;
-  image: ImageType = new ImageType();
-  user_id: string = null!;
+  phoneNumber: string = null!;
+   user_id: string = null!;
+  lab?: number;
+  address?: string;
 }
 
 export class UserRequest {
-  name: string | null = null;
+  userName: string | null = null;
   email: string = null!;
-  image: string | null = null;
+  phoneNumber: string = null!;
   user_id: string = null!;
+  lab?: number;
+  address?: string;
 }

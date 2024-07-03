@@ -2,9 +2,11 @@ import type { RoleWithPolicies } from "./Role.DTO.Model";
 
 export class UserDto {
   id: string = null!;
-  name?: string;
+  userName?: string;
   email: string = null!;
-  image?: string;
+  phoneNumber: string = null!;
   user_id: string = null!;
-  roles?:Array<RoleWithPolicies> = new Array<RoleWithPolicies>();
+  lab?: number;
+  address?: string; 
+  roles?: Array<RoleWithPolicies> = new Array<RoleWithPolicies>();
 }

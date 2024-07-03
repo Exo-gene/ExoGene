@@ -15,10 +15,12 @@ export class UsersRepository implements IUsersRepository {
   async createUser(user: CreateUserRequest, password: string): Promise<User> {
     try {
       const userRequest: UserRequest = {
-        name: user.name,
+        userName: user.userName,
         email: user.email,
-        image: user.image.url as string,
+        phoneNumber: user.email,
         user_id: user.user_id,
+        lab: user.lab,
+        address: user.address,
       };
 
       const response = await fetch("/api/user/create", {
@@ -47,7 +49,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async getUsers(): Promise<SupabaseResponse<User>> {
-    try {
+     try {
       const response = (await Supabase.client
         .from("users")
         .select("*")
@@ -55,7 +57,7 @@ export class UsersRepository implements IUsersRepository {
       if (response.error) {
         throw response.error;
       }
-      return response;
+       return response;
     } catch (error) {
       throw error;
     }
@@ -127,10 +129,12 @@ export class UsersRepository implements IUsersRepository {
   async updateUser(user: CreateUserRequest, password?: string): Promise<User> {
     try {
       const userRequest: UserRequest = {
-        name: user.name,
+        userName: user.userName,
         email: user.email,
-        image: user.image.url as string,
+        phoneNumber: user.phoneNumber,
         user_id: user.user_id,
+        lab: user.lab,
+        address: user.address,
       };
 
       const response = await fetch("/api/user/update", {

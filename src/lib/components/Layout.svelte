@@ -1,8 +1,16 @@
 <script lang="ts">
   import Navbar from "$lib/components/Navbar.svelte";
-  import Sidebar from "$lib/components/DrawerComponent.svelte";
-  export let sidebarOpen: boolean = true;
 </script>
+
+<div class="layout">
+  <div class="navbar">
+    <Navbar />
+  </div>
+
+  <div class="main" style="background-color: var(--mainBackgroundColor);">
+    <slot />
+  </div>
+</div>
 
 <style>
   .layout {
@@ -41,15 +49,3 @@
     }
   }
 </style>
-
-<div class="layout">
-  <div class="navbar">
-    <Navbar bind:sidebarOpen />
-  </div>
-  <div class={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-    <Sidebar {sidebarOpen} />
-  </div>
-  <div class="main" style="background-color: var(--background-color);">
-    <slot />
-  </div>
-</div>
