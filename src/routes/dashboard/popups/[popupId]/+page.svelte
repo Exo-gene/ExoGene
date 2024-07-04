@@ -1,5 +1,5 @@
 <script lang="ts">
-  import NewsDropdown from "$lib/components/NewsDropdown.svelte";
+  import NewsDropdown from "$lib/components/LabDropdown.svelte";
   import { Button, Input, Label, TabItem, Tabs } from "flowbite-svelte";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";

@@ -9,7 +9,7 @@
   import { v4 as uuidv4 } from "uuid";
   import { Tabs, TabItem, Label, Input, Button } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
-  import NewsDropdown from "$lib/components/NewsDropdown.svelte";
+  import NewsDropdown from "$lib/components/LabDropdown.svelte";
   import type { FormDataSet } from "../../../../models/carouselModel";
   import { IconAlertTriangle, IconUpload } from "@tabler/icons-svelte";
 

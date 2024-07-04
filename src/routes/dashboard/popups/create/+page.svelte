@@ -9,7 +9,7 @@
   import { LanguageEnum } from "../../../../models/languageEnum";
   import { popupsStore } from "../../../../stores/popupsStore";
   import type { FormDataSet } from "../../../../models/popupsModel";
-  import NewsDropdown from "$lib/components/NewsDropdown.svelte";
+  import NewsDropdown from "$lib/components/LabDropdown.svelte";
   import { IconUpload } from "@tabler/icons-svelte";
   import { v4 as uuidv4 } from "uuid"; // Import uuid
 

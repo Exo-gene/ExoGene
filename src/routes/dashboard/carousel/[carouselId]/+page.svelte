@@ -9,7 +9,7 @@
   import { onMount } from "svelte";
   import { Tabs, TabItem, Label, Input, Button, Select } from "flowbite-svelte";
   import { Alert } from "flowbite-svelte";
-  import NewsDropdown from "$lib/components/NewsDropdown.svelte";
+  import NewsDropdown from "$lib/components/LabDropdown.svelte";
   import { page } from "$app/stores";
   import type { FormDataSet } from "../../../../models/carouselModel";
   import FullPageLoadingIndicator from "$lib/components/FullPageLoadingIndicator.svelte";
