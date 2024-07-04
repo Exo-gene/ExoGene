@@ -18,9 +18,13 @@
     email: string;
     phoneNumber: number;
     address: string;
-    lab: number;
+    lab_name: string;
     status: string;
     user_id: string;
+    roles: {
+      role_id: number;
+      role_name: string;
+    }[];
   }
 
   let itemIdToDelete: number | null = null;
@@ -39,7 +43,6 @@
       page_number: pageNumber,
       page_size: pageSize,
     });
-    console.log(data);
 
     if (error) {
       console.error("Error fetching users:", error);
@@ -77,19 +80,6 @@
     } finally {
       openModal = false;
     }
-  }
-
-  async function getLabTitle(labId: number) {
-    const { data, error } = await supabase
-      .from("lab")
-      .select("lab_name")
-      .eq("id", labId)
-      .single();
-    if (error) {
-      console.error("Error fetching lab:", error);
-      return "Unknown Lab";
-    }
-    return data.lab_name;
   }
 
   function createEmployee() {
@@ -163,9 +153,12 @@
 
     <!-- Table data -->
     <div class="max-w-screen-2xl mx-auto px-4 lg:px-0">
-      <div class="overflow-x-auto">
+      <div
+        class="overflow-x-auto"
+        style="background-color: var(--mainBackgroundColor);color: var(--titleColor);border:1px solid #686868;"
+      >
         <div class="min-w-full table-responsive">
-          <table class="min-w-full table-fixed bg-[#d0d0d0]">
+          <table class="min-w-full table-fixed">
             <thead>
               <tr>
                 <th
@@ -211,6 +204,13 @@
                   </div>
                 </th>
                 <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
+                >
+                  <div class="flex justify-start items-start gap-2">
+                    <span>Role</span>
+                  </div>
+                </th>
+                <th
                   class="p-5 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
                 >
                   <div class="flex justify-end items-end gap-2">
@@ -223,57 +223,46 @@
             <tbody>
               {#each userData as item (item.id)}
                 <tr>
-                  <td class="p-3 bg-gray-10 border-b-2">
-                    <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200"
-                    >
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="flex justify-start">
                       {item.id}
                     </span>
                   </td>
-                  <td class="p-3 bg-gray-10 border-b-2">
-                    <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200"
-                    >
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="flex justify-start">
                       {item.userName}
                     </span>
                   </td>
-                  <td class="p-3 bg-gray-10 border-b-2">
-                    <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200"
-                    >
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="flex justify-start">
                       {item.email}
                     </span>
                   </td>
-                  <td class="p-3 bg-gray-10 border-b-2">
-                    <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200"
-                    >
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="flex justify-start">
                       {item.phoneNumber}
                     </span>
                   </td>
 
-                  <td class="p-3 bg-gray-10 border-b-2">
-                    <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200"
-                    >
-                      {#await getLabTitle(item.lab) then labTitle}
-                        {labTitle}
-                      {:catch}
-                        Unknown Lab
-                      {/await}
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="flex justify-start">
+                      {item.lab_name}
                     </span>
                   </td>
-                  <td class="p-3 bg-gray-10 border-b-2">
-                    <span
-                      class="flex justify-start text-[#111827] dark:text-gray-200"
-                    >
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="flex justify-start">
                       {item.address}
                     </span>
                   </td>
-                  <td class="p-5 bg-gray-10 border-b-2">
-                    <span
-                      class="space-x-3 flex justify-end text-[#111827] dark:text-gray-200"
-                    >
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="flex justify-start">
+                      {#each item.roles as role}
+                        {role.role_name}
+                      {/each}
+                    </span>
+                  </td>
+                  <td class="p-3 table-cell-bottom-border">
+                    <span class="space-x-3 flex justify-end">
                       {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
                         <button
                           class="font-medium text-green-600 hover:underline dark:text-green-600"
@@ -334,3 +323,9 @@
 </div>
 
 <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteEmployee} />
+
+<style>
+  .table-cell-bottom-border {
+    border-bottom: 1px solid var(--textColor);
+  }
+</style>
