@@ -9,7 +9,7 @@
   <button
     on:click={previousPage}
     disabled={currentPage <= 1}
-    class="px-2 py-2 text-sm font-medium text-gray-700 bg-white rounded hover:bg-gray-100 disabled:opacity-50"
+    class="hover-button rounded px-2 py-2 text-sm font-medium disabled:opacity-50"
   >
     <!-- Icon for previous button -->
     <svg
@@ -35,7 +35,7 @@
   <button
     on:click={nextPage}
     disabled={currentPage >= totalPages}
-    class="px-2 py-2 text-sm font-medium text-gray-700 bg-white rounded hover:bg-gray-100 disabled:opacity-50"
+    class="hover-button rounded px-2 py-2 text-sm font-medium disabled:opacity-50"
   >
     <!-- Icon for next button -->
     <svg
@@ -54,3 +54,16 @@
     </svg>
   </button>
 </div>
+
+<style>
+  .hover-button {
+    border: 1px solid var(--buttonBackgroundColor);
+    background-color: var(--buttonBackgroundColor);
+    color: var(--textColor);
+    transition: background-color 0.3s ease;
+  }
+  .hover-button:hover {
+    background-color: var(--textColor);
+    color: rgba(var(--buttonBackgroundColor), 1) !important ;
+  }
+</style>

@@ -3,25 +3,57 @@
   import { goto } from "$app/navigation";
   import ButtonComponent from "$lib/components/ButtonComponent.svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
-  import { userStore } from "./../../../stores/User.Store";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { onMount } from "svelte";
-  import { authStore } from "../../../stores/Auth.Store";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
-  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
-  import { supabase } from "$lib/supabaseClient"; // Assuming you have this client set up
+  import { IconEdit, IconTrash, IconUserX } from "@tabler/icons-svelte";
+  import { supabase } from "$lib/supabaseClient";
+  import { authStore } from "../../../stores/Auth.Store";
+  import PaginationControls from "$lib/components/PaginationControls.svelte";
+  import { IconUserCheck, IconUserOff } from "@tabler/icons-svelte";
 
-  let itemIdToDelete: any | null = null;
+  interface User {
+    id: number;
+    userName: string;
+    email: string;
+    phoneNumber: number;
+    address: string;
+    lab: number;
+    status: string;
+    user_id: string;
+  }
+
+  let itemIdToDelete: number | null = null;
   let isLoading = true;
-  let userData: any = [];
+  let userData: User[] = [];
   let openModal = false;
-  let pageName: string = "user";
-  $: userData = $userStore?.data || [];
+  let pageName = "user";
+  let pageNumber = 1;
+  let pageSize = 3;
+  let totalPages = 0;
+  let totalItems = 0;
 
-  onMount(async () => {
-    await userStore.getAll();
+  async function fetchUsers(pageNumber: number, pageSize: number) {
+    isLoading = true;
+    const { data, error } = await supabase.rpc("get_users_paginated", {
+      page_number: pageNumber,
+      page_size: pageSize,
+    });
+    console.log(data);
+
+    if (error) {
+      console.error("Error fetching users:", error);
+      userData = [];
+    } else {
+      totalItems = data.count;
+      totalPages = Math.ceil(totalItems / pageSize);
+      userData = data.items;
+    }
     isLoading = false;
-    userData = $userStore?.data || [];
+  }
+
+  onMount(() => {
+    fetchUsers(pageNumber, pageSize);
   });
 
   function editEmployee(userId: number) {
@@ -34,27 +66,77 @@
       return;
     }
     try {
-      userStore.delete(itemIdToDelete);
-      itemIdToDelete = null;
-      await userStore.getAll();
+      const { error } = await supabase
+        .from("users")
+        .delete()
+        .match({ id: itemIdToDelete });
+      if (error) throw error;
+      fetchUsers(pageNumber, pageSize); // Refresh the list after deletion
     } catch (error) {
-      console.error("Error deleting category:", error);
+      console.error("Error deleting user:", error);
     } finally {
       openModal = false;
     }
   }
 
-  async function getLabTitle(labId: number): Promise<string> {
+  async function getLabTitle(labId: number) {
     const { data, error } = await supabase
       .from("lab")
-      .select("labName")
+      .select("lab_name")
       .eq("id", labId)
       .single();
     if (error) {
       console.error("Error fetching lab:", error);
       return "Unknown Lab";
     }
-    return data.labName;
+    return data.lab_name;
+  }
+
+  function createEmployee() {
+    goto("/dashboard/users/add");
+  }
+
+  function previousPage() {
+    if (pageNumber > 1) {
+      pageNumber -= 1;
+      fetchUsers(pageNumber, pageSize);
+    }
+  }
+
+  function nextPage() {
+    if (pageNumber < totalPages) {
+      pageNumber += 1;
+      fetchUsers(pageNumber, pageSize);
+    }
+  }
+
+  async function changeUserStatus(itemID: number) {
+    // Fetch the current status of the user
+    let { data: users, error } = await supabase
+      .from("users")
+      .select("status")
+      .eq("id", itemID);
+
+    if (error) {
+      console.error("Error fetching user:", error);
+      return;
+    }
+
+    // Determine the new status based on the current one
+    const newStatus = users[0]!.status === "true" ? "false" : "true";
+
+    // Update the user's status in the database
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ status: newStatus })
+      .eq("id", itemID);
+
+    if (updateError) {
+      console.error("Error updating user status:", updateError);
+    } else {
+      // Refresh the user data to reflect the new status
+      fetchUsers(pageNumber, pageSize);
+    }
   }
 </script>
 
@@ -75,14 +157,11 @@
       </h1>
       <!-- insert new data -->
       {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}
-        <ButtonComponent
-          title="Add"
-          dispatch={() => goto("/dashboard/users/add")}
-        />
+        <ButtonComponent title="Add" dispatch={() => createEmployee()} />
       {/if}
     </div>
 
-    <!-- table data -->
+    <!-- Table data -->
     <div class="max-w-screen-2xl mx-auto px-4 lg:px-0">
       <div class="overflow-x-auto">
         <div class="min-w-full table-responsive">
@@ -90,42 +169,49 @@
             <thead>
               <tr>
                 <th
-                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
+                >
+                  <div class="flex justify-start items-start gap-2">
+                    <span>ID</span>
+                  </div>
+                </th>
+                <th
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
                 >
                   <div class="flex justify-start items-start gap-2">
                     <span>User Name</span>
                   </div>
                 </th>
                 <th
-                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
                 >
                   <div class="flex justify-start items-start gap-2">
                     <span>Email</span>
                   </div>
                 </th>
                 <th
-                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
                 >
                   <div class="flex justify-start items-start gap-2">
                     <span>Phone Number</span>
                   </div>
                 </th>
                 <th
-                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
                 >
                   <div class="flex justify-start items-start gap-2">
                     <span>Lab</span>
                   </div>
                 </th>
                 <th
-                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                  class="p-3 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
                 >
                   <div class="flex justify-start items-start gap-2">
                     <span>Address</span>
                   </div>
                 </th>
                 <th
-                  class="p-5 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/3"
+                  class="p-5 font-semibold uppercase bg-[#b0b0b0] text-[#012853] text-sm w-1/6"
                 >
                   <div class="flex justify-end items-end gap-2">
                     <span>Actions</span>
@@ -135,8 +221,15 @@
             </thead>
 
             <tbody>
-              {#each $userStore.data as item, index (item.id)}
+              {#each userData as item (item.id)}
                 <tr>
+                  <td class="p-3 bg-gray-10 border-b-2">
+                    <span
+                      class="flex justify-start text-[#111827] dark:text-gray-200"
+                    >
+                      {item.id}
+                    </span>
+                  </td>
                   <td class="p-3 bg-gray-10 border-b-2">
                     <span
                       class="flex justify-start text-[#111827] dark:text-gray-200"
@@ -179,14 +272,17 @@
                   </td>
                   <td class="p-5 bg-gray-10 border-b-2">
                     <span
-                      class="flex justify-end text-[#111827] dark:text-gray-200"
+                      class="space-x-3 flex justify-end text-[#111827] dark:text-gray-200"
                     >
                       {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
                         <button
                           class="font-medium text-green-600 hover:underline dark:text-green-600"
                           on:click={() => editEmployee(item.id)}
                         >
-                          <IconEdit stroke={2} class="text-green-700" />
+                          <IconEdit
+                            stroke={2}
+                            class="text-green-700 hover:text-green-600 transition-all"
+                          />
                         </button>
                       {/if}
                       {#if checkUserPolicies([Policies[`DELETE_${pageName.toUpperCase()}`]], $authStore)}
@@ -196,8 +292,28 @@
                             openModal = true;
                           }}
                         >
-                          <IconTrash stroke={2} class="text-red-700" />
+                          <IconTrash
+                            stroke={2}
+                            class="text-red-700 hover:text-red-600 transition-all"
+                          />
                         </button>
+                      {/if}
+                      {#if checkUserPolicies([Policies[`DISABLED_${pageName.toUpperCase()}`]], $authStore)}
+                        {#if item.status === "true"}
+                          <button
+                            class="text-blue-700 font-semibold hover:text-blue-600 transition-all"
+                            on:click={() => changeUserStatus(item.id)}
+                          >
+                            <IconUserCheck stroke={2} />
+                          </button>
+                        {:else}
+                          <button
+                            class="text-gray-700 font-semibold hover:text-gray-600 transition-all"
+                            on:click={() => changeUserStatus(item.id)}
+                          >
+                            <IconUserOff stroke={2} />
+                          </button>
+                        {/if}
                       {/if}
                     </span>
                   </td>
@@ -209,6 +325,12 @@
       </div>
     </div>
   {/if}
+  <PaginationControls
+    currentPage={pageNumber}
+    {totalPages}
+    {previousPage}
+    {nextPage}
+  />
 </div>
 
 <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteEmployee} />

@@ -49,7 +49,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async getUsers(): Promise<SupabaseResponse<User>> {
-     try {
+    try {
       const response = (await Supabase.client
         .from("users")
         .select("*")
@@ -57,7 +57,7 @@ export class UsersRepository implements IUsersRepository {
       if (response.error) {
         throw response.error;
       }
-       return response;
+      return response;
     } catch (error) {
       throw error;
     }
