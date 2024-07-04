@@ -9,6 +9,7 @@
 
   let searchTerm = "";
   let labItems: LabDataModel[] = [];
+  let selectedLabName: string = "";
   let lastFilter: string | undefined = "";
 
   async function fetchLabs(titleFilter?: string) {
@@ -22,7 +23,6 @@
     };
 
     const query = await supabase.rpc("get_paged_lab_filter", params);
-    console.log(query);
     if (query.error) {
       console.error("Fetch lab error:", query.error);
       return;
@@ -30,8 +30,24 @@
     labItems = query.data || [];
   }
 
+  async function fetchLabById(labId: number) {
+    const { data, error } = await supabase
+      .from("labs")
+      .select("*")
+      .eq("id", labId)
+      .single();
+    if (error) {
+      console.error("Fetch lab by ID error:", error);
+      return;
+    }
+    selectedLabName = data.lab_name;
+  }
+
   onMount(() => {
     fetchLabs(); // Initial fetch without any filter
+    if (selectedLabId) {
+      fetchLabById(selectedLabId); // Fetch the lab name based on the initial selectedLabId
+    }
   });
 
   $: if (searchTerm.trim()) {
@@ -43,6 +59,7 @@
   function handleSelection(item: LabDataModel, event: MouseEvent) {
     event.stopPropagation();
     selectedLabId = item.id;
+    selectedLabName = item.lab_name;
     searchTerm = item.lab_name;
     dispatch("labChange", item.id);
   }
@@ -62,8 +79,9 @@
   <Button
     class="w-full"
     style="border: 1px solid var(--buttonBackgroundColor);background-color: var(--textColor);color: var(--buttonBackgroundColor);"
-    >Select Lab</Button
   >
+    {selectedLabName ? `Selected Lab: ${selectedLabName}` : "Select Lab"}
+  </Button>
   <Dropdown class="w-full">
     <div slot="header" class="p-3">
       <Search

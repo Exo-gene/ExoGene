@@ -6,10 +6,11 @@
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { onMount } from "svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
-  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
+  import { IconEdit, IconTrash, IconUserX } from "@tabler/icons-svelte";
   import { supabase } from "$lib/supabaseClient";
   import { authStore } from "../../../stores/Auth.Store";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
+  import { IconUserCheck, IconUserOff } from "@tabler/icons-svelte";
 
   interface User {
     id: number;
@@ -18,6 +19,7 @@
     phoneNumber: number;
     address: string;
     lab: number;
+    status: string;
     user_id: string;
   }
 
@@ -27,23 +29,22 @@
   let openModal = false;
   let pageName = "user";
   let pageNumber = 1;
-  let pageSize = 2;
+  let pageSize = 3;
   let totalPages = 0;
   let totalItems = 0;
 
   async function fetchUsers(pageNumber: number, pageSize: number) {
-    console.log(`Fetching page ${pageNumber} with size ${pageSize}`);
     isLoading = true;
     const { data, error } = await supabase.rpc("get_users_paginated", {
       page_number: pageNumber,
       page_size: pageSize,
     });
+    console.log(data);
 
     if (error) {
       console.error("Error fetching users:", error);
       userData = [];
     } else {
-      console.log("Fetched data:", data);
       totalItems = data.count;
       totalPages = Math.ceil(totalItems / pageSize);
       userData = data.items;
@@ -55,7 +56,7 @@
     fetchUsers(pageNumber, pageSize);
   });
 
-  function editEmployee(userId: string) {
+  function editEmployee(userId: number) {
     goto(`/dashboard/users/edit/${userId}`);
   }
 
@@ -96,7 +97,6 @@
   }
 
   function previousPage() {
-    console.log("Current Page:", pageNumber); // Debugging
     if (pageNumber > 1) {
       pageNumber -= 1;
       fetchUsers(pageNumber, pageSize);
@@ -104,9 +104,37 @@
   }
 
   function nextPage() {
-    console.log("Current Page:", pageNumber); // Debugging
     if (pageNumber < totalPages) {
       pageNumber += 1;
+      fetchUsers(pageNumber, pageSize);
+    }
+  }
+
+  async function changeUserStatus(itemID: number) {
+    // Fetch the current status of the user
+    let { data: users, error } = await supabase
+      .from("users")
+      .select("status")
+      .eq("id", itemID);
+
+    if (error) {
+      console.error("Error fetching user:", error);
+      return;
+    }
+
+    // Determine the new status based on the current one
+    const newStatus = users[0]!.status === "true" ? "false" : "true";
+
+    // Update the user's status in the database
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ status: newStatus })
+      .eq("id", itemID);
+
+    if (updateError) {
+      console.error("Error updating user status:", updateError);
+    } else {
+      // Refresh the user data to reflect the new status
       fetchUsers(pageNumber, pageSize);
     }
   }
@@ -244,14 +272,17 @@
                   </td>
                   <td class="p-5 bg-gray-10 border-b-2">
                     <span
-                      class="flex justify-end text-[#111827] dark:text-gray-200"
+                      class="space-x-3 flex justify-end text-[#111827] dark:text-gray-200"
                     >
                       {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
                         <button
                           class="font-medium text-green-600 hover:underline dark:text-green-600"
                           on:click={() => editEmployee(item.id)}
                         >
-                          <IconEdit stroke={2} class="text-green-700" />
+                          <IconEdit
+                            stroke={2}
+                            class="text-green-700 hover:text-green-600 transition-all"
+                          />
                         </button>
                       {/if}
                       {#if checkUserPolicies([Policies[`DELETE_${pageName.toUpperCase()}`]], $authStore)}
@@ -261,8 +292,28 @@
                             openModal = true;
                           }}
                         >
-                          <IconTrash stroke={2} class="text-red-700" />
+                          <IconTrash
+                            stroke={2}
+                            class="text-red-700 hover:text-red-600 transition-all"
+                          />
                         </button>
+                      {/if}
+                      {#if checkUserPolicies([Policies[`DISABLED_${pageName.toUpperCase()}`]], $authStore)}
+                        {#if item.status === "true"}
+                          <button
+                            class="text-blue-700 font-semibold hover:text-blue-600 transition-all"
+                            on:click={() => changeUserStatus(item.id)}
+                          >
+                            <IconUserCheck stroke={2} />
+                          </button>
+                        {:else}
+                          <button
+                            class="text-gray-700 font-semibold hover:text-gray-600 transition-all"
+                            on:click={() => changeUserStatus(item.id)}
+                          >
+                            <IconUserOff stroke={2} />
+                          </button>
+                        {/if}
                       {/if}
                     </span>
                   </td>
@@ -274,12 +325,12 @@
       </div>
     </div>
   {/if}
+  <PaginationControls
+    currentPage={pageNumber}
+    {totalPages}
+    {previousPage}
+    {nextPage}
+  />
 </div>
-<PaginationControls
-  currentPage={pageNumber}
-  {totalPages}
-  {previousPage}
-  {nextPage}
-/>
 
 <ConfirmDeleteModal bind:open={openModal} on:confirm={deleteEmployee} />

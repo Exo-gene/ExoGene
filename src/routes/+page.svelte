@@ -1,19 +1,13 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import "./styles.css";
-  import "../app.css";
-  import { authStore } from "../stores/Auth.Store";
   import { onMount } from "svelte";
+  import { authStore } from "../stores/Auth.Store";
   import { LoginRequest } from "$lib/Models/Requests/Auth.Request.Model";
   import { Supabase } from "$lib/Supabase/Supabase.Client";
   import { IconMail, IconSquareX } from "@tabler/icons-svelte";
 
-  const loginRequest: LoginRequest = new LoginRequest();
+  let loginRequest: LoginRequest = new LoginRequest();
   let errorMessage: string | null = null;
-
-  export async function navigateTo() {
-    return goto("/dashboard/home");
-  }
 
   onMount(async () => {
     await CheckAuth();
@@ -26,57 +20,58 @@
     }
   }
 
-  async function fetchEmailByPhone(phone: string) {
+  async function fetchUserByIdentifier(identifier: string) {
     const { data, error } = await Supabase.client
       .from("users")
-      .select("email")
-      .eq("phoneNumber", phone)
+      .select("*")
+      .or(`email.eq.${identifier},phoneNumber.eq.${identifier}`)
       .single();
 
     if (error) {
-      throw new Error("Phone number not found");
+      throw new Error("Identifier not found");
     }
-
-    return data.email;
-  }
-
-  function isValidEmail(email: string): boolean {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
-  }
-
-  function isValidPhoneNumber(phone: string): boolean {
-    const phonePattern = /^077\d{8}$/;
-    return phonePattern.test(phone);
+    return data;
   }
 
   async function login(loginRequest: LoginRequest) {
     try {
       let identifier = loginRequest.email;
 
-      // Check if the identifier is a phone number
       if (/^\d+$/.test(identifier)) {
+        // Identifier is a phone number
         if (!isValidPhoneNumber(identifier)) {
-          throw new Error("Phone number should be in the format 07702223311");
+          throw new Error("Invalid phone format");
         }
-        identifier = await fetchEmailByPhone(identifier);
       } else if (!isValidEmail(identifier)) {
-        throw new Error(
-          "Invalid email format should be in the format example@gmail.com"
-        );
+        throw new Error("Invalid email format");
       }
 
-      const response = await authStore.login(identifier, loginRequest.password);
+      // Fetch user by email or phone number
+      const user = await fetchUserByIdentifier(identifier);
+      if (user.status !== "true") {
+        throw new Error("Sorry this user account is disabled");
+      }
+
+      // If user status is enabled, proceed with authentication
+      const response = await authStore.login(user.email, loginRequest.password);
       if (response) {
         await CheckAuth();
         return goto("/dashboard/home");
       } else {
-        throw new Error("Invalid email or password");
+        throw new Error("Invalid credentials");
       }
     } catch (error) {
       console.error(error);
       errorMessage = error.message;
     }
+  }
+
+  function isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function isValidPhoneNumber(phone: string): boolean {
+    return /^077\d{8}$/.test(phone);
   }
 </script>
 
