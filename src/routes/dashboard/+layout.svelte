@@ -6,12 +6,15 @@
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import { goto } from "$app/navigation";
   import { authStore } from "../../stores/Auth.Store";
+  import { themeStore } from "../../stores/themeStore";
 
   let isLoading: boolean = true;
+  let theme = "light";
+  let themeData = { light: {}, dark: {} };
 
   onMount(async () => {
     await CheckAuth();
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await loadThemeData();
     isLoading = false;
   });
 
@@ -19,6 +22,21 @@
     await authStore.getAuth();
     if (!$authStore) {
       return goto("/");
+    }
+  }
+
+  async function loadThemeData() {
+    theme = localStorage.getItem("theme") || "light";
+    await themeStore.fetchThemeData();
+    themeStore.subscribe((data) => {
+      themeData = data;
+      applyTheme(data[theme]);
+    });
+  }
+
+  function applyTheme(themeVariables:any) {
+    for (const [key, value] of Object.entries(themeVariables)) {
+      document.documentElement.style.setProperty(`--${key}`, value);
     }
   }
 </script>
