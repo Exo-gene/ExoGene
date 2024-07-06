@@ -31,10 +31,9 @@
   }
 
   // Toggle theme
- 
-  let isLoading: boolean = true;
+   let isLoading: boolean = true;
   let theme = "light";
-  let themeData = { light: {}, dark: {} };
+  let themeData :any= { light: {}, dark: {} };
 
   onMount(async () => {
     await CheckAuth();
