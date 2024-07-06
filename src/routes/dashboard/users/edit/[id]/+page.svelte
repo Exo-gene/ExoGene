@@ -55,7 +55,6 @@
     password: string
   ) {
     isLoading = true;
-    console.log(userOptions);
     try {
       const user = await userStore.update(userOptions, password);
       if (user && user.id) {
@@ -76,7 +75,6 @@
 
   function onLabSelected(event: CustomEvent) {
     selectedLabId = event.detail;
-    console.log("Lab selected with ID:", selectedLabId);
   }
 </script>
 
