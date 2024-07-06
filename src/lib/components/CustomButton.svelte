@@ -16,7 +16,7 @@
 </script>
 
 <button
-  style="width: {width}; height: {height}; "
+  style="width: {width}; height: {height};"
   class="hover-button font-semibold rounded flex items-center justify-center gap-2"
   on:click={handleClick}
 >
@@ -26,13 +26,13 @@
 
 <style>
   .hover-button {
-    border: 1px solid var(--buttonBackgroundColor);
-    background-color: var(--buttonBackgroundColor);
+    background-color: var(--backgroundButtonColor);
+    border: 1px solid var(--backgroundButtonColor);
     color: var(--textColor);
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
   }
   .hover-button:hover {
-    background-color: var(--textColor);
-    color: rgba(var(--buttonBackgroundColor), 1) !important ;
+    background-color: var(--hoverBackgroundColor);
+    color: var(--hoverTextColor);
   }
 </style>
