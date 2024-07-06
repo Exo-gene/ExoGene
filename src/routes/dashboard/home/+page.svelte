@@ -31,45 +31,48 @@
   }
 
   // Toggle theme
+ 
+  let isLoading: boolean = true;
   let theme = "light";
   let themeData = { light: {}, dark: {} };
 
   onMount(async () => {
+    await CheckAuth();
+    await loadThemeData();
+    isLoading = false;
+  });
+
+  async function CheckAuth() {
+    await authStore.getAuth();
+    if (!$authStore) {
+      return goto("/");
+    }
+  }
+
+  async function loadThemeData() {
     theme = localStorage.getItem("theme") || "light";
     await themeStore.fetchThemeData();
     themeStore.subscribe((data) => {
       themeData = data;
-      updateTheme();
+      applyTheme(data[theme]);
     });
-  });
+  }
+
+  function applyTheme(themeVariables:any) {
+    for (const [key, value] of Object.entries(themeVariables)) {
+      document.documentElement.style.setProperty(`--${key}`, value);
+    }
+  }
 
   function toggleTheme() {
     theme = theme === "light" ? "dark" : "light";
     localStorage.setItem("theme", theme);
-    updateTheme();
+    applyTheme(themeData[theme]);
   }
 
-  // custom theme
-  function updateTheme() {
-    const currentTheme = themeData[theme];
-    document.documentElement.setAttribute("data-theme", theme);
-    if (currentTheme) {
-      document.documentElement.style.setProperty(
-        "--mainBackgroundColor",
-        currentTheme.mainBackgroundColor || "#E0E0E0"
-      );
-      document.documentElement.style.setProperty(
-        "--textColor",
-        currentTheme.textColor || "#181818"
-      );
-      document.documentElement.style.setProperty(
-        "--buttonBackgroundColor",
-        currentTheme.backgroundButtonColor || "#1E90FF"
-      );
-    }
-  }
+ 
 </script>
-
+ 
 <div class="max-w-screen-xl mx-auto flex items-center justify-center h-2/3">
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
     <div class="flex justify-center">
