@@ -29,7 +29,9 @@
     background-color: var(--backgroundButtonColor);
     border: 1px solid var(--backgroundButtonColor);
     color: var(--textColor);
-    transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
+    transition:
+      background-color 0.3s,
+      color 0.3s; /* smooth transition for hover effect */
   }
   .hover-button:hover {
     background-color: var(--hoverBackgroundColor);

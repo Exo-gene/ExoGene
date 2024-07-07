@@ -191,17 +191,20 @@
 </script>
 
 <Modal
+  style="background-color: var(--mainBackgroundColor); color: var(--titleColor);"
   title="Add your Policies"
   bind:open={roleModal}
-  backdropClass="h-80 dark:bg-white"
-  class="h-[530px] max-w-screen-sm "
-  classDialog="backdrop-blur-lg "
-  bodyClass="bg-white rounded-lg rounded-lg"
+  backdropClass="h-80"
+  class="h-[600px] max-w-screen-lg mx-auto shadow"
+  classDialog="backdrop-blur-lg"
+  bodyClass=" "
 >
-  <div class="w-full h-auto flex flex-wrap gap-3">
+  <div class="w-full mt-4 h-auto flex flex-wrap gap-3">
+    <Label class="mx-4" style="color:var(--textColor)">Select role</Label>
     <div class="w-full z-50 flex flex-row h-auto mx-4">
       <Select
-        class="w-full border-gray-400 h-12 rounded"
+        style="background-color: var(--textColor);color: var(--buttonBackgroundColor);"
+        class="cursor-pointer w-full mr-2 border-gray-400 h-12 rounded"
         bind:value={selectedRolePolicies}
         on:change={async () => {
           await getPoliciesForRole(selectedRolePolicies.id);
@@ -216,20 +219,19 @@
       >
         {#if $roleStore}
           {#each $roleStore.data as role}
-            <option value={{ id: role.id, name: role.name }} selected
-              >{role.name}</option
-            >
+            <option value={{ id: role.id, name: role.name }} selected>
+              {role.name}
+            </option>
           {/each}
         {/if}
       </Select>
 
-      <CustomButton
-        width="40%"
-        height="3rem"
-        icon={IconPlus}
-        label="Add New Role"
+      <button
+        class="font-semibold w-40 rounded"
+        style="background-color: var(--backButtonBackgroundColor);color: var(--titleColor);"
         on:click={() => (drawerCondition = false)}
-      />
+        >{"Add New Role"}
+      </button>
     </div>
 
     <form class="mx-5 w-full" on:submit|preventDefault={filterPolicies}>
@@ -238,39 +240,36 @@
         placeholder="Search"
         bind:value={searchTerm}
         size="lg"
-        class="w-full dark:bg-ekhlas-table-light dark:border-ekhlas-main-light "
+        class="w-full  "
+        style="background-color: var(--textColor);color: var(--buttonBackgroundColor);"
       >
-        <SearchOutline
-          slot="left"
-          class="w-6 h-6 text-gray-500 dark:text-gray-400"
-        />
+        <SearchOutline slot="left" class="w-6 h-6 text-var(--iconColor)" />
         <Button
           slot="right"
           size="sm"
           type="submit"
-          class="bg-[#D0D0D0] hover:bg-[#d0d0d0cb] text-[#686868] ease-in-out duration-300"
-          >{"Search"}</Button
+          style="background-color: var(--backButtonBackgroundColor);color: var(--titleColor);"
+          class="ease-in-out duration-300"
         >
+          {"Search"}
+        </Button>
       </Input>
     </form>
 
     {#if selectedRolePolicies.policies}
       <div
-        class="w-full h-60 flex flex-col gap-5 justify-start items-start border m-4 rounded-lg p-4 text-black overflow-y-auto"
+        class="w-full h-60 flex flex-col gap-5 justify-start items-start m-4 rounded-lg p-4 text-var(--textColor) overflow-y-auto"
       >
         {#each Object.keys(groupedPolicies) as policyCategory}
           <div
-            class=" text-center w-full h-auto flex flex-col justify-between items-center bg-ekhlas-main-dark dark:bg-ekhlas-primary rounded-lg pt-2"
+            style="background-color: var(--backgroundButtonColor);color: var(--textColor);"
+            class=" p-2 w-full h-auto flex flex-col justify-between items-center rounded"
           >
-            <div
-              class=" text-center w-full h-auto flex justify-between items-center"
-            >
-              <p class=" w-full font-medium px-2 text-sm uppercase text-black">
+            <div class=" w-full h-auto flex justify-between items-center">
+              <p class="w-full font-medium px-2 text-sm uppercase">
                 Policies of {policyCategory}
               </p>
-              <div
-                class="w-full h-auto flex justify-end gap-2 items-center text-black"
-              >
+              <div class="w-full h-auto flex justify-end gap-2 items-center">
                 <p class="text-sm">Select All</p>
                 <input
                   type="checkbox"
@@ -283,7 +282,7 @@
                 />
               </div>
             </div>
-            <hr class="border-2 w-full mt-2 dark:border-ekhlas-main-light" />
+            <!-- <hr class="border-2 w-full mt-2 border-var(--dividerColor)" /> -->
           </div>
 
           {#each groupedPolicies[policyCategory] as policy}
@@ -312,7 +311,7 @@
                   }
                 }}
               />
-              <p class="text-justify dark:text-white">
+              <p class="text-justify text-var(--policyTextColor)">
                 {policy.name.replace(/_/g, " ")}
               </p>
             </div>
@@ -324,7 +323,7 @@
 
   {#if isLoadingToRole}
     <div class="w-full h-auto flex justify-center items-center gap-3">
-      <Spinner color="red" />
+      <Spinner color="var(--spinnerColor)" />
     </div>
   {:else if selectedRolePolicies.policies}
     <div class="flex justify-end my-4 mx-4">
@@ -340,31 +339,37 @@
 </Modal>
 
 <Drawer
+  style="background-color: var(--mainBackgroundColor); color: var(--titleColor);"
   transitionType="fly"
   placement="right"
   {transitionParams}
   bind:hidden={drawerCondition}
-  class="w-1/3 dark:bg-white dark:text-white"
+  class="w-1/3  "
 >
   <CloseButton
+    style="background-color: var(--mainBackgroundColor); color: var(--titleColor);"
     on:click={() => (drawerCondition = true)}
-    class="mb-4 dark:text-white"
+    class="mb-4 "
   />
   <form action="#" class="mb-6">
     <div class="w-full flex justify-center items-center gap-2">
       <div class="mb-6 w-full">
-        <Label for="title" class="block mb-2">{"Title"}</Label>
+        <Label style="color:var(--textColor)" for="title" class="block mb-2"
+          >{"Title"}</Label
+        >
         <Input
+          style="background-color: var(--backgroundButtonColor); color: var(--textColor);"
           id="title"
           name="title"
           required
           placeholder="Role Title"
           bind:value={roleOptions.name}
+          class="rounded"
         />
       </div>
       {#if roleOptions.id}
         <div
-          class="w-24 bg-red-700 text-white h-9 flex justify-center items-center p-4 rounded-xl"
+          class="w-24 bg-red-700 text-white h-10 flex justify-center items-center p-4 rounded"
         >
           <button
             on:click={() => {
@@ -381,7 +386,9 @@
       {/if}
     </div>
     <div class="mb-6">
-      <Label for="description" class="mb-2">{"policies"}</Label>
+      <Label style="color:var(--textColor)" for="description" class="mb-2"
+        >{"policies"}</Label
+      >
       <MultiSelect
         items={$policyStore
           ? $policyStore.data.map((policy) => {
@@ -414,12 +421,16 @@
     />
   {/if}
   <div
-    class="w-full h-[40rem] bg-[#f1f1f1] dark:bg-ekhlas-main-dark mt-4 rounded-lg flex justify-start items-center flex-col px-2"
+    style="background-color: var(--backgroundButtonColor); color: var(--titleColor);"
+    class="w-full h-[40rem] mt-4 rounded flex justify-start items-center flex-col px-2"
   >
-    <p class="text-center text-black w-full h-auto mt-4 mb-8">Roles List</p>
-    <div
-      class="w-full h-[40rem] bg-[#f1f1f1] dark:bg-ekhlas-main-dark overflow-y-auto"
+    <p
+      style="color: var(--titleColor);"
+      class="text-center w-full h-auto mt-4 mb-8"
     >
+      Roles List
+    </p>
+    <div class="w-full h-[40rem] overflow-y-auto">
       {#if $roleStore}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         {#each $roleStore.data as role}
@@ -428,7 +439,7 @@
           <div
             class="w-full h-12 text-black rounded-lg flex justify-between items-center px-4 mt-2 overflow-y-auto"
           >
-            <p class="">{role.name}</p>
+            <p style="color: var(--textColor);" class="">{role.name}</p>
 
             <div
               class=" w-auto h-8 rounded-lg flex justify-center items-center gap-2"
