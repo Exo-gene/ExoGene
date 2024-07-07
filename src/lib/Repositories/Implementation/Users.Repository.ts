@@ -17,7 +17,7 @@ export class UsersRepository implements IUsersRepository {
       const userRequest: UserRequest = {
         userName: user.userName,
         email: user.email,
-        phoneNumber: user.email,
+        phoneNumber: user.phoneNumber,
         user_id: user.user_id,
         lab: user.lab,
         address: user.address,

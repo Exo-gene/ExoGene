@@ -10,7 +10,13 @@
   import { supabase } from "$lib/supabaseClient";
   import { authStore } from "../../../stores/Auth.Store";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
-  import { IconUserCheck, IconUserOff } from "@tabler/icons-svelte";
+  import {
+    IconUserCheck,
+    IconUserOff,
+    IconRestore,
+  } from "@tabler/icons-svelte";
+  import { Button, Modal, Label, Input, Checkbox } from "flowbite-svelte";
+  let formModal = false;
 
   interface User {
     id: number;
@@ -68,13 +74,17 @@
       console.error("No item ID specified for deletion");
       return;
     }
+
+    const currentDate = new Date().toISOString(); // Get the current date in ISO format
+
     try {
       const { error } = await supabase
         .from("users")
-        .delete()
+        .update({ deleted_at: currentDate }) // Update the deleted_at column with the current date
         .match({ id: itemIdToDelete });
+
       if (error) throw error;
-      fetchUsers(pageNumber, pageSize); // Refresh the list after deletion
+      fetchUsers(pageNumber, pageSize);
     } catch (error) {
       console.error("Error deleting user:", error);
     } finally {
@@ -128,6 +138,18 @@
       fetchUsers(pageNumber, pageSize);
     }
   }
+
+  // reset password
+  async function resetPassword(itemID: number) {
+    console.log(itemID);
+    const { error } = await supabase
+      .from("users")
+      .update({ password: "password" })
+      .eq("id", itemID);
+    if (error) {
+      console.error("Error resetting password:", error);
+    }
+  }
 </script>
 
 <div class="max-w-screen-2xl mx-auto py-10">
@@ -146,9 +168,8 @@
         Users List
       </h1>
       <!-- insert new data -->
-      {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}
-        <ButtonComponent title="Add" dispatch={() => createEmployee()} />
-      {/if}
+      <ButtonComponent title="Add" dispatch={() => createEmployee()} />
+      {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}{/if}
     </div>
 
     <!-- Table data -->
@@ -304,6 +325,49 @@
                           </button>
                         {/if}
                       {/if}
+
+                      <!-- reset password  -->
+                      {#if checkUserPolicies([Policies[`RESETPASSWORD_${pageName.toUpperCase()}`]], $authStore)}
+                        <button
+                          class="text-gray-700 font-semibold hover:text-gray-600 transition-all"
+                          on:click={() => (formModal = true)}
+                        >
+                          <IconRestore stroke={2} />
+                        </button>
+                      {/if}
+
+                      <Modal
+                        bind:open={formModal}
+                        size="xs"
+                        autoclose={false}
+                        class="w-full"
+                      >
+                        <form class="flex flex-col space-y-6" action="#">
+                          <h3
+                            class="mb-4 text-xl font-medium text-gray-900 dark:text-white"
+                          >
+                            Reset password
+                          </h3>
+                          <Label class="space-y-2">
+                            <span>Your password</span>
+                            <Input
+                              type="password"
+                              name="password"
+                              placeholder="•••••••"
+                              required
+                            />
+                          </Label>
+
+                          <Button
+                            on:click={() => {
+                              resetPassword(item.id);
+                            }}
+                            type="submit"
+                            class="w-full1">Reset password</Button
+                          >
+                        </form>
+                      </Modal>
+                      <!-- reset password  -->
                     </span>
                   </td>
                 </tr>
