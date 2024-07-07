@@ -25,15 +25,16 @@
   import { onMount } from "svelte";
   import { themeStore } from "../../../stores/themeStore";
   import { get } from "svelte/store";
+  import Role from "$lib/components/Modals/Role.Modal.Component.svelte";
 
   function redirectToPage(page: string) {
     goto(`/dashboard/${page}`);
   }
 
   // Toggle theme
-   let isLoading: boolean = true;
+  let isLoading: boolean = true;
   let theme = "light";
-  let themeData :any= { light: {}, dark: {} };
+  let themeData: any = { light: {}, dark: {} };
 
   onMount(async () => {
     await CheckAuth();
@@ -57,7 +58,7 @@
     });
   }
 
-  function applyTheme(themeVariables:any) {
+  function applyTheme(themeVariables: any) {
     for (const [key, value] of Object.entries(themeVariables)) {
       document.documentElement.style.setProperty(`--${key}`, value);
     }
@@ -69,9 +70,13 @@
     applyTheme(themeData[theme]);
   }
 
- 
+  /////////////////////////////
+  let isLoadingToRole: boolean = false;
+  let roleModal: boolean = false;
 </script>
- 
+
+<Role bind:isLoadingToRole bind:roleModal />
+
 <div class="max-w-screen-xl mx-auto flex items-center justify-center h-2/3">
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
     <div class="flex justify-center">
@@ -92,7 +97,6 @@
         on:click={() => redirectToPage("test")}
       />
     </div>
-
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -171,7 +175,7 @@
         height="4rem"
         icon={IconPasswordUser}
         label="Role"
-        on:click={() => redirectToPage("role")}
+        on:click={() => (roleModal = true)}
       />
     </div>
     {#if checkUserPolicies([Policies.READ_USER], $authStore)}

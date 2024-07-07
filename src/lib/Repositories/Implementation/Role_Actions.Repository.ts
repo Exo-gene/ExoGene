@@ -40,7 +40,7 @@ export class RoleActionsRepository implements IRoleActionsRepository {
       if (response.error) {
         throw response.error;
       }
-       return response;
+      return response;
     } catch (error) {
       throw error;
     }

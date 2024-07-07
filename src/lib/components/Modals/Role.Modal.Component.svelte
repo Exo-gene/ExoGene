@@ -22,9 +22,15 @@
   import { policyStore } from "../../../stores/Policy.Store";
   import { roleStore } from "../../../stores/Role.Store";
   import { roleActionStore } from "../../../stores/Role_Action.Store";
-  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
+  import {
+    IconEdit,
+    IconPlus,
+    IconRefresh,
+    IconTrash,
+  } from "@tabler/icons-svelte";
+  import CustomButton from "../CustomButton.svelte";
 
-  export let isLoading: boolean = true;
+  export let isLoadingToRole: boolean = true;
   export let roleModal: boolean = false;
   let selectedRolePolicies: {
     id: string;
@@ -45,10 +51,11 @@
     easing: sineIn,
   };
   let groupedPolicies: {
-    [key: string]: PolicyDto[]; // This means the keys are strings and the values are arrays of PolicyDto
+    [key: string]: PolicyDto[];
   } = {};
   const actionRegex: RegExp = /^\w+_(\w+)$/;
   let roleData: RoleDto = new RoleDto();
+  let searchTerm = "";
 
   onMount(async () => {
     try {
@@ -56,13 +63,14 @@
       await roleStore.getAll();
       await roleActionStore.getAll();
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   });
-
-  async function filterPolicies() {
-    await policyStore.getAll();
-    groupByCategory($policyStore.data);
+  function filterPolicies() {
+    const filteredPolicies = $policyStore.data.filter((policy) =>
+      policy.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    groupByCategory(filteredPolicies);
   }
 
   function groupByCategory(policies: PolicyDto[]) {
@@ -80,7 +88,7 @@
   }
 
   async function createOrUpdate(options: CreateRoleRequest) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       const response = options.id
         ? await roleStore.update(options)
@@ -101,12 +109,12 @@
         }
       }
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
 
   async function updateRole(options: CreateRoleRequest) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       const response = await roleActionStore.updateFunction({
         role_id: options.id + "",
@@ -122,7 +130,7 @@
         };
       }
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
 
@@ -151,7 +159,7 @@
   }
 
   async function deleteRole(id: string) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       await roleStore.delete(id);
     } catch (error) {
@@ -159,12 +167,12 @@
     } finally {
       roleData = new RoleDto();
       deleteModal = false;
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
 
   async function getPoliciesForRole(id: string) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       const response = await roleActionStore.getRoleActionsByRole(id);
       selectedRolePolicies.policies = response?.map((roleAction) => {
@@ -177,32 +185,23 @@
       groupByCategory($policyStore.data);
       return selectedRolePolicies.policies.map((policy) => policy.id);
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
-  // $: {
-  //   if (
-  //     roleCreateOptions.name == "" ||
-  //     roleCreateOptions.policies.length == 0 ||
-  //     isLoading
-  //   ) {
-  //     roleCreateOptions.id = "";
-  //   }
-  // }
 </script>
 
 <Modal
   title="Add your Policies"
   bind:open={roleModal}
   backdropClass="h-80 dark:bg-white"
-  class="h-[530px] w-96 "
+  class="h-[530px] max-w-screen-sm "
   classDialog="backdrop-blur-lg "
   bodyClass="bg-white rounded-lg rounded-lg"
 >
   <div class="w-full h-auto flex flex-wrap gap-3">
     <div class="w-full z-50 flex flex-row h-auto mx-4">
       <Select
-        class="w-full border-gray-400 h-10"
+        class="w-full border-gray-400 h-12 rounded"
         bind:value={selectedRolePolicies}
         on:change={async () => {
           await getPoliciesForRole(selectedRolePolicies.id);
@@ -223,16 +222,21 @@
           {/each}
         {/if}
       </Select>
-      <Button
-        class="w-20 h-10 mx-2 text-xl font-bold text-white transition-all text-center  "
-        on:click={() => (drawerCondition = false)}>+</Button
-      >
+
+      <CustomButton
+        width="40%"
+        height="3rem"
+        icon={IconPlus}
+        label="Add New Role"
+        on:click={() => (drawerCondition = false)}
+      />
     </div>
 
-    <form class="mx-5 w-full">
+    <form class="mx-5 w-full" on:submit|preventDefault={filterPolicies}>
       <Input
         id="search"
         placeholder="Search"
+        bind:value={searchTerm}
         size="lg"
         class="w-full dark:bg-ekhlas-table-light dark:border-ekhlas-main-light "
       >
@@ -245,7 +249,7 @@
           size="sm"
           type="submit"
           class="bg-[#D0D0D0] hover:bg-[#d0d0d0cb] text-[#686868] ease-in-out duration-300"
-          on:click={filterPolicies}>{"search"}</Button
+          >{"Search"}</Button
         >
       </Input>
     </form>
@@ -318,22 +322,19 @@
     {/if}
   </div>
 
-  {#if isLoading}
+  {#if isLoadingToRole}
     <div class="w-full h-auto flex justify-center items-center gap-3">
-      <Button disabled class="ease-in-out duration-300 gap-3"
-        >{"Update"}
-        <Spinner color="red" />
-      </Button>
-
-      <!-- <Button color="alternative">Decline</Button> -->
+      <Spinner color="red" />
     </div>
   {:else if selectedRolePolicies.policies}
-    <div class="w-full h-auto flex justify-center items-center gap-3">
-      <Button
+    <div class="flex justify-end my-4 mx-4">
+      <CustomButton
+        width="30%"
+        height="3rem"
+        icon={IconRefresh}
+        label="Update"
         on:click={() => updateRole(roleOptions)}
-        class="ease-in-out duration-300">{"Update"}</Button
-      >
-      <!-- <Button color="alternative">Decline</Button> -->
+      />
     </div>
   {/if}
 </Modal>
@@ -363,7 +364,7 @@
       </div>
       {#if roleOptions.id}
         <div
-          class="w-24 bg-red-600 h-9 flex justify-center items-center p-4 rounded-xl"
+          class="w-24 bg-red-700 text-white h-9 flex justify-center items-center p-4 rounded-xl"
         >
           <button
             on:click={() => {
@@ -396,7 +397,7 @@
       />
     </div>
   </form>
-  {#if isLoading}
+  {#if isLoadingToRole}
     <div class="w-full flex flex-wrap items-center gap-2">
       <Button class="w-full" disabled>
         <Spinner class="me-3" size="4" color="white" />
@@ -404,12 +405,13 @@
       </Button>
     </div>
   {:else}
-    <Button
+    <CustomButton
+      width="100%"
+      height="3rem"
+      icon={IconPlus}
+      label="submit"
       on:click={() => createOrUpdate(roleOptions)}
-      class="ease-in-out duration-300 w-full"
-    >
-      {"submit"}</Button
-    >
+    />
   {/if}
   <div
     class="w-full h-[40rem] bg-[#f1f1f1] dark:bg-ekhlas-main-dark mt-4 rounded-lg flex justify-start items-center flex-col px-2"
