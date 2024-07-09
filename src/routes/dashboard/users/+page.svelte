@@ -16,6 +16,8 @@
     IconRestore,
   } from "@tabler/icons-svelte";
   import { Button, Modal, Label, Input, Checkbox } from "flowbite-svelte";
+  import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
+  import { userStore } from "../../../stores/User.Store";
   let formModal = false;
 
   interface User {
@@ -140,14 +142,49 @@
   }
 
   // reset password
-  async function resetPassword(itemID: number) {
-    console.log(itemID);
-    const { error } = await supabase
-      .from("users")
-      .update({ password: "password" })
-      .eq("id", itemID);
-    if (error) {
-      console.error("Error resetting password:", error);
+
+  let userOptions: CreateUserRequest = new CreateUserRequest();
+  let password: string = "";
+  async function fetchUserById(id: number) {
+    isLoading = true;
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user:", error);
+        return null;
+      }
+
+      return data;
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async function resetPassword(id: number, password: string) {
+    const userData = await fetchUserById(id);
+    if (userData) {
+      userOptions.id = userData.id;
+      userOptions.userName = userData.userName;
+      userOptions.email = userData.email;
+      userOptions.phoneNumber = userData.phoneNumber;
+      userOptions.address = userData.address;
+      userOptions.lab = userData.lab_name;
+      userOptions.user_id = userData.user_id;
+
+      isLoading = true;
+      try {
+        const user = await userStore.update(userOptions, password);
+        console.log("Password reset successful", user);
+      } finally {
+        isLoading = false;
+        formModal = false;
+        goto("/dashboard/users");
+      }
     }
   }
 </script>
@@ -342,7 +379,11 @@
                         autoclose={false}
                         class="w-full"
                       >
-                        <form class="flex flex-col space-y-6" action="#">
+                        <form
+                          class="flex flex-col space-y-6"
+                          on:submit|preventDefault={() =>
+                            resetPassword(item.id, password)}
+                        >
                           <h3
                             class="mb-4 text-xl font-medium text-gray-900 dark:text-white"
                           >
@@ -353,17 +394,15 @@
                             <Input
                               type="password"
                               name="password"
+                              bind:value={password}
                               placeholder="•••••••"
                               required
                             />
                           </Label>
 
-                          <Button
-                            on:click={() => {
-                              resetPassword(item.id);
-                            }}
-                            type="submit"
-                            class="w-full1">Reset password</Button
+                          <button
+                            class="h-12 hover-button font-semibold rounded flex items-center justify-center gap-2"
+                            type="submit">Reset password</button
                           >
                         </form>
                       </Modal>
@@ -391,5 +430,18 @@
 <style>
   .table-cell-bottom-border {
     border-bottom: 1px solid var(--textColor);
+  }
+
+  .hover-button {
+    background-color: var(--backgroundButtonColor);
+    border: 1px solid var(--backgroundButtonColor);
+    color: var(--textColor);
+    transition:
+      background-color 0.3s,
+      color 0.3s; /* smooth transition for hover effect */
+  }
+  .hover-button:hover {
+    background-color: var(--hoverBackgroundColor);
+    color: var(--hoverTextColor);
   }
 </style>

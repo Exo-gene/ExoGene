@@ -136,7 +136,6 @@ export class UsersRepository implements IUsersRepository {
         lab: user.lab,
         address: user.address,
       };
-
       const response = await fetch("/api/user/update", {
         method: "POST",
         headers: {

@@ -480,9 +480,12 @@
 </Drawer>
 
 <Modal
+  style="background-color: var(--mainBackgroundColor); color: var(--textColor);"
   title="Confirm Deletion"
   bind:open={deleteModal}
-  class="bg-white max-w-sm mx-auto"
+  class="max-w-sm mx-auto"
+  classHeader="modal-header"
+  classFooter="modal-footer"
 >
   <p>{"are you sure you want to delete this role ?"}</p>
   <svelte:fragment slot="footer">
@@ -512,5 +515,14 @@
   }
   input[type="checkbox"]:checked {
     background-color: #2d2d2d;
+  }
+
+  :global(.modal-header) {
+    background-color: var(--mainBackgroundColor) !important;
+    color: var(--textColor) !important;
+  }
+  :global(.modal-footer) {
+    background-color: var(--mainBackgroundColor) !important;
+    color: var(--textColor) !important;
   }
 </style>
