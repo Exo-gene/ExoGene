@@ -179,7 +179,6 @@
       isLoading = true;
       try {
         const user = await userStore.update(userOptions, password);
-        console.log("Password reset successful", user);
       } finally {
         isLoading = false;
         formModal = false;
@@ -387,7 +386,7 @@
                           <h3
                             class="mb-4 text-xl font-medium text-gray-900 dark:text-white"
                           >
-                            Reset password
+                           Reset password
                           </h3>
                           <Label class="space-y-2">
                             <span>Your password</span>
@@ -399,9 +398,8 @@
                               required
                             />
                           </Label>
-
-                          <button
-                            class="h-12 hover-button font-semibold rounded flex items-center justify-center gap-2"
+                           <button
+                             class="hover-button py-3 font-semibold rounded flex items-center justify-center gap-2"
                             type="submit">Reset password</button
                           >
                         </form>
@@ -432,7 +430,7 @@
     border-bottom: 1px solid var(--textColor);
   }
 
-  .hover-button {
+    .hover-button {
     background-color: var(--backgroundButtonColor);
     border: 1px solid var(--backgroundButtonColor);
     color: var(--textColor);

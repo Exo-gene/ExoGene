@@ -15,4 +15,8 @@ export enum Policies {
   DELETE_ROLE = 13,
   UPDATE_CUSTOMTHEME = 14,
   READ_CUSTOMTHEME = 15,
+  CREATE_LAB = 16,
+  READ_LAB = 17,
+  UPDATE_LAB = 18,
+  DELETE_LAB = 19,
 }

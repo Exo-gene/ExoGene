@@ -13,12 +13,12 @@
   import { toLocaleDateFormat, toUtc } from "$lib/utils/dateTimeFormat.js";
   import { PositionEnum } from "../../../../models/positionEnum.js";
   import { LanguageEnum } from "../../../../models/languageEnum";
-  import { advertisementStore } from "../../../../stores/advertisementStore";
+  import { advertisementStore } from "../../../../stores/labStore";
   import { page } from "$app/stores";
   import type {
     AdvertisementLanguageModelToUpdate,
     FormDataSet,
-  } from "../../../../models/advertisementModel";
+  } from "../../../../models/lab";
 
   const id = +$page.params.advertisementId;
   let isLoading = false;

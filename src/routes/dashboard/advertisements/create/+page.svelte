@@ -11,8 +11,8 @@
   import { toUtc } from "$lib/utils/dateTimeFormat.js";
   import { PositionEnum } from "../../../../models/positionEnum.js";
   import { LanguageEnum } from "../../../../models/languageEnum";
-  import { advertisementStore } from "../../../../stores/advertisementStore";
-  import type { FormDataSet } from "../../../../models/advertisementModel";
+  import { advertisementStore } from "../../../../stores/labStore";
+  import type { FormDataSet } from "../../../../models/lab";
   import CategoryDropdown from "$lib/components/CategoryDropdown.svelte";
 
   let isLoading = false;

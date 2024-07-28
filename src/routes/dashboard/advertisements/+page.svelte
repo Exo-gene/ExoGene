@@ -4,7 +4,7 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import { advertisementStore } from "../../../stores/advertisementStore";
+  import { advertisementStore } from "../../../stores/labStore";
   import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
