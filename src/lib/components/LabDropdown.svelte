@@ -40,7 +40,7 @@
       console.error("Fetch lab by ID error:", error);
       return;
     }
-    selectedLabName = data.lab_name;
+    selectedLabName = data.name;
   }
 
   onMount(() => {
@@ -59,8 +59,8 @@
   function handleSelection(item: LabDataModel, event: MouseEvent) {
     event.stopPropagation();
     selectedLabId = item.id;
-    selectedLabName = item.lab_name;
-    searchTerm = item.lab_name;
+    selectedLabName = item.name;
+    searchTerm = item.name;
     dispatch("labChange", item.id);
   }
 
@@ -100,7 +100,7 @@
         on:click={(event) => handleSelection(item, event)}
         aria-selected={isSelected(item.id)}
       >
-        {truncate(item.lab_name, 30)}{isSelected(item.id) ? " (Selected)" : ""}
+        {truncate(item.name, 30)}{isSelected(item.id) ? " (Selected)" : ""}
       </DropdownItem>
     {/each}
   </Dropdown>

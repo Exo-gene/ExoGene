@@ -1,14 +1,14 @@
 import { writable } from "svelte/store";
 import type { SupabaseClient } from "@supabase/supabase-js";
-
+import type { LabDataModel } from "../models/labModel";
 
 const createLabStore = () => {
-  const { subscribe, set, update } = writable<any[]>([]);
+  const { subscribe, set, update } = writable<LabDataModel[]>([]);
 
   return {
     subscribe,
-    set: (lab: any[]) => {
-      set(lab);
+    set: (labs: LabDataModel[]) => {
+      set(labs);
     },
     getLabData: async (
       supabase: SupabaseClient,
@@ -29,20 +29,17 @@ const createLabStore = () => {
     },
     deleteLabData: async (labId: number, supabase: SupabaseClient) => {
       try {
-        const { error } = await supabase.rpc(
-          "delete_lab_and_lab_translations",
-          {
-            data: { id: labId },
-          }
-        );
+        const { error } = await supabase.rpc("delete_labData", {
+          data: { id: labId },
+        });
 
         if (error) {
           console.error("Error deleting lab:", error);
           throw error;
         }
 
-        update((currentLabDataId) =>
-          currentLabDataId.filter((lab) => lab.id !== labId)
+        update((currentLabData) =>
+          currentLabData.filter((lab) => lab.id !== labId)
         );
       } catch (error) {
         console.error("Failed to delete lab:", error);
@@ -50,18 +47,13 @@ const createLabStore = () => {
       }
     },
     insertLabData: async (
-      labObject: any,
-      labLanguageData: any[],
+      labObject: Omit<LabDataModel, "id">,
       supabase: SupabaseClient
     ) => {
       try {
-        const { data, error } = await supabase.rpc(
-          "insert_lab_and_lab_translations",
-          {
-            advertisement_data: labObject,
-            advertisement_lang_data: labLanguageData,
-          }
-        );
+        const { data, error } = await supabase
+          .from("lab")
+          .insert([{ name: labObject.name, address: labObject.address }]);
 
         if (error) {
           console.error("Error inserting lab:", error);
@@ -79,20 +71,29 @@ const createLabStore = () => {
       }
     },
     updateLabData: async (
-      labObject: any,
-      labLanguageData: any[],
+      labObject: Partial<LabDataModel>,
+      labId: number,
       supabase: SupabaseClient
     ) => {
       try {
-        const { data, error } = await supabase.rpc("update_lab", {
-          advertisement_data: labObject,
-          advertisement_lang_data: labLanguageData,
-        });
+        const { data, error } = await supabase
+          .from("lab")
+          .update(labObject)
+          .eq("id", labId);
 
         if (error) {
           console.error("Error updating lab:", error);
           throw error;
         }
+
+        update((labs) => {
+          const index = labs.findIndex((lab) => lab.id === labId);
+          if (index !== -1) {
+            labs[index] = { ...labs[index], ...labObject };
+          }
+          return labs;
+        });
+
         return data;
       } catch (error) {
         console.error("Failed to update lab:", error);

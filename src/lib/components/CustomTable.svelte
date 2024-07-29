@@ -34,13 +34,13 @@
   </TableHead>
   <TableBody tableBodyClass="divide-y">
     {#each items as item}
-      <TableBodyRow style="background-color: var(--mainBackgroundColor); color:var(--textColor)">
+      <TableBodyRow>
         <TableBodyCell class="!p-4"></TableBodyCell>
         <TableBodyCell>{item.id}</TableBodyCell>
         <TableBodyCell class="font-semibold">
           {formatDateTime(item.created_at.toString())}
         </TableBodyCell>
-        <TableBodyCell>{item.lab_name}</TableBodyCell>
+        <TableBodyCell>{item.name}</TableBodyCell>
         <TableBodyCell>{item.address}</TableBodyCell>
         <TableBodyCell class="flex space-x-3">
           {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}

@@ -26,7 +26,7 @@
     email: string;
     phoneNumber: number;
     address: string;
-    lab_name: string;
+    name: string;
     status: string;
     user_id: string;
     roles: {
@@ -173,7 +173,7 @@
       userOptions.email = userData.email;
       userOptions.phoneNumber = userData.phoneNumber;
       userOptions.address = userData.address;
-      userOptions.lab = userData.lab_name;
+      userOptions.lab = userData.name;
       userOptions.user_id = userData.user_id;
 
       isLoading = true;
@@ -303,7 +303,7 @@
 
                   <td class="p-3 table-cell-bottom-border">
                     <span class="flex justify-start">
-                      {item.lab_name}
+                      {item.name}
                     </span>
                   </td>
                   <td class="p-3 table-cell-bottom-border">
