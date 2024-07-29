@@ -8,5 +8,6 @@ export interface LabModel {
 }
 export interface LabDataModel {
   id: number;
-  lab_name: string;
+  name: string;
+  address: string;
 }

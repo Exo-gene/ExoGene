@@ -116,9 +116,11 @@
         <p class=" w-full h-4 rounded-lg">{"phoneNumber"}</p>
         <input
           type="text"
-          class="rounded-lg text-black"
+          class="rounded-lg"
+          style="color: var(--textColor);"
           bind:value={userOptions.phoneNumber}
           required
+          placeholder="07702223744"
         />
       </div>
       <div class="w-full md:w-1/2 px-2 flex flex-col gap-2">

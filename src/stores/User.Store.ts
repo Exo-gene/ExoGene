@@ -4,7 +4,7 @@ import type { Store } from "$lib/Models/Responses/Store.Response.Model";
 import { UsersRepository } from "$lib/Repositories/Implementation/Users.Repository";
 import { get, writable } from "svelte/store";
 import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
- 
+
 const usersRepository = new UsersRepository();
 
 const createUserStore = () => {
@@ -23,7 +23,7 @@ const createUserStore = () => {
           throw new Error("Email is required");
         if (!password || password === "")
           throw new Error("Password is required");
-         if (user.email) {
+        if (user.email) {
           const check = await usersRepository.getUserByEmail(user.email);
           if (check) {
             throw new Error("User already exists");
@@ -101,8 +101,7 @@ const createUserStore = () => {
         if (!user.email || user.email === "") {
           user.email = document.email;
         }
-        
-        const data = await usersRepository.updateUser(user, password);
+         const data = await usersRepository.updateUser(user, password);
         const dto = Dto.ToUserDto(data);
         update((store) => {
           store.data = store.data.map((user) => {

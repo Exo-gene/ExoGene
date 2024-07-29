@@ -21,7 +21,14 @@
   }
 </script>
 
-<Modal title="Confirm Deletion" bind:open class="bg-white max-w-sm mx-auto">
+<Modal
+  title="Confirm Deletion"
+  style="background-color: var(--mainBackgroundColor); color: var(--textColor);"
+  bind:open
+  class="max-w-sm mx-auto"
+  classHeader="modal-header"
+  classFooter="modal-footer"
+>
   <p>{message}</p>
   <svelte:fragment slot="footer">
     <Button on:click={confirmDeletion} color="red" class="border">Delete</Button
@@ -33,3 +40,14 @@
 {#if showToast}
   <Toast message="Item deleted successfully" type="success" />
 {/if}
+
+<style>
+  :global(.modal-header) {
+    background-color: var(--mainBackgroundColor) !important;
+    color: var(--textColor) !important;
+  }
+  :global(.modal-footer) {
+    background-color: var(--mainBackgroundColor) !important;
+    color: var(--textColor) !important;
+  }
+</style>

@@ -10,7 +10,15 @@
   import { supabase } from "$lib/supabaseClient";
   import { authStore } from "../../../stores/Auth.Store";
   import PaginationControls from "$lib/components/PaginationControls.svelte";
-  import { IconUserCheck, IconUserOff } from "@tabler/icons-svelte";
+  import {
+    IconUserCheck,
+    IconUserOff,
+    IconRestore,
+  } from "@tabler/icons-svelte";
+  import { Button, Modal, Label, Input, Checkbox } from "flowbite-svelte";
+  import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
+  import { userStore } from "../../../stores/User.Store";
+  let formModal = false;
 
   interface User {
     id: number;
@@ -18,7 +26,7 @@
     email: string;
     phoneNumber: number;
     address: string;
-    lab_name: string;
+    name: string;
     status: string;
     user_id: string;
     roles: {
@@ -68,13 +76,17 @@
       console.error("No item ID specified for deletion");
       return;
     }
+
+    const currentDate = new Date().toISOString(); // Get the current date in ISO format
+
     try {
       const { error } = await supabase
         .from("users")
-        .delete()
+        .update({ deleted_at: currentDate }) // Update the deleted_at column with the current date
         .match({ id: itemIdToDelete });
+
       if (error) throw error;
-      fetchUsers(pageNumber, pageSize); // Refresh the list after deletion
+      fetchUsers(pageNumber, pageSize);
     } catch (error) {
       console.error("Error deleting user:", error);
     } finally {
@@ -128,6 +140,52 @@
       fetchUsers(pageNumber, pageSize);
     }
   }
+
+  // reset password
+
+  let userOptions: CreateUserRequest = new CreateUserRequest();
+  let password: string = "";
+  async function fetchUserById(id: number) {
+    isLoading = true;
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user:", error);
+        return null;
+      }
+
+      return data;
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async function resetPassword(id: number, password: string) {
+    const userData = await fetchUserById(id);
+    if (userData) {
+      userOptions.id = userData.id;
+      userOptions.userName = userData.userName;
+      userOptions.email = userData.email;
+      userOptions.phoneNumber = userData.phoneNumber;
+      userOptions.address = userData.address;
+      userOptions.lab = userData.name;
+      userOptions.user_id = userData.user_id;
+
+      isLoading = true;
+      try {
+        const user = await userStore.update(userOptions, password);
+      } finally {
+        isLoading = false;
+        formModal = false;
+        goto("/dashboard/users");
+      }
+    }
+  }
 </script>
 
 <div class="max-w-screen-2xl mx-auto py-10">
@@ -138,7 +196,7 @@
   {:else}
     <!-- Header Section -->
     <div class="w-full flex items-center justify-between py-4">
-      <ButtonComponent title="Back" dispatch={() => history.back()} />
+    <ButtonComponent title="Back" dispatch={() => goto("/dashboard/home")} />
       <h1
         class="font-bold text-center flex-grow"
         style="color: var(--titleColor);"
@@ -146,9 +204,8 @@
         Users List
       </h1>
       <!-- insert new data -->
-      {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}
-        <ButtonComponent title="Add" dispatch={() => createEmployee()} />
-      {/if}
+      <ButtonComponent title="Add" dispatch={() => createEmployee()} />
+      {#if checkUserPolicies([Policies.CREATE_USER], $authStore)}{/if}
     </div>
 
     <!-- Table data -->
@@ -246,7 +303,7 @@
 
                   <td class="p-3 table-cell-bottom-border">
                     <span class="flex justify-start">
-                      {item.lab_name}
+                      {item.name}
                     </span>
                   </td>
                   <td class="p-3 table-cell-bottom-border">
@@ -304,6 +361,50 @@
                           </button>
                         {/if}
                       {/if}
+
+                      <!-- reset password  -->
+                      {#if checkUserPolicies([Policies[`RESETPASSWORD_${pageName.toUpperCase()}`]], $authStore)}
+                        <button
+                          class="text-gray-700 font-semibold hover:text-gray-600 transition-all"
+                          on:click={() => (formModal = true)}
+                        >
+                          <IconRestore stroke={2} />
+                        </button>
+                      {/if}
+
+                      <Modal
+                        bind:open={formModal}
+                        size="xs"
+                        autoclose={false}
+                        class="w-full"
+                      >
+                        <form
+                          class="flex flex-col space-y-6"
+                          on:submit|preventDefault={() =>
+                            resetPassword(item.id, password)}
+                        >
+                          <h3
+                            class="mb-4 text-xl font-medium text-gray-900 dark:text-white"
+                          >
+                           Reset password
+                          </h3>
+                          <Label class="space-y-2">
+                            <span>Your password</span>
+                            <Input
+                              type="password"
+                              name="password"
+                              bind:value={password}
+                              placeholder="•••••••"
+                              required
+                            />
+                          </Label>
+                           <button
+                             class="hover-button py-3 font-semibold rounded flex items-center justify-center gap-2"
+                            type="submit">Reset password</button
+                          >
+                        </form>
+                      </Modal>
+                      <!-- reset password  -->
                     </span>
                   </td>
                 </tr>
@@ -327,5 +428,18 @@
 <style>
   .table-cell-bottom-border {
     border-bottom: 1px solid var(--textColor);
+  }
+
+    .hover-button {
+    background-color: var(--backgroundButtonColor);
+    border: 1px solid var(--backgroundButtonColor);
+    color: var(--textColor);
+    transition:
+      background-color 0.3s,
+      color 0.3s; /* smooth transition for hover effect */
+  }
+  .hover-button:hover {
+    background-color: var(--hoverBackgroundColor);
+    color: var(--hoverTextColor);
   }
 </style>

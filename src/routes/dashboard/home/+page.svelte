@@ -25,50 +25,57 @@
   import { onMount } from "svelte";
   import { themeStore } from "../../../stores/themeStore";
   import { get } from "svelte/store";
+  import Role from "$lib/components/Modals/Role.Modal.Component.svelte";
 
   function redirectToPage(page: string) {
     goto(`/dashboard/${page}`);
   }
 
   // Toggle theme
+  let isLoading: boolean = true;
   let theme = "light";
-  let themeData = { light: {}, dark: {} };
+  let themeData: any = { light: {}, dark: {} };
 
   onMount(async () => {
+    await CheckAuth();
+    await loadThemeData();
+    isLoading = false;
+  });
+
+  async function CheckAuth() {
+    await authStore.getAuth();
+    if (!$authStore) {
+      return goto("/");
+    }
+  }
+
+  async function loadThemeData() {
     theme = localStorage.getItem("theme") || "light";
     await themeStore.fetchThemeData();
     themeStore.subscribe((data) => {
       themeData = data;
-      updateTheme();
+      applyTheme(data[theme]);
     });
-  });
+  }
+
+  function applyTheme(themeVariables: any) {
+    for (const [key, value] of Object.entries(themeVariables)) {
+      document.documentElement.style.setProperty(`--${key}`, value);
+    }
+  }
 
   function toggleTheme() {
     theme = theme === "light" ? "dark" : "light";
     localStorage.setItem("theme", theme);
-    updateTheme();
+    applyTheme(themeData[theme]);
   }
 
-  // custom theme
-  function updateTheme() {
-    const currentTheme = themeData[theme];
-    document.documentElement.setAttribute("data-theme", theme);
-    if (currentTheme) {
-      document.documentElement.style.setProperty(
-        "--mainBackgroundColor",
-        currentTheme.mainBackgroundColor || "#E0E0E0"
-      );
-      document.documentElement.style.setProperty(
-        "--textColor",
-        currentTheme.textColor || "#181818"
-      );
-      document.documentElement.style.setProperty(
-        "--buttonBackgroundColor",
-        currentTheme.backgroundButtonColor || "#1E90FF"
-      );
-    }
-  }
+  /////////////////////////////
+  let isLoadingToRole: boolean = false;
+  let roleModal: boolean = false;
 </script>
+
+<Role bind:isLoadingToRole bind:roleModal />
 
 <div class="max-w-screen-xl mx-auto flex items-center justify-center h-2/3">
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
@@ -81,6 +88,7 @@
         on:click={() => redirectToPage("patient")}
       />
     </div>
+   {#if checkUserPolicies([Policies.READ_TEST], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -90,7 +98,8 @@
         on:click={() => redirectToPage("test")}
       />
     </div>
-
+    {/if}
+    {#if checkUserPolicies([Policies.READ_STATUS], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -100,15 +109,19 @@
         on:click={() => redirectToPage("status")}
       />
     </div>
+    {/if}
+     {#if checkUserPolicies([Policies.READ_SAMPLETYPE], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
         height="4rem"
         icon={IconAlignBoxBottomLeft}
         label="Sample Type"
-        on:click={() => redirectToPage("sample-type")}
+        on:click={() => redirectToPage("sampleType")}
       />
     </div>
+    {/if}
+   {#if checkUserPolicies([Policies.READ_COMPANY], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -118,6 +131,8 @@
         on:click={() => redirectToPage("company")}
       />
     </div>
+    {/if}
+    {#if checkUserPolicies([Policies.READ_DOCTOR], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -127,6 +142,7 @@
         on:click={() => redirectToPage("doctor")}
       />
     </div>
+    {/if}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -136,6 +152,7 @@
         on:click={() => redirectToPage("lab")}
       />
     </div>
+   {#if checkUserPolicies([Policies.READ_STORE], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -145,6 +162,7 @@
         on:click={() => redirectToPage("store")}
       />
     </div>
+    {/if}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -154,22 +172,13 @@
         on:click={() => redirectToPage("accountant")}
       />
     </div>
-    <div class="flex justify-center">
-      <CustomButton
-        width="100%"
-        height="4rem"
-        icon={IconSticker2}
-        label="Sticker"
-        on:click={() => redirectToPage("sticker")}
-      />
-    </div>
-    <div class="flex justify-center">
+      <div class="flex justify-center">
       <CustomButton
         width="100%"
         height="4rem"
         icon={IconPasswordUser}
         label="Role"
-        on:click={() => redirectToPage("role")}
+        on:click={() => (roleModal = true)}
       />
     </div>
     {#if checkUserPolicies([Policies.READ_USER], $authStore)}

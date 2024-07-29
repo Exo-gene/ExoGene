@@ -22,9 +22,15 @@
   import { policyStore } from "../../../stores/Policy.Store";
   import { roleStore } from "../../../stores/Role.Store";
   import { roleActionStore } from "../../../stores/Role_Action.Store";
-  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
+  import {
+    IconEdit,
+    IconPlus,
+    IconRefresh,
+    IconTrash,
+  } from "@tabler/icons-svelte";
+  import CustomButton from "../CustomButton.svelte";
 
-  export let isLoading: boolean = true;
+  export let isLoadingToRole: boolean = true;
   export let roleModal: boolean = false;
   let selectedRolePolicies: {
     id: string;
@@ -45,10 +51,11 @@
     easing: sineIn,
   };
   let groupedPolicies: {
-    [key: string]: PolicyDto[]; // This means the keys are strings and the values are arrays of PolicyDto
+    [key: string]: PolicyDto[];
   } = {};
   const actionRegex: RegExp = /^\w+_(\w+)$/;
   let roleData: RoleDto = new RoleDto();
+  let searchTerm = "";
 
   onMount(async () => {
     try {
@@ -56,13 +63,14 @@
       await roleStore.getAll();
       await roleActionStore.getAll();
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   });
-
-  async function filterPolicies() {
-    await policyStore.getAll();
-    groupByCategory($policyStore.data);
+  function filterPolicies() {
+    const filteredPolicies = $policyStore.data.filter((policy) =>
+      policy.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    groupByCategory(filteredPolicies);
   }
 
   function groupByCategory(policies: PolicyDto[]) {
@@ -80,7 +88,7 @@
   }
 
   async function createOrUpdate(options: CreateRoleRequest) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       const response = options.id
         ? await roleStore.update(options)
@@ -101,12 +109,12 @@
         }
       }
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
 
   async function updateRole(options: CreateRoleRequest) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       const response = await roleActionStore.updateFunction({
         role_id: options.id + "",
@@ -122,7 +130,7 @@
         };
       }
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
 
@@ -151,7 +159,7 @@
   }
 
   async function deleteRole(id: string) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       await roleStore.delete(id);
     } catch (error) {
@@ -159,12 +167,12 @@
     } finally {
       roleData = new RoleDto();
       deleteModal = false;
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
 
   async function getPoliciesForRole(id: string) {
-    isLoading = true;
+    isLoadingToRole = true;
     try {
       const response = await roleActionStore.getRoleActionsByRole(id);
       selectedRolePolicies.policies = response?.map((roleAction) => {
@@ -177,32 +185,26 @@
       groupByCategory($policyStore.data);
       return selectedRolePolicies.policies.map((policy) => policy.id);
     } finally {
-      isLoading = false;
+      isLoadingToRole = false;
     }
   }
-  // $: {
-  //   if (
-  //     roleCreateOptions.name == "" ||
-  //     roleCreateOptions.policies.length == 0 ||
-  //     isLoading
-  //   ) {
-  //     roleCreateOptions.id = "";
-  //   }
-  // }
 </script>
 
 <Modal
+  style="background-color: var(--mainBackgroundColor); color: var(--titleColor);"
   title="Add your Policies"
   bind:open={roleModal}
-  backdropClass="h-80 dark:bg-white"
-  class="h-[530px] w-96 "
-  classDialog="backdrop-blur-lg "
-  bodyClass="bg-white rounded-lg rounded-lg"
+  backdropClass="h-80"
+  class="h-[600px] max-w-screen-lg mx-auto shadow"
+  classDialog="backdrop-blur-lg"
+  bodyClass=" "
 >
-  <div class="w-full h-auto flex flex-wrap gap-3">
+  <div class="w-full mt-4 h-auto flex flex-wrap gap-3">
+    <Label class="mx-4" style="color:var(--textColor)">Select role</Label>
     <div class="w-full z-50 flex flex-row h-auto mx-4">
       <Select
-        class="w-full border-gray-400 h-10"
+        style="background-color: var(--textColor);color: var(--buttonBackgroundColor);"
+        class="cursor-pointer w-full mr-2 border-gray-400 h-12 rounded"
         bind:value={selectedRolePolicies}
         on:change={async () => {
           await getPoliciesForRole(selectedRolePolicies.id);
@@ -217,56 +219,57 @@
       >
         {#if $roleStore}
           {#each $roleStore.data as role}
-            <option value={{ id: role.id, name: role.name }} selected
-              >{role.name}</option
-            >
+            <option value={{ id: role.id, name: role.name }} selected>
+              {role.name}
+            </option>
           {/each}
         {/if}
       </Select>
-      <Button
-        class="w-20 h-10 mx-2 text-xl font-bold text-white transition-all text-center  "
-        on:click={() => (drawerCondition = false)}>+</Button
-      >
+
+      <button
+        class="font-semibold w-40 rounded"
+        style="background-color: var(--backButtonBackgroundColor);color: var(--titleColor);"
+        on:click={() => (drawerCondition = false)}
+        >{"Add New Role"}
+      </button>
     </div>
 
-    <form class="mx-5 w-full">
+    <form class="mx-5 w-full" on:submit|preventDefault={filterPolicies}>
       <Input
         id="search"
         placeholder="Search"
+        bind:value={searchTerm}
         size="lg"
-        class="w-full dark:bg-ekhlas-table-light dark:border-ekhlas-main-light "
+        class="w-full  "
+        style="background-color: var(--textColor);color: var(--buttonBackgroundColor);"
       >
-        <SearchOutline
-          slot="left"
-          class="w-6 h-6 text-gray-500 dark:text-gray-400"
-        />
+        <SearchOutline slot="left" class="w-6 h-6 text-var(--iconColor)" />
         <Button
           slot="right"
           size="sm"
           type="submit"
-          class="bg-[#D0D0D0] hover:bg-[#d0d0d0cb] text-[#686868] ease-in-out duration-300"
-          on:click={filterPolicies}>{"search"}</Button
+          style="background-color: var(--backButtonBackgroundColor);color: var(--titleColor);"
+          class="ease-in-out duration-300"
         >
+          {"Search"}
+        </Button>
       </Input>
     </form>
 
     {#if selectedRolePolicies.policies}
       <div
-        class="w-full h-60 flex flex-col gap-5 justify-start items-start border m-4 rounded-lg p-4 text-black overflow-y-auto"
+        class="w-full h-60 flex flex-col gap-5 justify-start items-start m-4 rounded-lg p-4 text-var(--textColor) overflow-y-auto"
       >
         {#each Object.keys(groupedPolicies) as policyCategory}
           <div
-            class=" text-center w-full h-auto flex flex-col justify-between items-center bg-ekhlas-main-dark dark:bg-ekhlas-primary rounded-lg pt-2"
+            style="background-color: var(--backgroundButtonColor);color: var(--textColor);"
+            class=" p-2 w-full h-auto flex flex-col justify-between items-center rounded"
           >
-            <div
-              class=" text-center w-full h-auto flex justify-between items-center"
-            >
-              <p class=" w-full font-medium px-2 text-sm uppercase text-black">
+            <div class=" w-full h-auto flex justify-between items-center">
+              <p class="w-full font-medium px-2 text-sm uppercase">
                 Policies of {policyCategory}
               </p>
-              <div
-                class="w-full h-auto flex justify-end gap-2 items-center text-black"
-              >
+              <div class="w-full h-auto flex justify-end gap-2 items-center">
                 <p class="text-sm">Select All</p>
                 <input
                   type="checkbox"
@@ -279,7 +282,7 @@
                 />
               </div>
             </div>
-            <hr class="border-2 w-full mt-2 dark:border-ekhlas-main-light" />
+            <!-- <hr class="border-2 w-full mt-2 border-var(--dividerColor)" /> -->
           </div>
 
           {#each groupedPolicies[policyCategory] as policy}
@@ -308,7 +311,7 @@
                   }
                 }}
               />
-              <p class="text-justify dark:text-white">
+              <p class="text-justify text-var(--policyTextColor)">
                 {policy.name.replace(/_/g, " ")}
               </p>
             </div>
@@ -318,52 +321,55 @@
     {/if}
   </div>
 
-  {#if isLoading}
+  {#if isLoadingToRole}
     <div class="w-full h-auto flex justify-center items-center gap-3">
-      <Button disabled class="ease-in-out duration-300 gap-3"
-        >{"Update"}
-        <Spinner color="red" />
-      </Button>
-
-      <!-- <Button color="alternative">Decline</Button> -->
+      <Spinner color="var(--spinnerColor)" />
     </div>
   {:else if selectedRolePolicies.policies}
-    <div class="w-full h-auto flex justify-center items-center gap-3">
-      <Button
+    <div class="flex justify-end my-4 mx-4">
+      <CustomButton
+        width="30%"
+        height="3rem"
+        icon={IconRefresh}
+        label="Update"
         on:click={() => updateRole(roleOptions)}
-        class="ease-in-out duration-300">{"Update"}</Button
-      >
-      <!-- <Button color="alternative">Decline</Button> -->
+      />
     </div>
   {/if}
 </Modal>
 
 <Drawer
+  style="background-color: var(--mainBackgroundColor); color: var(--titleColor);"
   transitionType="fly"
   placement="right"
   {transitionParams}
   bind:hidden={drawerCondition}
-  class="w-1/3 dark:bg-white dark:text-white"
+  class="w-1/3  "
 >
   <CloseButton
+    style="background-color: var(--mainBackgroundColor); color: var(--titleColor);"
     on:click={() => (drawerCondition = true)}
-    class="mb-4 dark:text-white"
+    class="mb-4 "
   />
   <form action="#" class="mb-6">
     <div class="w-full flex justify-center items-center gap-2">
       <div class="mb-6 w-full">
-        <Label for="title" class="block mb-2">{"Title"}</Label>
+        <Label style="color:var(--textColor)" for="title" class="block mb-2"
+          >{"Title"}</Label
+        >
         <Input
+          style="background-color: var(--backgroundButtonColor); color: var(--textColor);"
           id="title"
           name="title"
           required
           placeholder="Role Title"
           bind:value={roleOptions.name}
+          class="rounded"
         />
       </div>
       {#if roleOptions.id}
         <div
-          class="w-24 bg-red-600 h-9 flex justify-center items-center p-4 rounded-xl"
+          class="w-24 bg-red-700 text-white h-10 flex justify-center items-center p-4 rounded"
         >
           <button
             on:click={() => {
@@ -380,7 +386,9 @@
       {/if}
     </div>
     <div class="mb-6">
-      <Label for="description" class="mb-2">{"policies"}</Label>
+      <Label style="color:var(--textColor)" for="description" class="mb-2"
+        >{"policies"}</Label
+      >
       <MultiSelect
         items={$policyStore
           ? $policyStore.data.map((policy) => {
@@ -396,7 +404,7 @@
       />
     </div>
   </form>
-  {#if isLoading}
+  {#if isLoadingToRole}
     <div class="w-full flex flex-wrap items-center gap-2">
       <Button class="w-full" disabled>
         <Spinner class="me-3" size="4" color="white" />
@@ -404,20 +412,25 @@
       </Button>
     </div>
   {:else}
-    <Button
+    <CustomButton
+      width="100%"
+      height="3rem"
+      icon={IconPlus}
+      label="submit"
       on:click={() => createOrUpdate(roleOptions)}
-      class="ease-in-out duration-300 w-full"
-    >
-      {"submit"}</Button
-    >
+    />
   {/if}
   <div
-    class="w-full h-[40rem] bg-[#f1f1f1] dark:bg-ekhlas-main-dark mt-4 rounded-lg flex justify-start items-center flex-col px-2"
+    style="background-color: var(--backgroundButtonColor); color: var(--titleColor);"
+    class="w-full h-[40rem] mt-4 rounded flex justify-start items-center flex-col px-2"
   >
-    <p class="text-center text-black w-full h-auto mt-4 mb-8">Roles List</p>
-    <div
-      class="w-full h-[40rem] bg-[#f1f1f1] dark:bg-ekhlas-main-dark overflow-y-auto"
+    <p
+      style="color: var(--titleColor);"
+      class="text-center w-full h-auto mt-4 mb-8"
     >
+      Roles List
+    </p>
+    <div class="w-full h-[40rem] overflow-y-auto">
       {#if $roleStore}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         {#each $roleStore.data as role}
@@ -426,7 +439,7 @@
           <div
             class="w-full h-12 text-black rounded-lg flex justify-between items-center px-4 mt-2 overflow-y-auto"
           >
-            <p class="">{role.name}</p>
+            <p style="color: var(--textColor);" class="">{role.name}</p>
 
             <div
               class=" w-auto h-8 rounded-lg flex justify-center items-center gap-2"
@@ -467,9 +480,12 @@
 </Drawer>
 
 <Modal
+  style="background-color: var(--mainBackgroundColor); color: var(--textColor);"
   title="Confirm Deletion"
   bind:open={deleteModal}
-  class="bg-white max-w-sm mx-auto"
+  class="max-w-sm mx-auto"
+  classHeader="modal-header"
+  classFooter="modal-footer"
 >
   <p>{"are you sure you want to delete this role ?"}</p>
   <svelte:fragment slot="footer">
@@ -499,5 +515,14 @@
   }
   input[type="checkbox"]:checked {
     background-color: #2d2d2d;
+  }
+
+  :global(.modal-header) {
+    background-color: var(--mainBackgroundColor) !important;
+    color: var(--textColor) !important;
+  }
+  :global(.modal-footer) {
+    background-color: var(--mainBackgroundColor) !important;
+    color: var(--textColor) !important;
   }
 </style>
