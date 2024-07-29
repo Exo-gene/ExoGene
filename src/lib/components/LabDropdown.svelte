@@ -35,6 +35,7 @@
       .from("labs")
       .select("*")
       .eq("id", labId)
+      .is("deleted_at", null)
       .single();
     if (error) {
       console.error("Fetch lab by ID error:", error);

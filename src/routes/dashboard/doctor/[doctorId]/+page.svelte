@@ -29,6 +29,7 @@
         .from("doctor")
         .select("*")
         .eq("id", doctorId)
+        .is("deleted_at", null)
         .single();
      
         if (error) {

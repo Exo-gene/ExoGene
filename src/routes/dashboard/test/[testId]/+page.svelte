@@ -10,33 +10,33 @@
   import {  IconRefresh } from "@tabler/icons-svelte";
   import { page } from "$app/stores";
   import LoadingButton from '$lib/components/LoadingButton.svelte';
-  import { companyStore } from '../../../../stores/companyStore';
+  import { testStore } from '../../../../stores/testStore';
 
   let isLoading = false;
   let name: string = "";
-  let address: string = "";
+  let price: string = "";
   let showToast = false;
   let nameError: string = "";
-  let addressError: string = "";
+  let priceError: string = "";
   let showErrorAlert = false;
-  const companyId = +$page.params.companyId;
+  const testId = +$page.params.testId;
 
   // Fetch data
   onMount(async () => {
-    if (companyId) {
+    if (testId) {
       isLoading = true;
       const { data, error } = await supabase
-        .from("company")
+        .from("test")
         .select("*")
-        .eq("id", companyId)
+        .eq("id", testId)
         .is("deleted_at", null)
         .single();
-   
+    
       if (error) {
-        console.error("Error fetching company data:", error);
+        console.error("Error fetching test data:", error);
       } else {
         name = data.name;
-        address = data.address;
+        price = data.price;
       }
       isLoading = false;
     }
@@ -44,7 +44,7 @@
 
   async function formSubmit() {
     nameError = "";
-    addressError = "";
+    priceError = "";
     let isValid = true;
     isLoading = true;
 
@@ -53,8 +53,8 @@
       isValid = false;
     }
 
-    if (!address) {
-      addressError = "Address is required";
+    if (!price) {
+      priceError = "price is required";
       isValid = false;
     }
 
@@ -68,20 +68,20 @@
     }
 
     try {
-      const companyObject = {
+      const testObject = {
         name: name,
-        address: address,
+        price: price,
       };
 
-      await companyStore.updateCompanyData(companyObject, companyId, supabase);
+      await testStore.updateTestData(testObject, testId, supabase);
 
       showToast = true;
       setTimeout(() => {
         showToast = false;
-        goto("/dashboard/company");
+        goto("/dashboard/test");
       }, 3000);
     } catch (error) {
-      console.error("Error during company update:", error);
+      console.error("Error during test update:", error);
     } finally {
       isLoading = false;
     }
@@ -93,8 +93,8 @@
     <div class="w-full flex items-center justify-between py-4">
       <ButtonComponent title="Back" dispatch={() => history.back()} />
       <h1 class="font-bold text-center flex-grow" style="color: var(--titleColor);">
-        Update Company Data
-      </h1>
+        Update Test Data   
+       </h1>
     </div>
     {#if showErrorAlert}
       <Alert style="background-color: var(--mainBackgroundColor);" color="red" class="border shadow-xl fixed top-0 right-4 z-50 w-1/4 mx-auto mt-4">
@@ -102,8 +102,8 @@
         {#if nameError}
           <div class="text-red-500 text-sm">{nameError}</div>
         {/if}
-        {#if addressError}
-          <div class="text-red-500 text-sm">{addressError}</div>
+        {#if priceError}
+          <div class="text-red-500 text-sm">{priceError}</div>
         {/if}
       </Alert>
     {/if}
@@ -125,13 +125,13 @@
         <div class="w-full flex flex-col gap-2">
           <div class="flex gap-4 items-center">
             <div class="w-32">
-              <Label style="color:var(--textColor)" for="address">Address</Label>
+              <Label style="color:var(--textColor)" for="price">price</Label>
             </div>
             <Input
               class="form-input px-4 py-2 rounded-md border-2 border-gray-300 flex-grow"
               type="text"
-              id="address"
-              bind:value={address}
+              id="price"
+              bind:value={price}
             />
           </div>
         </div>
@@ -153,5 +153,5 @@
   </div>
  
 {#if showToast}
-  <Toast message="Company data has been updated successfully" type="success" />
+  <Toast message="Test data has been updated successfully" type="success" />
 {/if}

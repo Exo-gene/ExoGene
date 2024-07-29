@@ -88,6 +88,7 @@
         on:click={() => redirectToPage("patient")}
       />
     </div>
+   {#if checkUserPolicies([Policies.READ_TEST], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -97,6 +98,7 @@
         on:click={() => redirectToPage("test")}
       />
     </div>
+    {/if}
     {#if checkUserPolicies([Policies.READ_STATUS], $authStore)}
     <div class="flex justify-center">
       <CustomButton

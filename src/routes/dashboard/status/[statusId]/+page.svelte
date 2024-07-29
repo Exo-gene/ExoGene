@@ -27,8 +27,8 @@
         .from("status")
         .select("*")
         .eq("id", statusId)
+        .is("deleted_at", null)
         .single();
-    console.log(data);
     
       if (error) {
         console.error("Error fetching status data:", error);

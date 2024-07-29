@@ -29,9 +29,9 @@
         .from("lab")
         .select("*")
         .eq("id", labId)
+        .is("deleted_at", null)
         .single();
-    console.log(data);
-    
+   
       if (error) {
         console.error("Error fetching lab data:", error);
       } else {

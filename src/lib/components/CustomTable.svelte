@@ -42,6 +42,7 @@
         </TableBodyCell>
          {#if item.name} <TableBodyCell>{item.name}</TableBodyCell>{/if}
           {#if item.address} <TableBodyCell>{item.address}</TableBodyCell>{/if}
+           {#if item.price} <TableBodyCell>{item.price}</TableBodyCell>{/if}
           {#if item.phonenumber}<TableBodyCell>{item.phonenumber}</TableBodyCell>{/if}
         <TableBodyCell class="flex space-x-3">
           {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}

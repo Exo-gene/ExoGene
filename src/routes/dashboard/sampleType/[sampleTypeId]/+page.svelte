@@ -27,8 +27,8 @@
         .from("sampletype")
         .select("*")
         .eq("id", sampleTypeId)
+        .is("deleted_at", null)
         .single();
-    console.log(data);
     
       if (error) {
         console.error("Error fetching sampleType data:", error);
