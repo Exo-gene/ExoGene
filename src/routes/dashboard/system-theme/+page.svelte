@@ -12,6 +12,7 @@
   import CustomButton from "$lib/components/CustomButton.svelte";
   import { IconRefresh } from "@tabler/icons-svelte";
   import ButtonComponent from "$lib/components/ButtonComponent.svelte";
+  import { goto } from "$app/navigation";
 
   let isLoading = false;
   let showToast = false;
@@ -68,7 +69,7 @@
 <div class="max-w-screen-xl mx-auto flex flex-col items-center h-1/3">
   <!-- Header Section -->
   <div class="w-full flex items-center justify-between py-4">
-    <ButtonComponent title="Back" dispatch={() => history.back()} />
+     <ButtonComponent title="Back" dispatch={() => goto("/dashboard/home")} />
     <h1
       class="font-bold text-center flex-grow"
       style="color: var(--titleColor);"

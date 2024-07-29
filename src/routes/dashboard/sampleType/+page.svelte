@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import { companyStore } from "../../../stores/companyStore";
+  import { sampleTypeStore } from "../../../stores/sampleTypeStore";
   import ConfirmDeleteModal from "$lib/components/ConfirmDeleteModal.svelte";
   import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
   import CustomTable from "$lib/components/CustomTable.svelte";
@@ -21,66 +21,66 @@
 
   // Fetch initial data
   onMount(() => {
-    fetchCompanyData(currentPage);
+    fetchSampleTypeData(currentPage);
     isLoading = false;
   });
 
-  // Function to fetch company for a specific page
-  function fetchCompanyData(page: number) {
+  // Function to fetch sampleType for a specific page
+  function fetchSampleTypeData(page: number) {
     currentPage = page;
-    companyStore.getCompanyData(supabase, pageSize, currentPage);
+    sampleTypeStore.getSampleTypesData(supabase, pageSize, currentPage);
   }
 
   function nextPage() {
     if (currentPage < totalPages) {
-      fetchCompanyData(currentPage + 1);
+      fetchSampleTypeData(currentPage + 1);
     }
   }
 
   function previousPage() {
     if (currentPage > 1) {
-      fetchCompanyData(currentPage - 1);
+      fetchSampleTypeData(currentPage - 1);
     }
   }
 
   
-  // Function to delete a company
+  // Function to delete a sampleType
   function handleDelete(itemId: number) {
     itemIdToDelete = itemId;
     openModal = true;
   }
-  // Function to delete a company
-  async function deleteCompanyData() {
+  // Function to delete a sampleType
+  async function deleteSampleTypeData() {
     if (itemIdToDelete === null) {
       console.error("No item ID specified for deletion");
       return;
     }
     try {
-      await companyStore.deleteCompanyData(
+      await sampleTypeStore.deleteSampleTypeData(
         itemIdToDelete,
         supabase
       );
       itemIdToDelete = null;
-      fetchCompanyData(currentPage);
+      fetchSampleTypeData(currentPage);
     } catch (error) {
-      console.error("Error deleting company:", error);
+      console.error("Error deleting sampleType:", error);
     } finally {
       openModal = false;
     }
   }
 
-  function editCompanyData(companyId: number) {
-    goto(`/dashboard/company/${companyId}`);
+  function editSampleType(sampleTypeId: number) {
+    goto(`/dashboard/sampleType/${sampleTypeId}`);
   }
 
-  const tableHeaders = ["ID", "Created At", "Name","Address", "Action"];
-  $: totalPages = Math.ceil($companyStore[0]?.count / pageSize);
-  let companyData = $companyStore[0]?.items;
-  $: companyData = $companyStore[0]?.items || [];
+  const tableHeaders = ["ID", "Created At", "Name", "Action"];
+  $: totalPages = Math.ceil($sampleTypeStore[0]?.count / pageSize);
+  let sampleTypeData = $sampleTypeStore[0]?.items;
+  $: sampleTypeData = $sampleTypeStore[0]?.items || [];
  
 
-  function createCompany() {
-    goto("/dashboard/company/create");
+  function createSampleType() {
+    goto("/dashboard/sampleType/create");
   }
 </script>
 
@@ -97,21 +97,21 @@
         class="font-bold text-center flex-grow"
         style="color: var(--titleColor);"
       >
-       Company List
+       SampleType List
       </h1>
       <!-- insert new data -->
-      {#if checkUserPolicies([Policies.CREATE_COMPANY], $authStore)}
-      <ButtonComponent title="Add" dispatch={() => createCompany()} />
+      {#if checkUserPolicies([Policies.CREATE_SAMPLETYPE], $authStore)}
+      <ButtonComponent title="Add" dispatch={() => createSampleType()} />
        {/if}
     </div>
 
     <!-- Table data -->
   <CustomTable
-      items={companyData}
-      editData={editCompanyData}
+      items={sampleTypeData}
+      editData={editSampleType}
       {handleDelete}
       {tableHeaders}
-      pageName="company"
+      pageName="sampleType"
     />
   {/if}
  <PaginationControls {currentPage} {totalPages} {previousPage} {nextPage} />
@@ -119,5 +119,5 @@
 
  <ConfirmDeleteModal
       bind:open={openModal}
-      on:confirm={deleteCompanyData}
+      on:confirm={deleteSampleTypeData}
     />

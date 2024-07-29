@@ -106,15 +106,18 @@
         on:click={() => redirectToPage("status")}
       />
     </div>
+     {#if checkUserPolicies([Policies.READ_SAMPLETYPE], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
         height="4rem"
         icon={IconAlignBoxBottomLeft}
         label="Sample Type"
-        on:click={() => redirectToPage("sample-type")}
+        on:click={() => redirectToPage("sampleType")}
       />
     </div>
+    {/if}
+   {#if checkUserPolicies([Policies.READ_COMPANY], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -124,6 +127,8 @@
         on:click={() => redirectToPage("company")}
       />
     </div>
+    {/if}
+    {#if checkUserPolicies([Policies.READ_DOCTOR], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -133,6 +138,7 @@
         on:click={() => redirectToPage("doctor")}
       />
     </div>
+    {/if}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
