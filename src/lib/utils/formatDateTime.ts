@@ -14,4 +14,13 @@ export function formatDateTime(dateTimeString: string): string {
   };
   return localDate.toDate().toLocaleString(undefined, options);
 }
- 
+
+export function formatDate(dateTimeString: string): string {
+  const localDate = moment.utc(dateTimeString).local();
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  };
+  return localDate.toDate().toLocaleDateString(undefined, options);
+}

@@ -7,7 +7,7 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  import { formatDateTime } from "$lib/utils/formatDateTime";
+  import { formatDate, formatDateTime } from "$lib/utils/formatDateTime";
   import { IconEdit, IconTrash } from "@tabler/icons-svelte";
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
@@ -44,6 +44,16 @@
           {#if item.address} <TableBodyCell>{item.address}</TableBodyCell>{/if}
            {#if item.price} <TableBodyCell>{item.price}</TableBodyCell>{/if}
           {#if item.phonenumber}<TableBodyCell>{item.phonenumber}</TableBodyCell>{/if}
+          {#if item.company_name}<TableBodyCell>{item.company_name}</TableBodyCell>{/if}
+          {#if item.amount}<TableBodyCell>{item.amount}</TableBodyCell>{/if}
+          {#if item.lot_number}<TableBodyCell>{item.lot_number}</TableBodyCell>{/if}
+          {#if item.item_name}<TableBodyCell>{item.item_name}</TableBodyCell>{/if}
+          {#if item.registered_date}<TableBodyCell> 
+           {formatDate(item.registered_date.toString())}
+          </TableBodyCell>{/if}
+          {#if item.expiration_date}<TableBodyCell>
+             {formatDate(item.expiration_date.toString())}
+          </TableBodyCell>{/if}
         <TableBodyCell class="flex space-x-3">
           {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
             <button class="font-medium text-green-600 hover:underline dark:text-green-600" on:click={() => editData(item.id)}>

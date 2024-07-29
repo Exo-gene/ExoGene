@@ -39,4 +39,8 @@ export enum Policies {
   READ_TEST = 37,
   UPDATE_TEST = 38,
   DELETE_TEST = 39,
+  CREATE_STORE = 40,
+  READ_STORE = 41,
+  UPDATE_STORE = 42,
+  DELETE_STORE = 43,
 }

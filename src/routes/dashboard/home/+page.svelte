@@ -152,6 +152,7 @@
         on:click={() => redirectToPage("lab")}
       />
     </div>
+   {#if checkUserPolicies([Policies.READ_STORE], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -161,6 +162,7 @@
         on:click={() => redirectToPage("store")}
       />
     </div>
+    {/if}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -170,16 +172,7 @@
         on:click={() => redirectToPage("accountant")}
       />
     </div>
-    <div class="flex justify-center">
-      <CustomButton
-        width="100%"
-        height="4rem"
-        icon={IconSticker2}
-        label="Sticker"
-        on:click={() => redirectToPage("sticker")}
-      />
-    </div>
-    <div class="flex justify-center">
+      <div class="flex justify-center">
       <CustomButton
         width="100%"
         height="4rem"
