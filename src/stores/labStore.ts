@@ -1,13 +1,13 @@
 import { writable } from "svelte/store";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { LabDataModel } from "../models/labModel";
+import type { LabDataModel, LabModel } from "../models/labModel";
 
 const createLabStore = () => {
-  const { subscribe, set, update } = writable<LabDataModel[]>([]);
+  const { subscribe, set, update } = writable<LabModel[]>([]);
 
   return {
     subscribe,
-    set: (labs: LabDataModel[]) => {
+    set: (labs: LabModel[]) => {
       set(labs);
     },
     getLabData: async (

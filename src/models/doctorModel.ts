@@ -1,13 +1,13 @@
-export interface LabModel {
+export interface DoctorModel {
   id: number;
   count: number;
-  items: LabDataModel[];
+  items: DoctorDataModel[];
   page: number;
   page_limit: number;
   remainingItems: number;
 }
-export interface LabDataModel {
+export interface DoctorDataModel {
   id: number;
   name: string;
-  address: string;
+  phonenumber: string;
 }

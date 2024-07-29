@@ -19,4 +19,8 @@ export enum Policies {
   READ_LAB = 17,
   UPDATE_LAB = 18,
   DELETE_LAB = 19,
+  CREATE_DOCTOR = 20,
+  READ_DOCTOR = 21,
+  UPDATE_DOCTOR = 22,
+  DELETE_DOCTOR = 23,
 }

@@ -40,8 +40,9 @@
         <TableBodyCell class="font-semibold">
           {formatDateTime(item.created_at.toString())}
         </TableBodyCell>
-        <TableBodyCell>{item.name}</TableBodyCell>
-        <TableBodyCell>{item.address}</TableBodyCell>
+         {#if item.name} <TableBodyCell>{item.name}</TableBodyCell>{/if}
+          {#if item.address} <TableBodyCell>{item.address}</TableBodyCell>{/if}
+          {#if item.phonenumber}<TableBodyCell>{item.phonenumber}</TableBodyCell>{/if}
         <TableBodyCell class="flex space-x-3">
           {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
             <button class="font-medium text-green-600 hover:underline dark:text-green-600" on:click={() => editData(item.id)}>

@@ -10,33 +10,32 @@
   import {  IconRefresh } from "@tabler/icons-svelte";
   import { page } from "$app/stores";
   import LoadingButton from '$lib/components/LoadingButton.svelte';
-  import { labStore } from '../../../../stores/labStore';
+  import { doctorStore } from '../../../../stores/doctorStore';
 
   let isLoading = false;
   let name: string = "";
-  let address: string = "";
+  let phonenumber: string = "";
   let showToast = false;
   let nameError: string = "";
-  let addressError: string = "";
+  let phonenumberError: string = "";
   let showErrorAlert = false;
-  const labId = +$page.params.labId;
+  const doctorId = +$page.params.doctorId;
 
   // Fetch data
   onMount(async () => {
-    if (labId) {
+    if (doctorId) {
       isLoading = true;
       const { data, error } = await supabase
-        .from("lab")
+        .from("doctor")
         .select("*")
-        .eq("id", labId)
+        .eq("id", doctorId)
         .single();
-    console.log(data);
-    
-      if (error) {
-        console.error("Error fetching lab data:", error);
+     
+        if (error) {
+        console.error("Error fetching doctor data:", error);
       } else {
         name = data.name;
-        address = data.address;
+        phonenumber = data.phonenumber;
       }
       isLoading = false;
     }
@@ -44,7 +43,7 @@
 
   async function formSubmit() {
     nameError = "";
-    addressError = "";
+    phonenumberError = "";
     let isValid = true;
     isLoading = true;
 
@@ -53,8 +52,8 @@
       isValid = false;
     }
 
-    if (!address) {
-      addressError = "Address is required";
+    if (!phonenumber) {
+      phonenumberError = "PhoneNumber is required";
       isValid = false;
     }
 
@@ -68,20 +67,20 @@
     }
 
     try {
-      const labObject = {
+      const doctorObject = {
         name: name,
-        address: address,
+        phonenumber: phonenumber,
       };
 
-      await labStore.updateLabData(labObject, labId, supabase);
+      await doctorStore.updateDoctorData(doctorObject, doctorId, supabase);
 
       showToast = true;
       setTimeout(() => {
         showToast = false;
-        goto("/dashboard/lab");
+        goto("/dashboard/doctor");
       }, 3000);
     } catch (error) {
-      console.error("Error during lab update:", error);
+      console.error("Error during doctor update:", error);
     } finally {
       isLoading = false;
     }
@@ -93,7 +92,7 @@
     <div class="w-full flex items-center justify-between py-4">
       <ButtonComponent title="Back" dispatch={() => history.back()} />
       <h1 class="font-bold text-center flex-grow" style="color: var(--titleColor);">
-        Update Lab / Hospital
+        Update Doctor Data
       </h1>
     </div>
     {#if showErrorAlert}
@@ -102,8 +101,8 @@
         {#if nameError}
           <div class="text-red-500 text-sm">{nameError}</div>
         {/if}
-        {#if addressError}
-          <div class="text-red-500 text-sm">{addressError}</div>
+        {#if phonenumberError}
+          <div class="text-red-500 text-sm">{phonenumberError}</div>
         {/if}
       </Alert>
     {/if}
@@ -125,13 +124,13 @@
         <div class="w-full flex flex-col gap-2">
           <div class="flex gap-4 items-center">
             <div class="w-32">
-              <Label style="color:var(--textColor)" for="address">Address</Label>
+              <Label style="color:var(--textColor)" for="phonenumber">PhoneNumber</Label>
             </div>
             <Input
               class="form-input px-4 py-2 rounded-md border-2 border-gray-300 flex-grow"
               type="text"
-              id="address"
-              bind:value={address}
+              id="phonenumber"
+              bind:value={phonenumber}
             />
           </div>
         </div>
@@ -153,5 +152,5 @@
   </div>
  
 {#if showToast}
-  <Toast message="Lab data has been updated successfully" type="success" />
+  <Toast message="Doctor data has been updated successfully" type="success" />
 {/if}
