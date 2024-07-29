@@ -3,7 +3,7 @@
   import { supabase } from "$lib/supabaseClient";
   import { goto } from "$app/navigation";
   import Toast from "$lib/components/Toast.svelte";
-  import { labStore } from "../../../../stores/labStore"; 
+  import { companyStore } from "../../../../stores/companyStore"; 
   import ButtonComponent from "$lib/components/ButtonComponent.svelte";
   import CustomButton from "$lib/components/CustomButton.svelte";
   import { IconPlus } from "@tabler/icons-svelte";
@@ -44,20 +44,20 @@
     }
 
     try {
-      const labObject = {
+      const companyObject = {
         name: name,
         address: address,
       };
 
-      await labStore.insertLabData(labObject, supabase);
+      await companyStore.insertCompanyData(companyObject, supabase);
 
       showToast = true;
       setTimeout(() => {
         showToast = false;
-        goto("/dashboard/lab");
+        goto("/dashboard/company");
       }, 3000);
     } catch (error) {
-      console.error("Error during lab insertion:", error);
+      console.error("Error during company insertion:", error);
     } finally {
       isLoading = false;
     }
@@ -68,7 +68,7 @@
   <div class="w-full flex items-center justify-between py-4">
     <ButtonComponent title="Back" dispatch={() => history.back()} />
     <h1 class="font-bold text-center flex-grow" style="color: var(--titleColor);">
-      Create Lab / Hospital
+      Create company Data
     </h1>
   </div>
   {#if showErrorAlert}
@@ -128,7 +128,7 @@
 </div>
 
 {#if showToast}
-  <Toast message="New lab has been inserted successfully" type="success" />
+  <Toast message="New company has been inserted successfully" type="success" />
 {/if}
 
 
