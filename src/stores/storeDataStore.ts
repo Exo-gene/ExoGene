@@ -51,9 +51,9 @@ const createStoreDataStore = () => {
       supabase: SupabaseClient
     ) => {
       try {
-         const { data, error } = await supabase
-           .from("store")
-           .insert([storeObject]);
+        const { data, error } = await supabase
+          .from("store")
+          .insert([storeObject]);
 
         if (error) {
           console.error("Error inserting store:", error);
