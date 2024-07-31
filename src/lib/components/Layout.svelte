@@ -1,13 +1,9 @@
 <script lang="ts">
-  import Navbar from "$lib/components/Navbar.svelte";
+
 </script>
 
 <div class="layout">
-  <div class="navbar">
-    <Navbar />
-  </div>
-
-  <div class="main" style="background-color: var(--mainBackgroundColor);">
+   <div class="main" style="background-color: var(--mainBackgroundColor);">
     <slot />
   </div>
 </div>

@@ -9,6 +9,7 @@
   import { IconPlus } from "@tabler/icons-svelte";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
   import LoadingButton from "$lib/components/LoadingButton.svelte";
+  import FamilyMemberDropdown from "$lib/components/FamilyMemberDropdown.svelte";
 
   let showToast = false;
   let showErrorAlert = false;
@@ -25,78 +26,149 @@
   let birthDay: string = "";
   let birthMonth: string = "";
   let birthYear: string = "";
+  let selectedFamilyMemberId:number;
 
-  async function formSubmit() {
-    nameError = "";
-    addressError = "";
-    phonenumberError = "";
-    genderError = "";
-    birth_dateError = "";
-    let isValid = true;
-    isLoading = true;
+async function formSubmit() {
+  nameError = "";
+  addressError = "";
+  phonenumberError = "";
+  genderError = "";
+  birth_dateError = "";
+  let isValid = true;
+  isLoading = true;
 
-    if (!name) {
-      nameError = "Name is required";
-      isValid = false;
+  if (!name) {
+    nameError = "Name is required";
+    isValid = false;
+  }
+
+  if (!address) {
+    addressError = "Address is required";
+    isValid = false;
+  }
+
+  if (selectedFamilyMemberId === undefined && (!phonenumber || phonenumber.length !== 11)) {
+    phonenumberError = "Please enter a valid phone number or select a family member";
+    isValid = false;
+  }
+
+  if (!gender) {
+    genderError = "Gender is required";
+    isValid = false;
+  }
+
+  if (!birthDay || !birthMonth || !birthYear) {
+    birth_dateError = "Birth date is required";
+    isValid = false;
+  }
+
+  if (!isValid) {
+    isLoading = false;
+    showErrorAlert = true;
+    setTimeout(() => {
+      showErrorAlert = false;
+    }, 3000);
+    return;
+  }
+
+  const birth_date = `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`;
+
+  try {
+    let uniqid_family_member;
+    let finalPhoneNumber = phonenumber;
+
+    if (selectedFamilyMemberId) {
+      // Fetch the selected family member's phone number
+      let { data: selectedFamilyMember, error: selectedFamilyError } = await supabase
+        .from('family_members')
+        .select('*')
+        .eq('id', selectedFamilyMemberId)
+        .single();
+
+      if (selectedFamilyError) {
+        console.error('Error fetching selected family member:', selectedFamilyError);
+        isLoading = false;
+        return;
+      }
+
+      finalPhoneNumber = selectedFamilyMember.phonenumber;
+      uniqid_family_member = selectedFamilyMember.uniqid;
+    } else {
+      // Check if family member exists based on the provided phone number
+      let { data: familyMembers, error: familyError } = await supabase
+        .from('family_members')
+        .select('*')
+        .eq('phonenumber', phonenumber);
+
+      if (familyError) {
+        console.error('Error fetching family members:', familyError);
+        isLoading = false;
+        return;
+      }
+
+      if (familyMembers?.length === 0) {
+        // Add new family member
+        let { data: newFamilyMember, error: addFamilyError } = await supabase
+          .from('family_members')
+          .insert([{ phonenumber: phonenumber }])
+          .select(); // Ensure to select the inserted row
+
+        if (addFamilyError) {
+          console.error('Error adding family member:', addFamilyError);
+          isLoading = false;
+          return;
+        }
+
+        if (!newFamilyMember || newFamilyMember.length === 0) {
+          console.error('New family member insertion returned null');
+          isLoading = false;
+          return;
+        }
+
+        uniqid_family_member = newFamilyMember[0].uniqid;
+      } else {
+        // Use existing family member
+        uniqid_family_member = familyMembers[0]?.uniqid;
+      }
     }
 
-    if (!address) {
-      addressError = "Address is required";
-      isValid = false;
-    }
-
-    if (!phonenumber) {
-      phonenumberError = "Phone number is required";
-      isValid = false;
-    }
-    if(phonenumber.length > 11 || phonenumber.length < 11) {
-      phonenumberError = "Please, Enter a valid number";
-      isValid = false;
-    }
-
-    if (!gender) {
-      genderError = "Gender is required";
-      isValid = false;
-    }
-
-    if (!birthDay || !birthMonth || !birthYear) {
-      birth_dateError = "Birth date is required";
-      isValid = false;
-    }
-
-    if (!isValid) {
+    if (!uniqid_family_member) {
+      console.error('uniqid_family_member is null or undefined');
       isLoading = false;
-      showErrorAlert = true;
-      setTimeout(() => {
-        showErrorAlert = false;
-      }, 3000);
       return;
     }
 
-    const birth_date = `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`;
+    // Insert or update patient registration
+    const patientRegistrationObject = {
+      name: name,
+      address: address,
+      phonenumber: finalPhoneNumber,
+      gender: gender,
+      birth_date: birth_date,
+      uniqid_family_member: uniqid_family_member
+    };
 
-    try {
-      const patientRegistrationObject = {
-        name: name,
-        address: address,
-        phonenumber: phonenumber,
-        gender: gender,
-        birth_date: birth_date
-      };
+    let { error: addUserError } = await supabase
+      .from('patient_registration')
+      .upsert([patientRegistrationObject]);
 
-      await patientRegistrationStore.insertPatientRegistrationData(patientRegistrationObject, supabase);
-
-      showToast = true;
-      setTimeout(() => {
-        showToast = false;
-        goto("/dashboard/patientRegistration");
-      }, 3000);
-    } catch (error) {
-      console.error("Error during patientRegistration insertion:", error);
-    } finally {
+    if (addUserError) {
+      console.error('Error adding/updating user:', addUserError);
       isLoading = false;
+      return;
     }
+
+    showToast = true;
+    setTimeout(() => {
+      showToast = false;
+      goto("/dashboard/patientRegistration");
+    }, 3000);
+  } catch (error) {
+    console.error("Error during patientRegistration insertion:", error);
+  } finally {
+    isLoading = false;
   }
+}
 </script>
 
 <div class="max-w-screen-2xl mx-auto py-10">
@@ -212,6 +284,16 @@
               placeholder="YYYY"
               maxlength="4"
             />
+          </div>
+        </div>
+      </div>
+      <div class="w-full flex flex-col gap-2">
+        <div class="flex gap-4 items-center">
+          <div class="w-28">
+            <Label style="color:var(--textColor)" for="birthDay">Family Members</Label>
+          </div>
+            <div class="flex gap-2">
+           <FamilyMemberDropdown bind:selectedFamilyMemberId />
           </div>
         </div>
       </div>
