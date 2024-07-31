@@ -14,4 +14,5 @@ export interface PatientRegistrationDataModel {
   phonenumber: string;
   gender: string;
   birth_date: string;
+  created_at: string;
 }

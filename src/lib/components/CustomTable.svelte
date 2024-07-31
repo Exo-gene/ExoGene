@@ -48,8 +48,6 @@
           {#if item.amount}<TableBodyCell>{item.amount}</TableBodyCell>{/if}
           {#if item.lot_number}<TableBodyCell>{item.lot_number}</TableBodyCell>{/if}
           {#if item.item_name}<TableBodyCell>{item.item_name}</TableBodyCell>{/if}
-          {#if item.birth_date}<TableBodyCell> {item.birth_date} </TableBodyCell>{/if}
-          {#if item.gender}<TableBodyCell>{item.gender}</TableBodyCell>{/if}
            {#if item.registered_date}<TableBodyCell> 
            {formatDate(item.registered_date.toString())}
           </TableBodyCell>{/if}

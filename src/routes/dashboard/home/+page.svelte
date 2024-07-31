@@ -90,18 +90,7 @@
       />
     </div>
     {/if}
-    {#if checkUserPolicies([Policies.READ_PATIENTVISITS], $authStore)}
-     <div class="flex justify-center">
-      <CustomButton
-        width="100%"
-        height="4rem"
-        icon={IconEmergencyBed}
-        label="Patient Visits"
-        on:click={() => redirectToPage("patientVisits")}
-      />
-    </div>
-    {/if}
-   {#if checkUserPolicies([Policies.READ_TEST], $authStore)}
+    {#if checkUserPolicies([Policies.READ_TEST], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -167,7 +156,7 @@
       />
     </div>
     {/if}
-   {#if checkUserPolicies([Policies.READ_STORE], $authStore)}
+    {#if checkUserPolicies([Policies.READ_STORE], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
