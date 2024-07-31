@@ -108,17 +108,4 @@
 {/if}
 
 
-<style>
-   .hover-button {
-    background-color: var(--backgroundButtonColor);
-    border: 1px solid var(--backgroundButtonColor);
-    color: var(--textColor);
-    transition:
-      background-color 0.3s,
-      color 0.3s; /* smooth transition for hover effect */
-  }
-  .hover-button:hover {
-    background-color: var(--hoverBackgroundColor);
-    color: var(--hoverTextColor);
-  }
-</style>
+ 

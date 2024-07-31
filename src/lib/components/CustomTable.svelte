@@ -48,7 +48,7 @@
           {#if item.amount}<TableBodyCell>{item.amount}</TableBodyCell>{/if}
           {#if item.lot_number}<TableBodyCell>{item.lot_number}</TableBodyCell>{/if}
           {#if item.item_name}<TableBodyCell>{item.item_name}</TableBodyCell>{/if}
-          {#if item.registered_date}<TableBodyCell> 
+           {#if item.registered_date}<TableBodyCell> 
            {formatDate(item.registered_date.toString())}
           </TableBodyCell>{/if}
           {#if item.expiration_date}<TableBodyCell>

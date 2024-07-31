@@ -4,15 +4,15 @@
   import { supabase } from "$lib/supabaseClient";
   import { ChevronDownOutline } from "flowbite-svelte-icons";
  
-  export let selectedLabId: number;
+  export let selectedStatusId: number;
   const dispatch = createEventDispatcher();
 
   let searchTerm = "";
-  let labItems: any[] = [];
-  let selectedLabName: string = "";
+  let statusItems: any[] = [];
+  let selectedStatusName: string = "";
   let lastFilter: string | undefined = "";
 
-  async function fetchLabs(titleFilter?: string) {
+  async function fetchStatus(titleFilter?: string) {
     if (titleFilter === lastFilter) return;
     lastFilter = titleFilter;
 
@@ -22,51 +22,51 @@
       filter_title: titleFilter || null,
     };
 
-    const query = await supabase.rpc("get_paged_lab_filter", params);
+    const query = await supabase.rpc("get_paged_status_filter", params);
     if (query.error) {
-      console.error("Fetch lab error:", query.error);
+      console.error("Fetch status error:", query.error);
       return;
     }
-    labItems = query.data || [];
+    statusItems = query.data || [];
   }
 
-  async function fetchLabById(labId: number) {
+  async function fetchStatusById(statusId: number) {
     const { data, error } = await supabase
-      .from("lab")
+      .from("status")
       .select("*")
-      .eq("id", labId)
+      .eq("id", statusId)
       .is("deleted_at", null)
       .single();
     if (error) {
-      console.error("Fetch lab by ID error:", error);
+      console.error("Fetch status by ID error:", error);
       return;
     }
-    selectedLabName = data.name;
+    selectedStatusName = data.name;
   }
 
   onMount(() => {
-    fetchLabs(); // Initial fetch without any filter
-    if (selectedLabId) {
-      fetchLabById(selectedLabId); // Fetch the lab name based on the initial selectedLabId
+    fetchStatus(); // Initial fetch without any filter
+    if (selectedStatusId) {
+      fetchStatusById(selectedStatusId); // Fetch the status name based on the initial selectedStatusId
     }
   });
 
   $: if (searchTerm && searchTerm.trim()) {
-    fetchLabs(searchTerm);
+    fetchStatus(searchTerm);
   } else if (searchTerm === "") {
-    fetchLabs(); // Reset filter when search term is cleared
+    fetchStatus(); // Reset filter when search term is cleared
   }
 
   function handleSelection(item: any, event: MouseEvent) {
     event.stopPropagation();
-    selectedLabId = item.id;
-    selectedLabName = item.lab_name;
-    searchTerm = item.lab_name;
-    dispatch("labChange", item.id);
+    selectedStatusId = item.id;
+    selectedStatusName = item.name;
+    searchTerm = item.name;
+    dispatch("statusChange", item.id);
   }
 
   function isSelected(id: number): boolean {
-    return selectedLabId === id;
+    return selectedStatusId === id;
   }
 
   function truncate(text: string, maxLength: number) {
@@ -78,7 +78,7 @@
 
 <div class="my-2">
   <Button>
-    {"Select Lab"} 
+    {"Select status"} 
     <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
   </Button>
   <Dropdown class="w-full">
@@ -86,21 +86,21 @@
       <Search
         size="md"
         bind:value={searchTerm}
-        placeholder="Search lab by title..."
+        placeholder="Search status by title..."
         debounce={300}
       />
     </div>
-    {#if labItems.length === 0}
-      <DropdownItem>No lab found.</DropdownItem>
+    {#if statusItems.length === 0}
+      <DropdownItem>No status found.</DropdownItem>
     {/if}
-    {#each labItems as item}
+    {#each statusItems as item}
       <DropdownItem
         class="flex items-center justify-between w-full"
         on:click={(event) => handleSelection(item, event)}
         
         aria-selected={isSelected(item.id).toString()}
       >
-        {truncate(item.lab_name, 30)}{isSelected(item.id) ? " (Selected)" : ""}
+        {truncate(item.name, 30)}{isSelected(item.id) ? " (Selected)" : ""}
       </DropdownItem>
     {/each}
   </Dropdown>
