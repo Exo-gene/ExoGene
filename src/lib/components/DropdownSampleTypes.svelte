@@ -7,7 +7,6 @@
   import SearchComponent from './SearchComponent.svelte';
 
   export let selectedSampleTypes = new Map<number, number>(); // Map to store sampleTypeId and its number
-  export let patientId: number;
   const sampleTypes = writable([]);
   let isLoading = true;
   const dispatch = createEventDispatcher();

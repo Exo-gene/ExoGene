@@ -7,7 +7,7 @@
 
   export let patient_registration_id: number;
   let patientRegistrationData: PatientRegistrationDataModel | null = null;
-
+ 
   onMount(async () => {
     try {
       patientRegistrationData = await patientRegistrationStore.getPatientRegistrationById(patient_registration_id, supabase);

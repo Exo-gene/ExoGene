@@ -156,8 +156,8 @@ function handleFileUpload(event: Event, type: 'files' | 'reports') {
   <div class="my-6" style="border: 1px solid var(--textColor);"></div> <!-- adding border -->
 
   <div class="grid grid-cols-2 gap-4">
-    <DropdownTests patientId={patient_registration_id} bind:selectedTests />
-    <DropdownSampleTypes patientId={patient_registration_id} bind:selectedSampleTypes />
+    <DropdownTests bind:selectedTests />
+    <DropdownSampleTypes bind:selectedSampleTypes />
     <DoctorDropdown bind:selectedDoctorId />
     <LabDropdown bind:selectedLabId />
     <DropdownStatuses bind:selectedStatusId />

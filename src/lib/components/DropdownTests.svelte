@@ -7,7 +7,6 @@
   import SearchComponent from './SearchComponent.svelte';
 
   export let selectedTests = new Set<number>();
-  export let patientId: number;
   const tests = writable([]);
   let isLoading = true;
   const dispatch = createEventDispatcher();
