@@ -7,7 +7,6 @@
   import SearchComponent from './SearchComponent.svelte';
 
   export let selectedTests = new Set<number>();
-  export let patientId: number;
   const tests = writable([]);
   let isLoading = true;
   const dispatch = createEventDispatcher();
@@ -51,11 +50,11 @@
   <p>Loading...</p>
 {:else}
   <div>
-    <Button>
-      Select tests
+    <Button class="w-96 h-10 rounded-lg flex justify-center items-center text-center text-base  duration-300 ease-in-out">
+      Select Tests
       <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
     </Button>
-    <Dropdown class="w-48 p-3 space-y-1 text-sm">
+    <Dropdown class="w-96 p-3 space-y-1 text-sm">
       <div slot="header" class="p-3">
         <SearchComponent on:search={handleSearch} />
       </div>

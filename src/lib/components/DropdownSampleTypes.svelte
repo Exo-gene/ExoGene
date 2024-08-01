@@ -7,7 +7,6 @@
   import SearchComponent from './SearchComponent.svelte';
 
   export let selectedSampleTypes = new Map<number, number>(); // Map to store sampleTypeId and its number
-  export let patientId: number;
   const sampleTypes = writable([]);
   let isLoading = true;
   const dispatch = createEventDispatcher();
@@ -60,11 +59,11 @@
   <p>Loading...</p>
 {:else}
   <div>
-    <Button>
+ <Button class="w-96 h-10 rounded-lg flex justify-center items-center text-center text-base  duration-300 ease-in-out">
       Select SampleTypes
       <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
     </Button>
-    <Dropdown class="w-64 p-3 space-y-1 text-sm">
+    <Dropdown class="w-96 p-3 space-y-1 text-sm">
       <div slot="header" class="p-3">
         <SearchComponent on:search={handleSearch} />
       </div>
@@ -81,7 +80,7 @@
             {sampleType.name}
           </Checkbox>
             <input
-              min="0"
+              min="1"
               type="number"
               class="ml-2 border rounded p-1 w-20"
               placeholder="Number"

@@ -104,6 +104,28 @@ const createPatientRegistrationStore = () => {
         throw error;
       }
     },
+    getPatientRegistrationById: async (
+      patientRegistrationId: number,
+      supabase: SupabaseClient
+    ) => {
+      try {
+        const { data, error } = await supabase
+          .from("patient_registration")
+          .select("*")
+          .eq("id", patientRegistrationId)
+          .single();
+
+        if (error) {
+          console.error("Error fetching PatientRegistration by ID:", error);
+          throw error;
+        }
+
+        return data;
+      } catch (error) {
+        console.error("Failed to fetch PatientRegistration by ID:", error);
+        throw error;
+      }
+    },
   };
 };
 
