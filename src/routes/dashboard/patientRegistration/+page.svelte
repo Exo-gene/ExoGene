@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconCashRegister, IconEdit, IconReportMedical, IconX } from '@tabler/icons-svelte';
+  import { IconCashRegister, IconEdit, IconEmergencyBed, IconReportMedical, IconX } from '@tabler/icons-svelte';
   import { IconSearch } from '@tabler/icons-svelte'; 
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils"; 
   import { goto } from "$app/navigation";
@@ -71,7 +71,7 @@
 
   $: showClearButton = searchPhonenumber !== '' || searchName !== '';
 
-  const tableHeaders = ["ID", "Name", "Gender", "Address", "Birth Date", "Created At", "Phone Number", "Edit","Visits"];
+  const tableHeaders = ["ID", "Name", "Gender", "Address", "Birth Date", "Created At", "Phone Number", "Edit Profile","Add Visit","Edit Visits"];
   $: totalPages = Math.ceil($patientRegistrationStore[0]?.count / pageSize);
   let patientRegistrationData = $patientRegistrationStore[0]?.items;
   $: patientRegistrationData = $patientRegistrationStore[0]?.items || [];
@@ -192,7 +192,7 @@
                         {#if checkUserPolicies([Policies[`READ_PATIENTVISITS`]], $authStore)}
                           <button
                             class="font-medium text-blue-600 hover:underline dark:text-blue-600"
-                            on:click={() => goto("patientVisits/" + item.id)}
+                            on:click={() => goto("patientVisits/create/" + item.id)}
                           >
                             <IconReportMedical 
                               stroke={2}
@@ -202,7 +202,21 @@
                         {/if}
                       </span>
                     </td>
-                     
+                        <td class="p-3 table-cell-bottom-border">
+                      <span class="space-x-3 flex justify-end">
+                        {#if checkUserPolicies([Policies[`UPDATE_PATIENTVISITS`]], $authStore)}
+                          <button
+                            class="font-medium text-amber-600 hover:underline dark:text-amber-600"
+                           on:click={() => goto("patientVisits/profile/" + item.id)}
+                          >
+                            <IconEmergencyBed  
+                              stroke={2}
+                              class="text-amber-700 hover:text-amber-600 transition-all"
+                            />
+                          </button>
+                        {/if}
+                      </span>
+                    </td>
                   </tr>
                 {/each}
               </tbody>

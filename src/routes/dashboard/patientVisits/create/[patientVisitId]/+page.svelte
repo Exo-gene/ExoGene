@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
   import { toUtc } from '$lib/utils/dateTimeFormat';
   import { v4 as uuidv4 } from 'uuid';
   import { IconUpload } from '@tabler/icons-svelte';
@@ -145,7 +146,7 @@ function handleFileUpload(event: Event, type: 'files' | 'reports') {
     console.error('Error inserting patient sample types:', sampleTypesError);
   }
 
-  console.log('Form submitted successfully');
+  goto(`/dashboard/patientRegistration`);
 }
 
 </script>
