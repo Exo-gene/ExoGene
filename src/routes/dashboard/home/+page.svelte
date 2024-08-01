@@ -171,15 +171,6 @@
       <CustomButton
         width="100%"
         height="4rem"
-        icon={IconCalculator}
-        label="Accountant"
-        on:click={() => redirectToPage("accountant")}
-      />
-    </div>
-      <div class="flex justify-center">
-      <CustomButton
-        width="100%"
-        height="4rem"
         icon={IconPasswordUser}
         label="Role"
         on:click={() => (roleModal = true)}

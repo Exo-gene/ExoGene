@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconEdit, IconReportMedical, IconX } from '@tabler/icons-svelte';
+  import { IconCashRegister, IconEdit, IconReportMedical, IconX } from '@tabler/icons-svelte';
   import { IconSearch } from '@tabler/icons-svelte'; 
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils"; 
   import { goto } from "$app/navigation";
@@ -71,7 +71,7 @@
 
   $: showClearButton = searchPhonenumber !== '' || searchName !== '';
 
-  const tableHeaders = ["ID", "Name", "Gender", "Address", "Birth Date", "Created At", "Phone Number", "Actions","Visits"];
+  const tableHeaders = ["ID", "Name", "Gender", "Address", "Birth Date", "Created At", "Phone Number", "Edit","Visits"];
   $: totalPages = Math.ceil($patientRegistrationStore[0]?.count / pageSize);
   let patientRegistrationData = $patientRegistrationStore[0]?.items;
   $: patientRegistrationData = $patientRegistrationStore[0]?.items || [];
@@ -202,6 +202,7 @@
                         {/if}
                       </span>
                     </td>
+                     
                   </tr>
                 {/each}
               </tbody>
