@@ -88,6 +88,19 @@
     "Deadline",
     "Edit"
   ];
+
+    function getStatusClass(statusName: string): string {
+    switch (statusName.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-400';
+      case 'accept':
+        return 'bg-green-400';
+      case 'reject':
+        return 'bg-red-400';
+      default:
+        return 'bg-gray-400';
+    }
+  }
 </script>
 
 <div class="max-w-screen-2xl mx-auto py-10">
@@ -134,8 +147,8 @@
                       <span class="flex justify-start">{item.doctor_name}</span>
                     </td>
                     <td class="p-3 table-cell-bottom-border">
-                      <span class="flex justify-start">{item.status_name}</span>
-                    </td>
+                 <span class="flex justify-center p-1 rounded-xl {getStatusClass(item.status_name)}">{item.status_name}</span>
+                   </td>
                        <td class="p-3 table-cell-bottom-border">
                       <span class="flex justify-start">{formatDateTime(item.registered_date)}</span>
                     </td>
@@ -168,3 +181,15 @@
     {/if}
   {/if}
 </div>
+
+
+
+<style>
+  .table-header {
+    text-align: left;
+  }
+
+  .table-cell-bottom-border {
+    border-bottom: 1px solid #e5e7eb;
+  }
+</style>
