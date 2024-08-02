@@ -5,6 +5,8 @@
   import { LoginRequest } from "$lib/Models/Requests/Auth.Request.Model";
   import { Supabase } from "$lib/Supabase/Supabase.Client";
   import { IconMail, IconSquareX } from "@tabler/icons-svelte";
+  import "./styles.css";
+  import "../app.css";
 
   let loginRequest: LoginRequest = new LoginRequest();
   let errorMessage: string | null = null;
