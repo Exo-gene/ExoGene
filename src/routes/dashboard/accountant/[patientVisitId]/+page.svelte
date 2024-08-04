@@ -32,6 +32,7 @@
     patientVisitId = +$page.params.patientVisitId;
     await fetchPatientRegistrationId(patientVisitId);
     await fetchTests(patientVisitId);
+    await calculateLoan(patientVisitId, discount, cash);
   });
 
   async function fetchPatientRegistrationId(patientVisitId: number) {
@@ -108,14 +109,34 @@
     loanAmount = total + cumulativeLoanAmount > cash ? total + cumulativeLoanAmount - cash : 0;
   }
 
+  async function calculateLoan(patientVisitId: number, discount: number, cash: number) {
+    const { data, error } = await supabase
+      .rpc('calculate_loan', { 
+        patient_visit_id: patientVisitId, 
+        discount: discount, 
+        cash: cash 
+      });
+
+    if (error) {
+      console.error('Error calculating loan:', error);
+      return;
+    }
+
+    total = data[0].total;
+    loanAmount = data[0].loan_amount;
+    const isPayed = data[0].is_payed;
+
+    // Update the UI with the new loan amount
+  }
+
   function handleDiscountChange(event: Event) {
     discount = +(event.target as HTMLInputElement).value;
-    calculateTotal();
+    calculateLoan(patientVisitId, discount, cash);
   }
 
   function handleCashChange(event: Event) {
     cash = +(event.target as HTMLInputElement).value;
-    calculateTotal();
+    calculateLoan(patientVisitId, discount, cash);
   }
 
   async function handleSubmit() {
