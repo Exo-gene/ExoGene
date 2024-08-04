@@ -6,16 +6,27 @@
   import { IconPlus } from '@tabler/icons-svelte';
   import CustomButton from '$lib/components/CustomButton.svelte';
 
+  interface Test {
+    id: number;
+    name: string;
+    price: number;
+  }
+
+  interface Loan {
+    id: number;
+    loan_amount: string;
+  }
+
   let patientVisitId: number;
   let patientRegistrationId: number;
-  let tests = [];
-  let discount = 0;
-  let cash = 0;
-  let total = 0;
-  let loanAmount = 0;
-  let existingLoans = [];
-  let cumulativeLoanAmount = 0;
-  let testsInfo = '';
+  let tests: Test[] = [];
+  let discount: number = 0;
+  let cash: number = 0;
+  let total: number = 0;
+  let loanAmount: number = 0;
+  let existingLoans: Loan[] = [];
+  let cumulativeLoanAmount: number = 0;
+  let testsInfo: string = '';
 
   onMount(async () => {
     patientVisitId = +$page.params.patientVisitId;
@@ -97,13 +108,13 @@
     loanAmount = total + cumulativeLoanAmount > cash ? total + cumulativeLoanAmount - cash : 0;
   }
 
-  function handleDiscountChange(event) {
-    discount = +event.target.value;
+  function handleDiscountChange(event: Event) {
+    discount = +(event.target as HTMLInputElement).value;
     calculateTotal();
   }
 
-  function handleCashChange(event) {
-    cash = +event.target.value;
+  function handleCashChange(event: Event) {
+    cash = +(event.target as HTMLInputElement).value;
     calculateTotal();
   }
 
@@ -123,7 +134,17 @@
     goto(`/dashboard/patientRegistration`);
   }
 
-  async function saveLoan(loan) {
+  interface SaveLoanInput {
+    patientRegistrationId: number;
+    patientVisitId: number;
+    loanAmount: number;
+    discount: number;
+    cash: number;
+    testsInfo: string;
+    isPayed: boolean;
+  }
+
+  async function saveLoan(loan: SaveLoanInput) {
     try {
       const { data, error } = await supabase
         .from('patient_loan')
@@ -177,22 +198,23 @@
         <label for="loan" class="block text-sm font-medium text-gray-700">Loan Amount</label>
         <input type="number" id="loan" value={loanAmount} readonly disabled class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100" />
       </div>
-        <div class="flex justify-end">
+      <div class="flex justify-end">
         <CustomButton
-      width="20%"
-      height="3rem"
-      icon={IconPlus}
-      label="Add"
-      on:click={handleSubmit}
-    />    
-      
-  </div>
-    
-   
-      {:else}
+          width="20%"
+          height="3rem"
+          icon={IconPlus}
+          label="Add"
+          on:click={handleSubmit}
+        />    
+      </div>
+    {:else}
       <p class="text-center text-gray-500">No tests found for this patient visit.</p>
     {/if}
   </div>
 </div>
 
- 
+<style>
+  .spinner-border {
+    border-top-color: transparent;
+  }
+</style>

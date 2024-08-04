@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconCalculator, IconCashRegister, IconEdit, IconEmergencyBed, IconReportMedical, IconX } from '@tabler/icons-svelte';
+  import {  IconEdit, IconEmergencyBed, IconReportMedical, IconX } from '@tabler/icons-svelte';
   import { IconSearch } from '@tabler/icons-svelte'; 
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils"; 
   import { goto } from "$app/navigation";
