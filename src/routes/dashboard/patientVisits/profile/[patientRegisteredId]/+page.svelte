@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconEdit, IconX, IconSearch } from '@tabler/icons-svelte'; 
+  import { IconEdit, IconX, IconSearch, IconCalculator } from '@tabler/icons-svelte'; 
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils"; 
   import { goto } from "$app/navigation";
   import { onMount } from "svelte"; 
@@ -86,7 +86,8 @@
     "Status Name",
     "Registered",
     "Deadline",
-    "Edit"
+    "Edit",
+    "Accountant"
   ];
 
     function getStatusClass(statusName: string): string {
@@ -167,6 +168,21 @@
                             />
                           </button>
                         {/if}
+                    </td>
+                        <td class="p-3 table-cell-bottom-border">
+                      <span class="space-x-3 flex justify-end">
+                        {#if checkUserPolicies([Policies[`READ_ACCOUNTANT`]], $authStore)}
+                          <button
+                            class="font-medium text-purple-600 hover:underline dark:text-purple-600"
+                            on:click={() => goto(`/dashboard/accountant/${item.id}`, { replaceState: true })}
+                          >
+                            <IconCalculator  
+                              stroke={2}
+                              class="text-purple-700 hover:text-purple-600 transition-all"
+                            />
+                          </button>
+                        {/if}
+                      </span>
                     </td>
                   </tr>
                 {/each}
