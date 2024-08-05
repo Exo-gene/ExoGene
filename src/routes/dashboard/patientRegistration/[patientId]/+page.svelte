@@ -16,21 +16,22 @@
   let showToast = false;
   let showErrorAlert = false;
   let isLoading = false;
-  let name: string = "";
-  let nameError: string = "";
-  let address: string = "";
-  let addressError: string = "";
-  let phonenumber: string = "";
-  let phonenumberError: string = "";
-  let gender: string = "";
-  let genderError: string = "";
-  let birth_dateError: string = "";
-  let birthDay: string = "";
-  let birthMonth: string = "";
-  let birthYear: string = "";
+  let name = "";
+  let nameError = "";
+  let address = "";
+  let addressError = "";
+  let phonenumber = "";
+  let phonenumberError = "";
+  let gender = "";
+  let genderError = "";
+  let birth_dateError = "";
+  let birthDay = "";
+  let birthMonth = "";
+  let birthYear = "";
   const patientRegistrationId = +$page.params.patientId;
-  let familyMembersExists:any;
- let selectedFamilyMemberId:number;
+  let familyMembersExists:any = [];
+  let selectedFamilyMemberId:any = null;
+  let uniqidFamilyMember:any = null;
 
   // Fetch data
   onMount(async () => {
@@ -41,17 +42,12 @@
         .select("*")
         .eq("id", patientRegistrationId)
         .single();
-   
 
       if (error) {
         console.error("Error fetching patient registration data:", error);
       } else {
-        name = data.name;
-        address = data.address;
-        gender = data.gender;
-        phonenumber = data.phonenumber;
-      
-       checkFamilyMemberExists(data.uniqid_family_member);
+        ({ name, address, gender, phonenumber, uniqid_family_member: uniqidFamilyMember } = data);
+        await checkFamilyMemberExists(uniqidFamilyMember);
         if (data.birth_date) {
           const [year, month, day] = data.birth_date.split("-");
           birthYear = year;
@@ -63,79 +59,79 @@
     }
   });
 
-async function formSubmit() {
-  nameError = "";
-  addressError = "";
-  phonenumberError = "";
-  genderError = "";
-  birth_dateError = "";
-  let isValid = true;
-  isLoading = true;
+  async function formSubmit() {
+    nameError = "";
+    addressError = "";
+    phonenumberError = "";
+    genderError = "";
+    birth_dateError = "";
+    let isValid = true;
+    isLoading = true;
 
-  if (!name) {
-    nameError = "Name is required";
-    isValid = false;
+    if (!name) {
+      nameError = "Name is required";
+      isValid = false;
+    }
+
+    if (!address) {
+      addressError = "Address is required";
+      isValid = false;
+    }
+
+    if (!phonenumber) {
+      phonenumberError = "Phone number is required";
+      isValid = false;
+    }
+    if (phonenumber.length !== 11) {
+      phonenumberError = "Please, enter a valid number";
+      isValid = false;
+    }
+
+    if (!gender) {
+      genderError = "Gender is required";
+      isValid = false;
+    }
+
+    if (!birthDay || !birthMonth || !birthYear) {
+      birth_dateError = "Birth date is required";
+      isValid = false;
+    }
+
+    if (!isValid) {
+      isLoading = false;
+      showErrorAlert = true;
+      setTimeout(() => {
+        showErrorAlert = false;
+      }, 3000);
+      return;
+    }
+
+    const birth_date = `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`;
+
+    try {
+      const patientRegistrationObject = {
+        id: patientRegistrationId,  
+        name,
+        address,
+        phonenumber,
+        gender,
+        birth_date,
+        uniqid_family_member: uniqidFamilyMember || selectedFamilyMemberId
+      };
+
+      await patientRegistrationStore.updatePatientRegistrationData(patientRegistrationObject, patientRegistrationId, supabase);
+
+      showToast = true;
+      setTimeout(() => {
+        showToast = false;
+        goto("/dashboard/patientRegistration");
+      }, 3000);
+    } catch (error) {
+      console.error("Error during patientRegistration update:", error);
+    } finally {
+      isLoading = false;
+    }
   }
-
-  if (!address) {
-    addressError = "Address is required";
-    isValid = false;
-  }
-
-  if (!phonenumber) {
-    phonenumberError = "Phone number is required";
-    isValid = false;
-  }
-  if(phonenumber.length > 11 || phonenumber.length < 11) {
-    phonenumberError = "Please, Enter a valid number";
-    isValid = false;
-  }
-
-  if (!gender) {
-    genderError = "Gender is required";
-    isValid = false;
-  }
-
-  if (!birthDay || !birthMonth || !birthYear) {
-    birth_dateError = "Birth date is required";
-    isValid = false;
-  }
-
-  if (!isValid) {
-    isLoading = false;
-    showErrorAlert = true;
-    setTimeout(() => {
-      showErrorAlert = false;
-    }, 3000);
-    return;
-  }
-
-  const birth_date = `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`;
-
-  try {
-    const patientRegistrationObject = {
-      id: patientRegistrationId,  
-      name: name,
-      address: address,
-      phonenumber: phonenumber,
-      gender: gender,
-      birth_date: birth_date
-    };
-
-    await patientRegistrationStore.updatePatientRegistrationData(patientRegistrationObject,patientRegistrationId,supabase);
-
-    showToast = true;
-    setTimeout(() => {
-      showToast = false;
-      goto("/dashboard/patientRegistration");
-    }, 3000);
-  } catch (error) {
-    console.error("Error during patientRegistration insertion:", error);
-  } finally {
-    isLoading = false;
-  }
-}
-
 
 async function checkFamilyMemberExists(uniqid: string) {
   if (!uniqid) return;
@@ -145,13 +141,30 @@ async function checkFamilyMemberExists(uniqid: string) {
     .eq('uniqid_family_member', uniqid);
   familyMembersExists = familyMembers;
 }
+  // Watch for changes in the selected family member
+  $: if (selectedFamilyMemberId) {
+    updateUniqidForSelectedFamilyMember(selectedFamilyMemberId);
+  }
+
+  async function updateUniqidForSelectedFamilyMember(familyMemberId: number) {
+    const { data: familyMember, error } = await supabase
+      .from('family_members')
+      .select('*')
+      .eq('id', familyMemberId)
+      .single();
+    if (error) {
+      console.error("Error fetching family member by ID:", error);
+      return;
+    }
+    uniqidFamilyMember = familyMember.uniqid;
+  }
 </script>
 
 <div class="max-w-screen-2xl mx-auto py-10">
   <div class="w-full flex items-center justify-between py-4">
     <ButtonComponent title="Back" dispatch={() => history.back()} />
     <h1 class="font-bold text-center flex-grow" style="color: var(--titleColor);">
-        Patient Registration 
+      Update Patient Registration 
     </h1>
   </div>
   {#if showErrorAlert}
@@ -271,10 +284,12 @@ async function checkFamilyMemberExists(uniqid: string) {
             <div class="flex gap-2">
            <FamilyMemberDropdown bind:selectedFamilyMemberId />
           </div>
-          {#if familyMembersExists}
-          {#each familyMembersExists as familyMember}
-          <p>{familyMember.name}</p>
-          {/each}
+          {#if familyMembersExists.length > 0}
+            {#each familyMembersExists as familyMember}
+              <p>{familyMember.name}</p>
+            {/each}
+          {:else}
+            <p>No family members found</p>
           {/if}
         </div>
       </div>
@@ -296,5 +311,5 @@ async function checkFamilyMemberExists(uniqid: string) {
 </div>
 
 {#if showToast}
-  <Toast message="New Patient has been Registered successfully" type="success" />
+  <Toast message="Patient registration updated successfully" type="success" />
 {/if}

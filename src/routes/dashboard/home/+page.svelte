@@ -90,6 +90,17 @@
       />
     </div>
     {/if}
+      {#if checkUserPolicies([Policies.READ_ACCOUNTANT], $authStore)}
+    <div class="flex justify-center">
+      <CustomButton
+        width="100%"
+        height="4rem"
+        icon={IconCalculator}
+        label="Accountant"
+        on:click={() => redirectToPage("accountant")}
+      />
+    </div>
+    {/if}
     {#if checkUserPolicies([Policies.READ_TEST], $authStore)}
     <div class="flex justify-center">
       <CustomButton

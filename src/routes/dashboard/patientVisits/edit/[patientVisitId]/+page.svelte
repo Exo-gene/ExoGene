@@ -106,6 +106,18 @@
       reports = [...reports, ...newReports];
       reportNames = [...reportNames, ...newReports.map(fileObj => fileObj.randomName)];
     }
+
+    // Ensure no duplicates in files and reports
+    files = files.filter((fileObj, index, self) =>
+      index === self.findIndex((f) => (
+        f.randomName === fileObj.randomName
+      ))
+    );
+    reports = reports.filter((fileObj, index, self) =>
+      index === self.findIndex((f) => (
+        f.randomName === fileObj.randomName
+      ))
+    );
   }
 
   function getRandomString() {
@@ -183,8 +195,8 @@
       patient_registration_id: patient_registration_id,
       registered_date: toUtc(registrationDate),
       deadline: toUtc(deadline),
-      files: [...fileNames.filter(name => !removedFiles.includes(name)), ...filesPaths],
-      reports: [...reportNames.filter(name => !removedReports.includes(name)), ...reportsPaths]
+      files: [...new Set([...fileNames.filter(name => !removedFiles.includes(name)), ...filesPaths])],
+      reports: [...new Set([...reportNames.filter(name => !removedReports.includes(name)), ...reportsPaths])]
     };
 
     // Update patient_visits
@@ -249,6 +261,18 @@
 
     history.back();
   }
+
+  function getFileUrl(fileName: string, type: 'existing' | 'new', kind: 'files' | 'reports'): string {
+    if (type === 'existing') {
+      return getSupabaseFileUrl('patient_files', fileName);
+    } else {
+      const fileObj = (kind === 'files' ? files : reports).find(f => f.randomName === fileName);
+      if (fileObj) {
+        return URL.createObjectURL(fileObj.file);
+      }
+      return '';
+    }
+  }
 </script>
 
 <div class="max-w-screen-md mx-auto py-10">
@@ -277,7 +301,6 @@
       <Input type="datetime-local" bind:value={deadline} />
     </div>
   </div>
-
   <div class="my-4 grid grid-cols-2 gap-4">
     <div>
       <Label class="pb-2">Attach files</Label>
@@ -297,9 +320,9 @@
       </div>
       {#if fileNames.length > 0}
         <div class="mt-4 text-sm">
-          {#each fileNames as fileName}
+          {#each fileNames as fileName, index}
             <div class="flex items-center justify-between">
-              <a href={getSupabaseFileUrl('patient_files', fileName)} target="_blank" class="text-blue-500 underline">{fileName}</a>
+              <a href={getFileUrl(fileName, index < fileNames.length - files.length ? 'existing' : 'new', 'files')} target="_blank" class="text-blue-500 underline">{fileName}</a>
               <button on:click={() => removeFile('patient_files', fileName, 'files')}>
                 <IconX stroke={2} class="text-red-500 hover:text-red-700 transition-all" />
               </button>
@@ -326,9 +349,9 @@
       </div>
       {#if reportNames.length > 0}
         <div class="mt-4 text-sm">
-          {#each reportNames as reportName}
+          {#each reportNames as reportName, index}
             <div class="flex items-center justify-between">
-              <a href={getSupabaseFileUrl('patient_files', reportName)} target="_blank" class="text-blue-500 underline">{reportName}</a>
+              <a href={getFileUrl(reportName, index < reportNames.length - reports.length ? 'existing' : 'new', 'reports')} target="_blank" class="text-blue-500 underline">{reportName}</a>
               <button on:click={() => removeFile('patient_files', reportName, 'reports')}>
                 <IconX stroke={2} class="text-red-500 hover:text-red-700 transition-all" />
               </button>

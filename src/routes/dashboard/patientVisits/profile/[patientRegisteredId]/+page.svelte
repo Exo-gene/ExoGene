@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconEdit, IconX, IconSearch } from '@tabler/icons-svelte'; 
+  import { IconEdit, IconX, IconSearch, IconCalculator } from '@tabler/icons-svelte'; 
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils"; 
   import { goto } from "$app/navigation";
   import { onMount } from "svelte"; 
@@ -86,8 +86,22 @@
     "Status Name",
     "Registered",
     "Deadline",
-    "Edit"
+    "Edit",
+    "Accountant"
   ];
+
+    function getStatusClass(statusName: string): string {
+    switch (statusName.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-400';
+      case 'accept':
+        return 'bg-green-400';
+      case 'reject':
+        return 'bg-red-400';
+      default:
+        return 'bg-gray-400';
+    }
+  }
 </script>
 
 <div class="max-w-screen-2xl mx-auto py-10">
@@ -134,8 +148,8 @@
                       <span class="flex justify-start">{item.doctor_name}</span>
                     </td>
                     <td class="p-3 table-cell-bottom-border">
-                      <span class="flex justify-start">{item.status_name}</span>
-                    </td>
+                 <span class="flex justify-center p-1 rounded-xl {getStatusClass(item.status_name)}">{item.status_name}</span>
+                   </td>
                        <td class="p-3 table-cell-bottom-border">
                       <span class="flex justify-start">{formatDateTime(item.registered_date)}</span>
                     </td>
@@ -155,6 +169,21 @@
                           </button>
                         {/if}
                     </td>
+                        <td class="p-3 table-cell-bottom-border">
+                      <span class="space-x-3 flex justify-end">
+                        {#if checkUserPolicies([Policies[`READ_ACCOUNTANT`]], $authStore)}
+                          <button
+                            class="font-medium text-purple-600 hover:underline dark:text-purple-600"
+                            on:click={() => goto(`/dashboard/accountant/${item.id}`, { replaceState: true })}
+                          >
+                            <IconCalculator  
+                              stroke={2}
+                              class="text-purple-700 hover:text-purple-600 transition-all"
+                            />
+                          </button>
+                        {/if}
+                      </span>
+                    </td>
                   </tr>
                 {/each}
               </tbody>
@@ -168,3 +197,15 @@
     {/if}
   {/if}
 </div>
+
+
+
+<style>
+  .table-header {
+    text-align: left;
+  }
+
+  .table-cell-bottom-border {
+    border-bottom: 1px solid #e5e7eb;
+  }
+</style>
