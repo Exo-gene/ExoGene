@@ -4,10 +4,10 @@ import { Supabase } from "$lib/Supabase/Supabase.Client";
 
 export const POST: RequestHandler = async ({ locals, params, request }) => {
   try {
-      let policies: { name: string; action: number }[] = Object.keys(Policies)
+    let policies: { name: string; action: number }[] = Object.keys(Policies)
       .filter((key) => isNaN(Number(key)))
       .map((key, value) => ({ name: key, action: value }));
-     
+
     const { error } = await Supabase.client.from("policies").insert(policies);
     console.log("Error", error);
     return new Response(

@@ -47,19 +47,17 @@
       return;
     }
 
-    patientLoanData = data as PatientLoan[];
+    const result = data as {
+      count: number;
+      page: number;
+      page_limit: number;
+      remainingitems: number;
+      items: PatientLoan[];
+    };
+
+    patientLoanData = result.items;
+    totalPages = Math.ceil(result.count / pageSize);
     isLoading = false;
-
-    const totalRecords = await getTotalRecords();
-    totalPages = Math.ceil(totalRecords / pageSize);
-  }
-
-  async function getTotalRecords() {
-    const { count } = await supabase
-      .from('patient_loan')
-      .select('*', { count: 'exact', head: true });
-
-    return count || 0;
   }
 
   function nextPage() {
@@ -161,7 +159,7 @@
                 <td class="p-3">{formatDateTime(item.created_at)}</td>
                 <td class="p-3">{item.patient_name}</td>
                 <td class="p-3">{item.loan_amount}</td>
-                <td class="p-3">{item.is_payed ? 'True' : 'False'}</td>
+                <td class="p-3">{item.is_payed}</td>
                 <td class="p-3">{item.tests_info}</td>
               </tr>
             {/each}

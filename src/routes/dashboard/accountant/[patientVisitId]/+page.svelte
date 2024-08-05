@@ -98,7 +98,7 @@
       price: Number(test.price.replace(/,/g, ''))
     }));
 
-    testsInfo = tests.map(test => `ID: ${test.id}, Name: ${test.name}, Price: $${test.price}`).join(' | ');
+    testsInfo = tests.map(test => `ID: ${test.id}, Name: ${test.name}, Price: ${test.price}`).join(' | ');
     calculateTotal();
   }
 
