@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {  IconEdit, IconEmergencyBed, IconReportMedical, IconX } from '@tabler/icons-svelte';
+  import {  IconCalculator, IconEdit, IconEmergencyBed, IconReportMedical, IconX } from '@tabler/icons-svelte';
   import { IconSearch } from '@tabler/icons-svelte'; 
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils"; 
   import { goto } from "$app/navigation";
@@ -81,8 +81,9 @@
         "Phone Number",
          "Edit Profile",
          "Add Visit",
-         "Edit Visits"];
-        
+         "Edit Visits",
+         "Accountant"];
+              
   $: totalPages = Math.ceil($patientRegistrationStore[0]?.count / pageSize);
   let patientRegistrationData = $patientRegistrationStore[0]?.items;
   $: patientRegistrationData = $patientRegistrationStore[0]?.items || [];
@@ -213,7 +214,7 @@
                         {/if}
                       </span>
                     </td>
-                      <td class="p-3 table-cell-bottom-border">
+                     <td class="p-3 table-cell-bottom-border">
                       <span class="space-x-3 flex justify-end">
                         {#if checkUserPolicies([Policies[`UPDATE_PATIENTVISITS`]], $authStore)}
                           <button
@@ -223,6 +224,21 @@
                             <IconEmergencyBed  
                               stroke={2}
                               class="text-amber-700 hover:text-amber-600 transition-all"
+                            />
+                          </button>
+                        {/if}
+                      </span>
+                    </td>
+                  <td class="p-3 table-cell-bottom-border">
+                      <span class="space-x-3 flex justify-end">
+                        {#if checkUserPolicies([Policies[`UPDATE_ACCOUNTANT`]], $authStore)}
+                          <button
+                            class="font-medium text-orange-600 hover:underline dark:text-orange-600"
+                           on:click={() => goto("accountant/create/" + item.id)}
+                          >
+                            <IconCalculator 
+                              stroke={2}
+                              class="text-orange-700 hover:text-orange-600 transition-all"
                             />
                           </button>
                         {/if}
