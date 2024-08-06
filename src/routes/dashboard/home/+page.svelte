@@ -198,7 +198,7 @@
         />
       </div>
     {/if}
-    <div class="flex justify-center">
+    <!-- <div class="flex justify-center">
       <CustomButton
         width="100%"
         height="4rem"
@@ -206,7 +206,7 @@
         label="Statistic"
         on:click={() => redirectToPage("statistic")}
       />
-    </div>
+    </div> -->
     <div class="flex justify-center">
       <CustomButton
         width="100%"
