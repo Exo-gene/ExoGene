@@ -12,6 +12,7 @@
     price: number;
   }
 
+  
   interface Loan {
     id: number;
     loan_amount: string;
