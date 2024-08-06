@@ -52,4 +52,5 @@ export enum Policies {
   CREATE_ACCOUNTANT = 50,
   READ_ACCOUNTANT = 51,
   UPDATE_ACCOUNTANT = 52,
+  READ_REPORT = 53,
 }
