@@ -83,8 +83,7 @@
         "Phone Number",
          "Edit Profile",
          "Add Visit",
-         "Edit Visits",
-         "Accountant"];
+         "Edit Visits"];
               
   $: totalPages = Math.ceil($patientRegistrationStore[0]?.count / pageSize);
   let patientRegistrationData = $patientRegistrationStore[0]?.items;
@@ -231,7 +230,7 @@
                         {/if}
                       </span>
                     </td>
-                  <td class="p-3 table-cell-bottom-border">
+                  <!-- <td class="p-3 table-cell-bottom-border">
                       <span class="space-x-3 flex justify-end">
                         {#if checkUserPolicies([Policies[`UPDATE_ACCOUNTANT`]], $authStore)}
                           <button
@@ -245,7 +244,7 @@
                           </button>
                         {/if}
                       </span>
-                    </td>
+                    </td> -->
                   </tr>
                 {/each}
               </tbody>

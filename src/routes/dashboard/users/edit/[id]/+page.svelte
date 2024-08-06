@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Supabase } from '$lib/Supabase/Supabase.Client';
   import { CreateUser_RoleRequest } from "$lib/Models/Requests/User_Role.Request.Model";
   import { onMount } from "svelte";
   import { Spinner, MultiSelect, Button } from "flowbite-svelte";
@@ -18,7 +19,7 @@
   let userRoleOptions: CreateUser_RoleRequest = new CreateUser_RoleRequest();
   let password: string = "";
   let selected: string[] = [];
-  let selectedLabId: number | undefined;
+  let selectedLabId: number;
   let isLoading = true;
 
   onMount(async () => {
@@ -26,9 +27,9 @@
       await roleStore.getAll();
       const id = $page.params.id;
       const data = await userStore.get(id);
-
+   
       if (data && data.id) {
-        selectedLabId = data.lab;
+        selectedLabId = data.lab!;
         userOptions = {
           id: data.id,
           userName: data.userName ? data.userName : "",
@@ -56,25 +57,29 @@
   ) {
     isLoading = true;
     try {
+      userOptions.lab = selectedLabId;
       const user = await userStore.update(userOptions, password);
       if (user && user.id) {
         userRoleOptions.user_id = user.id;
-        const response = await userRoleStore.updateFunction({
-          user_id: user.id,
-          role_ids: selected,
+
+        const response = await Supabase.client.rpc("update_roles", {
+          _user_id: user.id,
+          _role_ids: selected,
         });
-        if (response && response.length > 0) {
-          goto(`/dashboard/users`);
+
+        if (response.error) {
+          console.error("RPC call failed:", response.error);
+        } else {
+          console.log("RPC call succeeded:", response.data);
+          if (response.data && response.data.length > 0) {
+            goto(`/dashboard/users`);
+          }
         }
       }
     } finally {
       isLoading = false;
       goto("/dashboard/users");
-    }
   }
-
-  function onLabSelected(event: CustomEvent) {
-    selectedLabId = event.detail;
   }
 </script>
 
@@ -145,7 +150,7 @@
     <div class="flex flex-wrap py-2">
       <div class="w-full md:w-1/2 px-2 flex flex-col gap-2">
         <p class="w-full h-4 rounded-lg">{"Lab"}</p>
-        <LabDropdown bind:selectedLabId on:labChange={onLabSelected} />
+         <LabDropdown bind:selectedLabId />
       </div>
       <div class="w-full md:w-1/2 px-2 flex flex-col gap-2">
         <p class=" w-full h-4 rounded-lg">{"Roles"}</p>

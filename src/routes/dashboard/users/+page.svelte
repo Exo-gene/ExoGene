@@ -41,7 +41,7 @@
   let openModal = false;
   let pageName = "user";
   let pageNumber = 1;
-  let pageSize = 3;
+  let pageSize = 10;
   let totalPages = 0;
   let totalItems = 0;
 
@@ -59,6 +59,7 @@
       totalItems = data.count;
       totalPages = Math.ceil(totalItems / pageSize);
       userData = data.items;
+       
     }
     isLoading = false;
   }
@@ -313,10 +314,14 @@
                   </td>
                   <td class="p-3 table-cell-bottom-border">
                     <span class="flex justify-start">
-                      {#each item.roles as role}
-                        {role.role_name}
-                      {/each}
-                    </span>
+               {#each item.roles as role, index}
+                {role.role_name}
+                    {#if index < item.roles.length - 1}
+                        , 
+                       {/if}
+                       {/each}
+</span>
+
                   </td>
                   <td class="p-3 table-cell-bottom-border">
                     <span class="space-x-3 flex justify-end">

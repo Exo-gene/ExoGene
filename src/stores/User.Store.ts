@@ -30,7 +30,7 @@ const createUserStore = () => {
           }
         }
         const data = await usersRepository.createUser(user, password);
-        const dto = Dto.ToUserDto(data);
+         const dto = Dto.ToUserDto(data);
         update((store) => {
           store.data = [...store.data, dto];
           store.count = store.data.length;
@@ -101,7 +101,7 @@ const createUserStore = () => {
         if (!user.email || user.email === "") {
           user.email = document.email;
         }
-         const data = await usersRepository.updateUser(user, password);
+        const data = await usersRepository.updateUser(user, password);
         const dto = Dto.ToUserDto(data);
         update((store) => {
           store.data = store.data.map((user) => {
