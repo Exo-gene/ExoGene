@@ -8,9 +8,11 @@ import type { UserRequest } from "$lib/Models/Requests/User.Request.Model";
 import type { User } from "$lib/Models/Entities/User.Entity.Model";
 import { Supabase } from "$lib/Supabase/Supabase.Client";
 import type { SupabaseResponse } from "$lib/Models/Responses/Supabase.Response.Model";
-import { VITE_SERVICE_ROLE_KEY, VITE_SUPABASE_URL } from "$env/static/public";
 
-const supabase = createClient(VITE_SUPABASE_URL, VITE_SERVICE_ROLE_KEY, {
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const serviceRoleKey = import.meta.env.VITE_SERVICE_ROLE_KEY;
+
+const supabase = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
