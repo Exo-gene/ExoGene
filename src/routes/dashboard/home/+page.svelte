@@ -208,6 +208,7 @@
         on:click={() => redirectToPage("statistic")}
       />
     </div> -->
+      <!-- {#if checkUserPolicies([Policies.READ_REPORT], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -217,6 +218,7 @@
         on:click={() => redirectToPage("report")}
       />
     </div>
+    {/if} -->
     {#if checkUserPolicies([Policies.READ_CUSTOMTHEME], $authStore)}
       <div class="flex justify-center">
         <CustomButton

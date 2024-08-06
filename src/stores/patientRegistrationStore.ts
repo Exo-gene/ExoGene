@@ -126,6 +126,7 @@ const createPatientRegistrationStore = () => {
         throw error;
       }
     },
+    
   };
 };
 
