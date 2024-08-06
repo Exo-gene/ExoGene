@@ -71,6 +71,8 @@
 
   $: showClearButton = searchPhonenumber !== '' || searchName !== '';
 
+
+  
   const tableHeaders = [
     "ID",
     "Name",
