@@ -61,7 +61,7 @@
       console.error('Error fetching existing loans:', error);
       return;
     }
-
+    console.log("data", data);
     existingLoans = data;
     cumulativeLoanAmount = existingLoans.reduce((acc, loan) => acc + parseFloat(loan.loan_amount.replace(/,/g, '')), 0);
   }
@@ -105,7 +105,6 @@
   function calculateTotal() {
     const totalPrice = tests.reduce((acc, test) => acc + test.price, 0);
     total = totalPrice - discount;
-
     loanAmount = total + cumulativeLoanAmount > cash ? total + cumulativeLoanAmount - cash : 0;
   }
 
@@ -190,7 +189,7 @@
     }
   }
 </script>
-
+ 
 <div class="flex items-center justify-center min-h-screen">
   <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
     <h2 class="text-2xl font-semibold mb-4 text-center">Patient Tests and Payment</h2>

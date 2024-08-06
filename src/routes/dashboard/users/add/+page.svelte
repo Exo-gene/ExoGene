@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { userRoleStore } from "./../../../../stores/User_Role.Store";
-  import { CreateUser_RoleRequest } from "$lib/Models/Requests/User_Role.Request.Model";
-  import { onMount } from "svelte";
+ import { onMount } from "svelte";
   import { MultiSelect, Spinner } from "flowbite-svelte";
   import { CreateUserRequest } from "$lib/Models/Requests/User.Request.Model";
   import { roleStore } from "../../../../stores/Role.Store";
@@ -11,14 +9,11 @@
   import { goto } from "$app/navigation";
   import LabDropdown from "$lib/components/LabDropdown.svelte";
   import ButtonComponent from "$lib/components/ButtonComponent.svelte";
-  import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils";
-  import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
-  import { authStore } from "../../../../stores/Auth.Store";
+  import { Supabase } from "$lib/Supabase/Supabase.Client";
 
   let userOptions: CreateUserRequest = new CreateUserRequest();
-  let userRoleOptions: CreateUser_RoleRequest = new CreateUser_RoleRequest();
   let password: string = "";
-  let selected: string[] = [];
+  let selected: number[] = [];
   let selectedLabId: number;
 
   let isLoading = true;
@@ -32,29 +27,34 @@
 
   async function create(
     userOptions: CreateUserRequest,
-    userRoleOptions: CreateUser_RoleRequest,
-    password: string
+    password: string,
+    selectedRoles: number[]
   ) {
     isLoading = true;
     try {
       userOptions.lab = selectedLabId;
       const user = await userStore.create(userOptions, password);
       if (user && user.id) {
-        selected.forEach(async (role_id) => {
-          userRoleOptions.role_id = role_id;
-          userRoleOptions.user_id = user.id;
-          await userRoleStore.create(userRoleOptions);
+        const response = await Supabase.client.rpc("create_roles", {
+          _user_id: user.id,
+          _role_ids: selectedRoles,
         });
+
+        if (response.error) {
+          console.error("RPC call failed:", response.error);
+        } else {
+          console.log("Roles assigned to user:", response.data);
+          goto("/dashboard/users");
+        }
       }
+    } catch (error) {
+      console.error("Error creating user or assigning roles:", error);
     } finally {
       isLoading = false;
-      goto("/dashboard/users");
     }
   }
 
-  function onLabSelected(event: any) {
-    selectedLabId = event.detail;
-  }
+
 </script>
 
 <div class="max-w-screen-2xl mx-auto">
@@ -134,12 +134,11 @@
       <div class="flex flex-wrap py-2">
         <div class="w-full md:w-1/2 px-2 flex flex-col gap-2">
           <p class="w-full h-4 rounded-lg">{"Lab"}</p>
-          <LabDropdown {selectedLabId} on:labChange={onLabSelected} />
+         <LabDropdown bind:selectedLabId />
         </div>
         <div class="w-full md:w-1/2 px-2 flex flex-col gap-2">
           <p class="w-full h-4 rounded-lg">{"Roles"}</p>
           <MultiSelect
-            class="mt-2"
             items={$roleStore.data.map((role) => {
               return {
                 name: role.name,
@@ -147,7 +146,7 @@
               };
             })}
             bind:value={selected}
-            size="md"
+            size="lg"
           />
         </div>
       </div>
@@ -169,7 +168,7 @@
               icon={IconPlus}
               label="Add"
               on:click={() => {
-                create(userOptions, userRoleOptions, password);
+                create(userOptions, password, selected);
               }}
             />
           </div>
