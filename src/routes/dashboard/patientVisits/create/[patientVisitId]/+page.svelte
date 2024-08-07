@@ -146,7 +146,8 @@ function handleFileUpload(event: Event, type: 'files' | 'reports') {
     console.error('Error inserting patient sample types:', sampleTypesError);
   }
 
-  goto(`/dashboard/patientRegistration`);
+
+  goto(`/dashboard/accountant/create/${data.id}`, { replaceState: true })
 }
 
 </script>

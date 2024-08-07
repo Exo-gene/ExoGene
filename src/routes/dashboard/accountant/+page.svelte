@@ -8,7 +8,7 @@
   import CustomButton from '$lib/components/CustomButton.svelte';
   import { IconSearch, IconX } from '@tabler/icons-svelte';
 
-  interface PatientLoan {
+  interface PatientPayment {
     id: number;
     created_at: string;
     loan_amount: string;
@@ -18,7 +18,7 @@
   }
 
   let isLoading: boolean = true;
-  let patientLoanData: PatientLoan[] = [];
+  let patientPaymentData: PatientPayment[] = [];
   let currentPage: number = 1;
   let totalPages: number = 1;
   const pageSize: number = 10;
@@ -34,7 +34,7 @@
     isLoading = true;
 
     const { data, error } = await supabase
-      .rpc('get_patient_loans', {
+      .rpc('get_patient_payment', {
         page_num: currentPage,
         page_size: pageSize,
         search_name: searchName || null,
@@ -42,7 +42,7 @@
       });
 
     if (error) {
-      console.error('Error fetching patient loan data:', error);
+      console.error('Error fetching patient payment data:', error);
       isLoading = false;
       return;
     }
@@ -52,10 +52,10 @@
       page: number;
       page_limit: number;
       remainingitems: number;
-      items: PatientLoan[];
+      items: PatientPayment[];
     };
 
-    patientLoanData = result.items;
+    patientPaymentData = result.items;
     totalPages = Math.ceil(result.count / pageSize);
     isLoading = false;
   }
@@ -153,7 +153,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each patientLoanData as item (item.id)}
+            {#each patientPaymentData as item (item.id)}
               <tr class="border-b border-gray-200">
                 <td class="p-3">{item.id}</td>
                 <td class="p-3">{formatDateTime(item.created_at)}</td>

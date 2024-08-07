@@ -86,9 +86,8 @@
     "Status Name",
     "Registered",
     "Deadline",
-    "Edit",
-    "Accountant"
-  ];
+    "Edit"
+   ];
 
     function getStatusClass(statusName: string): string {
     switch (statusName.toLowerCase()) {
@@ -169,22 +168,7 @@
                           </button>
                         {/if}
                     </td>
-                        <td class="p-3 table-cell-bottom-border">
-                      <span class="space-x-3 flex justify-end">
-                        {#if checkUserPolicies([Policies[`READ_ACCOUNTANT`]], $authStore)}
-                          <button
-                            class="font-medium text-purple-600 hover:underline dark:text-purple-600"
-                            on:click={() => goto(`/dashboard/accountant/${item.id}`, { replaceState: true })}
-                          >
-                            <IconCalculator  
-                              stroke={2}
-                              class="text-purple-700 hover:text-purple-600 transition-all"
-                            />
-                          </button>
-                        {/if}
-                      </span>
-                    </td>
-                  </tr>
+                   </tr>
                 {/each}
               </tbody>
             </table>

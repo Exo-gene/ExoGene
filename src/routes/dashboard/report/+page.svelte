@@ -11,7 +11,7 @@
   import { writable } from 'svelte/store';
   
   // Store to manage patient registration data
-  const patientRegistrationStore = writable({
+  const patientRegistrationStore: any = writable({
     count: 0,
     items: []
   });
@@ -115,7 +115,7 @@
     });
   }
   
-  let patientRegistrationData = [];
+  let patientRegistrationData :any= [];
   patientRegistrationStore.subscribe(data => {
     patientRegistrationData = data.items;
   });
@@ -187,48 +187,48 @@
                 </tr>
               </thead>
               <tbody>
-                {#each patientRegistrationData as item (item.patient_id)}
+                {#each patientRegistrationData as item}
                   <tr style="border-bottom: 1px solid var(--backButtonBackgroundColor);">
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.patient_id}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.patient_name}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.gender}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.patient_address}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.birth_date}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.patient_phonenumber}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
-                      <span class="flex justify-start"> {formatDateTime(item.patient_created_at.toString())}</span>
+                    <td class="p-3">
+                      <span class="flex justify-start"> {formatDateTime(item.patient_created_at)}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.doctor_name}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.test_name}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.sample_type}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.registered_date}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.family_member_phonenumber}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.lab_name}</span>
                     </td>
-                    <td class="p-3 table-cell-bottom-border">
+                    <td class="p-3">
                       <span class="flex justify-start">{item.status_name}</span>
                     </td>
                   </tr>

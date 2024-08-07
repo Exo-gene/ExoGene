@@ -59,7 +59,6 @@
       totalItems = data.count;
       totalPages = Math.ceil(totalItems / pageSize);
       userData = data.items;
-       
     }
     isLoading = false;
   }
@@ -146,6 +145,8 @@
 
   let userOptions: CreateUserRequest = new CreateUserRequest();
   let password: string = "";
+  let selectedUserId: number | null = null;
+
   async function fetchUserById(id: number) {
     isLoading = true;
     try {
@@ -168,6 +169,7 @@
 
   async function resetPassword(id: number, password: string) {
     const userData = await fetchUserById(id);
+     
     if (userData) {
       userOptions.id = userData.id;
       userOptions.userName = userData.userName;
@@ -197,7 +199,7 @@
   {:else}
     <!-- Header Section -->
     <div class="w-full flex items-center justify-between py-4">
-    <ButtonComponent title="Back" dispatch={() => goto("/dashboard/home")} />
+      <ButtonComponent title="Back" dispatch={() => goto("/dashboard/home")} />
       <h1
         class="font-bold text-center flex-grow"
         style="color: var(--titleColor);"
@@ -314,14 +316,13 @@
                   </td>
                   <td class="p-3 table-cell-bottom-border">
                     <span class="flex justify-start">
-               {#each item.roles as role, index}
-                {role.role_name}
-                    {#if index < item.roles.length - 1}
-                        , 
-                       {/if}
-                       {/each}
-</span>
-
+                      {#each item.roles as role, index}
+                        {role.role_name}
+                        {#if index < item.roles.length - 1}
+                          , 
+                        {/if}
+                      {/each}
+                    </span>
                   </td>
                   <td class="p-3 table-cell-bottom-border">
                     <span class="space-x-3 flex justify-end">
@@ -371,7 +372,10 @@
                       {#if checkUserPolicies([Policies[`RESETPASSWORD_${pageName.toUpperCase()}`]], $authStore)}
                         <button
                           class="text-gray-700 font-semibold hover:text-gray-600 transition-all"
-                          on:click={() => (formModal = true)}
+                          on:click={() => {
+                            selectedUserId = item.id;
+                            formModal = true;
+                          }}
                         >
                           <IconRestore stroke={2} />
                         </button>
@@ -386,12 +390,12 @@
                         <form
                           class="flex flex-col space-y-6"
                           on:submit|preventDefault={() =>
-                            resetPassword(item.id, password)}
+                            resetPassword(selectedUserId, password)}
                         >
                           <h3
                             class="mb-4 text-xl font-medium text-gray-900 dark:text-white"
                           >
-                           Reset password
+                            Reset password
                           </h3>
                           <Label class="space-y-2">
                             <span>Your password</span>
@@ -403,10 +407,12 @@
                               required
                             />
                           </Label>
-                           <button
-                             class="hover-button py-3 font-semibold rounded flex items-center justify-center gap-2"
-                            type="submit">Reset password</button
+                          <button
+                            class="hover-button py-3 font-semibold rounded flex items-center justify-center gap-2"
+                            type="submit"
                           >
+                            Reset password
+                          </button>
                         </form>
                       </Modal>
                       <!-- reset password  -->
@@ -435,13 +441,11 @@
     border-bottom: 1px solid var(--textColor);
   }
 
-    .hover-button {
+  .hover-button {
     background-color: var(--backgroundButtonColor);
     border: 1px solid var(--backgroundButtonColor);
     color: var(--textColor);
-    transition:
-      background-color 0.3s,
-      color 0.3s; /* smooth transition for hover effect */
+    transition: background-color 0.3s, color 0.3s; /* smooth transition for hover effect */
   }
   .hover-button:hover {
     background-color: var(--hoverBackgroundColor);

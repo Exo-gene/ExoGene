@@ -32,6 +32,7 @@
   let reportNames: string[] = [];
   let removedFiles: string[] = [];
   let removedReports: string[] = [];
+  let initialTestIds = new Set<number>();
 
   const SUPABASE_STORAGE_URL = import.meta.env.VITE_PUBLIC_SUPABASE_STORAGE_URL;
 
@@ -71,7 +72,12 @@
       return;
     }
 
-    testsData.forEach(test => selectedTests.add(test.t_id));
+   
+    testsData.forEach(test => {
+      selectedTests.add(test.t_id);
+      initialTestIds.add(test.t_id);
+    });
+
 
     // Fetch and set selected sample types
     const { data: sampleTypesData, error: sampleTypesError } = await supabase
@@ -259,9 +265,20 @@
       console.error('Error inserting patient sample types:', sampleTypesError);
     }
 
-    history.back();
+  // Check if the selected tests have changed
+    const initialTestIdsArray = Array.from(initialTestIds);
+    const selectedTestsArray = Array.from(selectedTests);
+    const testsChanged = initialTestIdsArray.length !== selectedTestsArray.length ||
+      !initialTestIdsArray.every(id => selectedTestsArray.includes(id));
+
+    if (testsChanged) {
+      goto(`/dashboard/accountant/${patientVisitId}`, { replaceState: true });
+    } else {
+      history.back();
+    }
   }
 
+  
   function getFileUrl(fileName: string, type: 'existing' | 'new', kind: 'files' | 'reports'): string {
     if (type === 'existing') {
       return getSupabaseFileUrl('patient_files', fileName);
