@@ -100,7 +100,7 @@
     <div class="w-full flex items-center justify-between py-4">
       <ButtonComponent title="Back" dispatch={() => goto("/dashboard/home")} />
       <h1 class="font-bold text-center flex-grow" style="color: var(--titleColor);">
-        Patient Loan List
+       Accountant List
       </h1>
     </div>
 
