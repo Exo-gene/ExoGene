@@ -8,7 +8,7 @@ export interface StoreModel {
 }
 export interface StoreDataModel {
   id: number;
-  company_name: string;
+  company_id: number;
   amount: number;
   lot_number: number;
   item_name: string;

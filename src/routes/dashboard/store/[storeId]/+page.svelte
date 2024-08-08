@@ -12,11 +12,11 @@
   import LoadingButton from "$lib/components/LoadingButton.svelte";
   import { page } from "$app/stores";
   import {  IconRefresh } from "@tabler/icons-svelte";
+  import CompanyDropdown from '$lib/components/companyDropdown.svelte';
 
   let isLoading = false;
   let showToast = false;
   let showErrorAlert = false;
-  let company_name: string = "";
   let company_nameError: string = "";
   let amount: string = "";
   let amountError: string = "";
@@ -28,6 +28,7 @@
   let registered_dateError: string = "";
   let expiration_date: string = "";
   let expiration_dateError: string = "";
+  let selectedCompanyId: number;
 
   const storeId = +$page.params.storeId;  
 
@@ -44,7 +45,7 @@
         throw error;
       }
 
-      company_name = data.company_name;
+      selectedCompanyId = data.company_id;
       amount = data.amount;
       lot_number = data.lot_number;
       item_name = data.item_name;
@@ -70,7 +71,7 @@
     let isValid = true;
     isLoading = true;
 
-    if (!company_name) {
+    if (!selectedCompanyId) {
       company_nameError = "Company Name is required";
       isValid = false;
     }
@@ -111,7 +112,7 @@
 
     try {
       const storeObject = {
-        company_name: company_name,
+        company_id: selectedCompanyId,
         amount: amount,
         lot_number: lot_number,
         item_name: item_name,
@@ -173,12 +174,7 @@
           <div class="w-32">
             <Label style="color:var(--textColor)" for="company_name">Name</Label>
           </div>
-          <Input
-            class="form-input px-4 py-2 rounded-md border-2 border-gray-300 flex-grow"
-            type="text"
-            id="company_name"
-            bind:value={company_name}
-          />
+         <CompanyDropdown bind:selectedCompanyId />
         </div>
       </div>
       <div class="w-full flex flex-col gap-2">
