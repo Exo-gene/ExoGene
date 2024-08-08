@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {  IconCalculator, IconEdit, IconEmergencyBed, IconReportMedical, IconX } from '@tabler/icons-svelte';
+  import {  IconCalculator, IconEdit, IconEmergencyBed, IconEye, IconReportMedical, IconX } from '@tabler/icons-svelte';
   import { IconSearch } from '@tabler/icons-svelte'; 
   import { checkUserPolicies } from "$lib/utils/checkUserPolicies.Utils"; 
   import { goto } from "$app/navigation";
@@ -84,6 +84,7 @@
          "Edit Profile",
          "Add Visit",
          "Edit Visits",
+         "Preview Profile",
          "Pay Loan"
         ];
               
@@ -227,6 +228,21 @@
                             <IconEmergencyBed  
                               stroke={2}
                               class="text-amber-700 hover:text-amber-600 transition-all"
+                            />
+                          </button>
+                        {/if}
+                      </span>
+                    </td>
+                      <td class="p-3 table-cell-bottom-border">
+                      <span class="space-x-3 flex justify-end">
+                        {#if checkUserPolicies([Policies[`READ_PATIENT_PREVIEW`]], $authStore)}
+                          <button
+                            class="font-medium text-yellow-600 hover:underline dark:text-yellow-600"
+                           on:click={() => goto("patientRegistration/preview/" + item.id)}
+                          >
+                            <IconEye 
+                              stroke={2}
+                              class="text-yellow-700 hover:text-yellow-600 transition-all"
                             />
                           </button>
                         {/if}

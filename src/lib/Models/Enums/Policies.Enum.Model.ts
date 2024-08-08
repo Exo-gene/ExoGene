@@ -54,4 +54,5 @@ export enum Policies {
   UPDATE_ACCOUNTANT = 52,
   READ_REPORT = 53,
   CREATE_CURRENCY = 54,
+  READ_PATIENT_PREVIEW = 55,
 }

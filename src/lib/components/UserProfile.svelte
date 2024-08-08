@@ -1,9 +1,9 @@
 <script lang="ts">
   import { Input } from 'flowbite-svelte';
-  import { supabase } from '$lib/supabaseClient';
-  import { patientRegistrationStore } from './../../stores/patientRegistrationStore.ts';
+  import { supabase } from '$lib/supabaseClient'; 
   import { onMount } from "svelte";
   import type { PatientRegistrationDataModel } from "../../models/patientRegistrationModel";
+  import { patientRegistrationStore } from '../../stores/patientRegistrationStore';
 
   export let patient_registration_id: number;
   let patientRegistrationData: PatientRegistrationDataModel | null = null;
