@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { IconMoon, IconSun } from "@tabler/icons-svelte";
+  import { IconMoneybag, IconMoon, IconSun } from "@tabler/icons-svelte";
   import {
     IconEmergencyBed,
     IconMicroscope,
@@ -24,24 +24,28 @@
   import { Policies } from "$lib/Models/Enums/Policies.Enum.Model";
   import { onMount } from "svelte";
   import { themeStore } from "../../../stores/themeStore";
-  import { get } from "svelte/store";
   import Role from "$lib/components/Modals/Role.Modal.Component.svelte";
+  import { supabase } from "$lib/supabaseClient";
+  import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
 
-  function redirectToPage(page: string) {
-    goto(`/dashboard/${page}`);
-  }
+ 
 
   // Toggle theme
   let isLoading: boolean = true;
   let theme = "light";
   let themeData: any = { light: {}, dark: {} };
+   let currency: string | undefined;
 
   onMount(async () => {
     await CheckAuth();
     await loadThemeData();
+    await getCurrency();
     isLoading = false;
   });
 
+  function redirectToPage(page: string) {
+    goto(`/dashboard/${page}`);
+  }
   async function CheckAuth() {
     await authStore.getAuth();
     if (!$authStore) {
@@ -73,12 +77,45 @@
   /////////////////////////////
   let isLoadingToRole: boolean = false;
   let roleModal: boolean = false;
+
+
+  ///////get currency//////////
+ async function getCurrency() {
+    const { data, error } = await supabase
+      .from('currency')
+      .select('*')
+      .limit(1)
+      .single();
+    if (data) { 
+      currency = data.money_dinar;
+    } else {
+      currency = undefined;
+    }
+    if (error) {
+      console.log(error);
+      currency = undefined;
+    }
+  }
 </script>
+{#if isLoading}
+<LoadingIndicator/>
+{:else} 
 
 <Role bind:isLoadingToRole bind:roleModal />
 
-<div class="max-w-screen-xl mx-auto flex items-center justify-center h-2/3">
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+<div class="max-w-screen-xl mx-auto flex flex-col items-center justify-center h-2/3">
+
+  <!-- showing currency of today  -->
+<div class="my-2 w-full rounded">
+<div class="flex justify-start w-1/4 p-4 rounded"  style="background-color: var(--backButtonBackgroundColor);color:var(--textColor)">
+   100$ , <span class="font-bold mx-1"
+ >{currency}</span> IQD
+</div>
+</div>
+
+<!-- showing buttons of dashboard  -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+
    {#if checkUserPolicies([Policies.READ_PATIENTREGISTRATION], $authStore)}
     <div class="flex justify-center">
       <CustomButton
@@ -198,16 +235,17 @@
         />
       </div>
     {/if}
-    
-    <!-- <div class="flex justify-center">
+    {#if checkUserPolicies([Policies.CREATE_CURRENCY], $authStore)}
+    <div class="flex justify-center">
       <CustomButton
         width="100%"
         height="4rem"
-        icon={IconChartInfographic}
-        label="Statistic"
-        on:click={() => redirectToPage("statistic")}
+        icon={IconMoneybag}
+        label="Currency"
+        on:click={() => redirectToPage("currency")}
       />
-    </div> -->
+    </div>
+    {/if}
     <!-- {#if checkUserPolicies([Policies.READ_REPORT], $authStore)} -->
     <div class="flex justify-center">
       <CustomButton
@@ -241,3 +279,4 @@
     </div>
   </div>
 </div>
+{/if}
