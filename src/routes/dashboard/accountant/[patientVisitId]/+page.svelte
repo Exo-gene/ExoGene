@@ -107,10 +107,8 @@
       price: Number(test.price.replace(/,/g, ''))
     }));
 
-    console.log("tests: ", tests);
     testsInfo = tests.map(test => `ID: ${test.id}, Name: ${test.name}, Price: ${test.price}`).join(' | ');
     totalTestPrice = tests.reduce((acc, test) => acc + test.price, 0);
-    console.log("totalTestPrice: ", totalTestPrice);
     calculateTotal();
   }
 

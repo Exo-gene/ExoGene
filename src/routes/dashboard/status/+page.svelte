@@ -73,7 +73,7 @@
     goto(`/dashboard/status/${statusId}`);
   }
 
-  const tableHeaders = ["ID", "Created At", "Name", "Action"];
+  const tableHeaders = ["ID", "Created At", "Name","Default", "Action"];
   $: totalPages = Math.ceil($statusStore[0]?.count / pageSize);
   let statusData = $statusStore[0]?.items;
   $: statusData = $statusStore[0]?.items || [];
@@ -106,7 +106,7 @@
     </div>
 
     <!-- Table data -->
-  <CustomTable
+     <CustomTable
       items={statusData}
       editData={editStatus}
       {handleDelete}

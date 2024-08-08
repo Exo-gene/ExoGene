@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+  Badge,
     Table,
     TableBody,
     TableBodyCell,
@@ -48,13 +49,20 @@
           {#if item.amount}<TableBodyCell>{item.amount}</TableBodyCell>{/if}
           {#if item.lot_number}<TableBodyCell>{item.lot_number}</TableBodyCell>{/if}
           {#if item.item_name}<TableBodyCell>{item.item_name}</TableBodyCell>{/if}
-           {#if item.registered_date}<TableBodyCell> 
+          {#if item.registered_date}<TableBodyCell> 
            {formatDate(item.registered_date.toString())}
           </TableBodyCell>{/if}
           {#if item.expiration_date}<TableBodyCell>
              {formatDate(item.expiration_date.toString())}
           </TableBodyCell>{/if}
-        <TableBodyCell class="flex space-x-3">
+       {#if item.is_default}
+        {#if item.is_default === "true"}
+       <TableBodyCell>  <Badge color="green">{item.is_default}</Badge></TableBodyCell>
+         {:else}
+         <TableBodyCell>    <Badge color="red">{item.is_default}</Badge></TableBodyCell>
+           {/if}
+       {/if}
+          <TableBodyCell class="flex space-x-3">
           {#if checkUserPolicies([Policies[`UPDATE_${pageName.toUpperCase()}`]], $authStore)}
             <button class="font-medium text-green-600 hover:underline dark:text-green-600" on:click={() => editData(item.id)}>
               <IconEdit stroke={2} class="text-green-700" />

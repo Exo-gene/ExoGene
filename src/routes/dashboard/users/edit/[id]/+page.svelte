@@ -70,8 +70,7 @@
         if (response.error) {
           console.error("RPC call failed:", response.error);
         } else {
-          console.log("RPC call succeeded:", response.data);
-          if (response.data && response.data.length > 0) {
+        if (response.data && response.data.length > 0) {
             goto(`/dashboard/users`);
           }
         }

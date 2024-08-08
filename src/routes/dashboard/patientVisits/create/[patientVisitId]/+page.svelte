@@ -14,7 +14,7 @@
   import CustomButton from '$lib/components/CustomButton.svelte';
   import { IconPlus } from '@tabler/icons-svelte'; 
   import { Label } from 'flowbite-svelte';
- import UserProfile from '$lib/components/UserProfile.svelte';
+  import UserProfile from '$lib/components/UserProfile.svelte';
  
   const patient_registration_id = +$page.params.patientVisitId;
   let selectedTests = new Set<number>();
@@ -29,19 +29,36 @@
   let fileNames: string[] = [];
   let reportNames: string[] = [];
 
-function handleFileUpload(event: Event, type: 'files' | 'reports') {
-  const target = event.target as HTMLInputElement;
-  const uploadedFiles = Array.from(target.files || []);
+  async function getDefaultStatusId() {
+    const { data, error } = await supabase
+      .from('status')
+      .select('id')
+      .eq('is_default', true)
+      .single();
 
-  if (type === 'files') {
-    files = uploadedFiles;
-    fileNames = uploadedFiles.map(file => file.name);
-  } else if (type === 'reports') {
-    reports = uploadedFiles;
-    reportNames = uploadedFiles.map(file => file.name);
+    if (error) {
+      console.error('Error fetching default status:', error);
+      return;
+    }
+
+    selectedStatusId = data.id;
   }
-}
 
+  function handleFileUpload(event: Event, type: 'files' | 'reports') {
+    const target = event.target as HTMLInputElement;
+    const uploadedFiles = Array.from(target.files || []);
+
+    if (type === 'files') {
+      files = uploadedFiles;
+      fileNames = uploadedFiles.map(file => file.name);
+    } else if (type === 'reports') {
+      reports = uploadedFiles;
+      reportNames = uploadedFiles.map(file => file.name);
+      if (reports.length > 0) {
+        getDefaultStatusId();
+      }
+    }
+  }
 
   function getRandomString() {
     return uuidv4().split("-")[0];
@@ -67,90 +84,89 @@ function handleFileUpload(event: Event, type: 'files' | 'reports') {
     return data.path;
   }
 
- async function submitForm() {
-  let isValid = true;
-  let validationMessage = '';
+  async function submitForm() {
+    let isValid = true;
+    let validationMessage = '';
 
-  selectedSampleTypes.forEach((number, sampleTypeId) => {
-    if (!sampleTypeId || !number) {
-      isValid = false;
-      validationMessage = 'Sample type ID and number are required.';
+    selectedSampleTypes.forEach((number, sampleTypeId) => {
+      if (!sampleTypeId || !number) {
+        isValid = false;
+        validationMessage = 'Sample type ID and number are required.';
+      }
+    });
+
+    if (!isValid) {
+      alert(validationMessage);
+      return;
     }
-  });
 
-  if (!isValid) {
-    alert(validationMessage);
-    return;
+    // Upload files and reports to Supabase storage
+    const fileUploadPromises = files.map(file => uploadFileToSupabase(file, 'patient_files'));
+    const reportUploadPromises = reports.map(file => uploadFileToSupabase(file, 'patient_files'));
+
+    const filesPaths = await Promise.all(fileUploadPromises);
+    const reportsPaths = await Promise.all(reportUploadPromises);
+
+    // Prepare payload for patient_visits
+    const payload = {
+      lab_id: selectedLabId,
+      status_id: selectedStatusId,
+      doctor_id: selectedDoctorId,
+      patient_registration_id: patient_registration_id,
+      registered_date: toUtc(registrationDate),
+      deadline: toUtc(deadline),
+      files: filesPaths,
+      reports: reportsPaths
+    };
+
+    // Insert into patient_visits and get the new ID
+    const { data, error: visitError } = await supabase
+      .from('patient_visits')
+      .insert(payload)
+      .select('id')
+      .single();
+
+    if (visitError) {
+      console.error('Error inserting patient visit:', visitError);
+      return;
+    }
+
+    const patientVisitId = data.id;
+
+    // Submit tests
+    const insertDataTests = Array.from(selectedTests).map(testId => ({
+      p_id: patientVisitId,
+      t_id: testId,
+    }));
+
+    const { error: testsError } = await supabase
+      .from('patient_test')
+      .insert(insertDataTests);
+
+    if (testsError) {
+      console.error('Error inserting patient tests:', testsError);
+    }
+
+    // Submit sample types
+    const insertDataSampleTypes = Array.from(selectedSampleTypes.entries()).map(([sampleTypeId, number]) => ({
+      p_id: patientVisitId,
+      s_id: sampleTypeId,
+      number: number,
+    }));
+
+    const { error: sampleTypesError } = await supabase
+      .from('patient_sample_type')
+      .insert(insertDataSampleTypes);
+
+    if (sampleTypesError) {
+      console.error('Error inserting patient sample types:', sampleTypesError);
+    }
+
+    goto(`/dashboard/accountant/create/${data.id}`, { replaceState: true });
   }
-
-  // Upload files and reports to Supabase storage
-  const fileUploadPromises = files.map(file => uploadFileToSupabase(file, 'patient_files'));
-  const reportUploadPromises = reports.map(file => uploadFileToSupabase(file, 'patient_files'));
-
-  const filesPaths = await Promise.all(fileUploadPromises);
-  const reportsPaths = await Promise.all(reportUploadPromises);
-
- 
-  // Prepare payload for patient_visits
-  const payload = {
-    lab_id: selectedLabId,
-    status_id: selectedStatusId,
-    doctor_id: selectedDoctorId,
-    patient_registration_id: patient_registration_id,
-    registered_date: toUtc(registrationDate),
-    deadline: toUtc(deadline),
-    files: filesPaths,
-    reports: reportsPaths
-  };
-
-  // Insert into patient_visits and get the new ID
-  const { data, error: visitError } = await supabase
-    .from('patient_visits')
-    .insert(payload)
-    .select('id')
-    .single();
-
-  if (visitError) {
-    console.error('Error inserting patient visit:', visitError);
-    return;
-  }
-
-  const patientVisitId = data.id;
-
-  // Submit tests
-  const insertDataTests = Array.from(selectedTests).map(testId => ({
-    p_id: patientVisitId,
-    t_id: testId,
-  }));
-
-  const { error: testsError } = await supabase
-    .from('patient_test')
-    .insert(insertDataTests);
-
-  if (testsError) {
-    console.error('Error inserting patient tests:', testsError);
-  }
-
-  // Submit sample types
-  const insertDataSampleTypes = Array.from(selectedSampleTypes.entries()).map(([sampleTypeId, number]) => ({
-    p_id: patientVisitId,
-    s_id: sampleTypeId,
-    number: number,
-  }));
-
-  const { error: sampleTypesError } = await supabase
-    .from('patient_sample_type')
-    .insert(insertDataSampleTypes);
-
-  if (sampleTypesError) {
-    console.error('Error inserting patient sample types:', sampleTypesError);
-  }
-
-
-  goto(`/dashboard/accountant/create/${data.id}`, { replaceState: true })
-}
 
 </script>
+
 
 <div class="max-w-screen-md mx-auto py-10">
    <UserProfile {patient_registration_id} />

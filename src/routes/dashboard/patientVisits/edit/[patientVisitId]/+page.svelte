@@ -72,12 +72,10 @@
       return;
     }
 
-   
     testsData.forEach(test => {
       selectedTests.add(test.t_id);
       initialTestIds.add(test.t_id);
     });
-
 
     // Fetch and set selected sample types
     const { data: sampleTypesData, error: sampleTypesError } = await supabase
@@ -91,6 +89,21 @@
     }
 
     sampleTypesData.forEach(sampleType => selectedSampleTypes.set(sampleType.s_id, sampleType.number));
+  }
+
+  async function getDefaultStatusId() {
+    const { data, error } = await supabase
+      .from('status')
+      .select('id')
+      .eq('is_default', true)
+      .single();
+
+    if (error) {
+      console.error('Error fetching default status:', error);
+      return;
+    }
+
+    selectedStatusId = data.id;
   }
 
   function handleFileUpload(event: Event, type: 'files' | 'reports') {
@@ -111,6 +124,11 @@
       }));
       reports = [...reports, ...newReports];
       reportNames = [...reportNames, ...newReports.map(fileObj => fileObj.randomName)];
+
+      // Set default status if reports are uploaded
+      if (reports.length > 0) {
+        getDefaultStatusId();
+      }
     }
 
     // Ensure no duplicates in files and reports
@@ -265,7 +283,7 @@
       console.error('Error inserting patient sample types:', sampleTypesError);
     }
 
-  // Check if the selected tests have changed
+    // Check if the selected tests have changed
     const initialTestIdsArray = Array.from(initialTestIds);
     const selectedTestsArray = Array.from(selectedTests);
     const testsChanged = initialTestIdsArray.length !== selectedTestsArray.length ||
@@ -278,7 +296,6 @@
     }
   }
 
-  
   function getFileUrl(fileName: string, type: 'existing' | 'new', kind: 'files' | 'reports'): string {
     if (type === 'existing') {
       return getSupabaseFileUrl('patient_files', fileName);
@@ -291,6 +308,7 @@
     }
   }
 </script>
+
 
 <div class="max-w-screen-md mx-auto py-10">
   {#if patient_registration_id}

@@ -101,17 +101,17 @@
 <LoadingIndicator/>
 {:else} 
 
-<Role bind:isLoadingToRole bind:roleModal />
-
-<div class="max-w-screen-xl mx-auto flex flex-col items-center justify-center h-2/3">
-
   <!-- showing currency of today  -->
-<div class="my-2 w-full rounded">
-<div class="flex justify-start w-1/4 p-4 rounded"  style="background-color: var(--backButtonBackgroundColor);color:var(--textColor)">
+<div class="my-2 w-full rounded max-w-screen-xl mx-auto flex justify-end ">
+<div class="w-1/5 p-4 rounded"  style="background-color: var(--backButtonBackgroundColor);color:var(--textColor)">
    100$ , <span class="font-bold mx-1"
  >{currency}</span> IQD
 </div>
 </div>
+
+<Role bind:isLoadingToRole bind:roleModal />
+
+<div class="max-w-screen-xl mx-auto flex items-center justify-center h-2/3">
 
 <!-- showing buttons of dashboard  -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
@@ -215,6 +215,7 @@
       />
     </div>
     {/if}
+     {#if checkUserPolicies([Policies.READ_ROLE], $authStore)}
     <div class="flex justify-center">
       <CustomButton
         width="100%"
@@ -224,6 +225,7 @@
         on:click={() => (roleModal = true)}
       />
     </div>
+    {/if}
     {#if checkUserPolicies([Policies.READ_USER], $authStore)}
       <div class="flex justify-center">
         <CustomButton

@@ -117,37 +117,34 @@ const createUserRoleStore = () => {
         });
       }
     },
-   updateFunction: async (user_role: UpdateUser_RoleRequest) => {
-  try {
-    if (!user_role.user_id || user_role.user_id === "") {
-      throw new Error("User ID is required");
-    }
+    updateFunction: async (user_role: UpdateUser_RoleRequest) => {
+      try {
+        if (!user_role.user_id || user_role.user_id === "") {
+          throw new Error("User ID is required");
+        }
+ 
+        const data = await user_RolesRepository.updateFuction(user_role);
 
-    // console.log("Updating roles for user:", user_role);
-    
-    const data = await user_RolesRepository.updateFuction(user_role);
+        if (!data || data.length === 0) {
+          throw new Error("Failed to update roles or no roles returned");
+        }
 
-    if (!data || data.length === 0) {
-      throw new Error("Failed to update roles or no roles returned");
-    }
+        const dtos = data.map((entity) => Dto.ToUserRoleDto(entity));
+        update((store) => {
+          store.data = dtos;
+          store.count = dtos.length;
+          return store;
+        });
 
-    const dtos = data.map((entity) => Dto.ToUserRoleDto(entity));
-    update((store) => {
-      store.data = dtos;
-      store.count = dtos.length;
-      return store;
-    });
-
-    // console.log("Roles updated successfully:", dtos);
-    return dtos;
-  } catch (error) {
-    console.error("Error updating roles:", error);
-    update((store) => {
-      store.error = error;
-      return store;
-    });
-    throw error; // Re-throw the error if you want the caller to handle it
-  }
+        return dtos;
+      } catch (error) {
+        console.error("Error updating roles:", error);
+        update((store) => {
+          store.error = error;
+          return store;
+        });
+        throw error; // Re-throw the error if you want the caller to handle it
+      }
     },
 
     delete: async (user_role_id: string) => {

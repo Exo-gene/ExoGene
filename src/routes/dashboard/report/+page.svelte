@@ -48,8 +48,7 @@
       return;
     }
 
-    console.log("Fetched data:", data); // Debugging statement
-
+   
     // Check if data is correctly structured
     if (data && Array.isArray(data) && data.length > 0) {
       const responseData = data[0];
